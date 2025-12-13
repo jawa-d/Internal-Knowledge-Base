@@ -1,5 +1,7 @@
-// applications.js
-import { db, storage } from "./firebase.js";
+/* ==============================
+   Firebase Imports (Firestore فقط)
+============================== */
+import { db } from "./firebase.js";
 
 import {
   collection,
@@ -11,147 +13,101 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
 
-import {
-  ref,
-  uploadBytes,
-  getDownloadURL
-} from "https://www.gstatic.com/firebasejs/10.7.2/firebase-storage.js";
-
-/* =========================
-   Elements
-========================= */
+/* ==============================
+   DOM Elements
+============================== */
 const grid = document.getElementById("appsGrid");
 const searchInput = document.getElementById("searchInput");
 const addBtn = document.getElementById("addAppBtn");
 const currentUserSpan = document.getElementById("currentUser");
 
-const addPopup = document.getElementById("addPopup");
-const addSaveBtn = document.getElementById("addSaveBtn");
-
-const addTitle = document.getElementById("addTitle");
-const addDesc = document.getElementById("addDesc");
-const addLink = document.getElementById("addLink");
-const addImage = document.getElementById("addImage");
-
-/* =========================
+/* ==============================
    State
-========================= */
+============================== */
 let isAdmin = false;
 let allApps = [];
 
-// إخفاء زر الإضافة افتراضيًا
-addBtn.style.display = "none";
+/* ==============================
+   Helpers
+============================== */
+function esc(str = "") {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
 
-/* =========================
-   Popup controls
-========================= */
-window.openAddPopup = function () {
-  addPopup.style.display = "flex";
-};
+function openAddPopup() {
+  document.getElementById("addPopup").style.display = "flex";
+}
 
 window.closePopup = function () {
   document.querySelectorAll(".popup-overlay").forEach(p => {
     p.style.display = "none";
   });
 
-  // تنظيف الحقول
-  addTitle.value = "";
-  addDesc.value = "";
-  addLink.value = "";
-  addImage.value = "";
+  document.getElementById("addTitle").value = "";
+  document.getElementById("addDesc").value = "";
+  document.getElementById("addLink").value = "";
 };
 
-/* =========================
-   Load user role
-========================= */
+/* ==============================
+   Load User Role (Admin / User)
+============================== */
 async function loadCurrentUserRole() {
   const email = localStorage.getItem("kb_user_email");
+  currentUserSpan.textContent = email ? email.split("@")[0] : "User";
 
-  currentUserSpan.textContent = email
-    ? email.split("@")[0]
-    : "User";
-
-  if (!email) return;
+  if (!email) {
+    addBtn.style.display = "none";
+    return;
+  }
 
   const snap = await getDoc(doc(db, "users", email));
-  if (!snap.exists()) return;
+  if (!snap.exists()) {
+    addBtn.style.display = "none";
+    return;
+  }
 
-  const role = String(snap.data().role || "").toLowerCase();
-  isAdmin = role === "admin";
-
+  isAdmin = snap.data().role?.toLowerCase() === "admin";
   addBtn.style.display = isAdmin ? "inline-flex" : "none";
 }
 
-/* =========================
-   🔥 SAFE IMAGE UPLOAD
-   تقبل أي صورة + أي اسم
-========================= */
-function safeFileName(name) {
-  return name
-    .toLowerCase()
-    .replace(/[^a-z0-9.]/g, "_");
-}
-
-async function uploadImageIfAny(file) {
-  if (!file) return "";
-
-  const safeName =
-    Date.now() + "_" + safeFileName(file.name);
-
-  const storageRef = ref(storage, `apps/${safeName}`);
-
-  await uploadBytes(storageRef, file);
-  return await getDownloadURL(storageRef);
-}
-
-/* =========================
-   Fetch apps
-========================= */
+/* ==============================
+   Fetch Applications
+============================== */
 async function fetchApps() {
   const snap = await getDocs(collection(db, "apps"));
-
-  allApps = snap.docs.map(d => ({
-    id: d.id,
-    ...d.data()
-  }));
-
+  allApps = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   renderApps(allApps);
 }
 
-/* =========================
-   Render apps
-========================= */
-function renderApps(apps) {
+/* ==============================
+   Render Applications
+============================== */
+function renderApps(list) {
   grid.innerHTML = "";
 
-  apps.forEach(app => {
-    const safeLink =
-      app.link && app.link.startsWith("http")
-        ? app.link
-        : "javascript:void(0)";
-
+  list.forEach(app => {
     grid.innerHTML += `
       <div class="app-card">
-        <div
-          class="app-img"
-          style="background-image:url('${app.imageUrl || ""}')">
-        </div>
+        <div class="app-img"></div>
 
-        <h3>${app.title || ""}</h3>
-        <p>${app.desc || ""}</p>
+        <h3>${esc(app.title)}</h3>
+        <p>${esc(app.desc)}</p>
 
-        <a class="run-btn" href="${safeLink}" target="_blank">
+        <a class="run-btn" href="${esc(app.link)}" target="_blank" rel="noopener">
           تشغيل
         </a>
 
         ${
           isAdmin
-            ? `
-          <div class="actions">
-            <button class="delete-btn" onclick="deleteApp('${app.id}')">
-              حذف
-            </button>
-          </div>`
+            ? `<div class="actions">
+                 <button class="delete-btn" onclick="deleteApp('${app.id}')">
+                   حذف
+                 </button>
+               </div>`
             : ""
         }
       </div>
@@ -159,78 +115,68 @@ function renderApps(apps) {
   });
 }
 
-/* =========================
+/* ==============================
    Search
-========================= */
+============================== */
 searchInput.addEventListener("input", () => {
   const term = searchInput.value.trim().toLowerCase();
-
   if (!term) {
     renderApps(allApps);
     return;
   }
 
-  const filtered = allApps.filter(app =>
-    (app.title || "").toLowerCase().includes(term)
+  renderApps(
+    allApps.filter(app =>
+      app.title?.toLowerCase().includes(term)
+    )
   );
-
-  renderApps(filtered);
 });
 
-/* =========================
-   Add App
-========================= */
+/* ==============================
+   Add Application (Admin)
+============================== */
 addBtn.addEventListener("click", () => {
   if (!isAdmin) return;
   openAddPopup();
 });
 
-addSaveBtn.addEventListener("click", async () => {
+document.getElementById("addSaveBtn").addEventListener("click", async () => {
   if (!isAdmin) return;
 
-  const title = addTitle.value.trim();
-  const desc = addDesc.value.trim();
-  let link = addLink.value.trim();
+  const title = document.getElementById("addTitle").value.trim();
+  const desc = document.getElementById("addDesc").value.trim();
+  const link = document.getElementById("addLink").value.trim();
 
-  if (!title || !desc) {
-    alert("يرجى إدخال اسم التطبيق والوصف");
+  if (!title || !desc || !link) {
+    alert("يرجى ملء جميع الحقول");
     return;
   }
-
-  // السماح بأي رابط (وإن كان غير صحيح)
-  if (!link || !link.startsWith("http")) {
-    link = "#";
-  }
-
-  const imageUrl = await uploadImageIfAny(addImage.files[0]);
 
   await addDoc(collection(db, "apps"), {
     title,
     desc,
     link,
-    imageUrl,
     createdAt: serverTimestamp()
   });
 
   closePopup();
-  await fetchApps();
+  fetchApps();
 });
 
-/* =========================
-   Delete App
-========================= */
+/* ==============================
+   Delete Application (Admin)
+============================== */
 window.deleteApp = async function (id) {
   if (!isAdmin) return;
 
-  const ok = confirm("هل تريد حذف هذا التطبيق؟");
-  if (!ok) return;
+  if (!confirm("هل تريد حذف هذا التطبيق؟")) return;
 
   await deleteDoc(doc(db, "apps", id));
-  await fetchApps();
+  fetchApps();
 };
 
-/* =========================
+/* ==============================
    Init
-========================= */
+============================== */
 await loadCurrentUserRole();
 await fetchApps();
