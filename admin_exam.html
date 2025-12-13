@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>لوحة نتائج الامتحانات</title>
+  <link rel="stylesheet" href="admin_exam.css">
+</head>
+
+<body>
+
+<h1 class="title">🔍 لوحة نتائج الامتحانات</h1>
+
+<!-- أدوات التحكم -->
+<div class="controls">
+
+  <input type="text" id="searchBox" placeholder="🔎 ابحث عن موظف..." class="search-input">
+
+  <select id="sortSelect" class="sort-select">
+    <option value="date_desc">📅 الأحدث أولاً</option>
+    <option value="date_asc">📅 الأقدم أولاً</option>
+    <option value="score_desc">🏆 الأعلى درجة</option>
+    <option value="score_asc">📉 الأقل درجة</option>
+    <option value="name_asc">🔤 الاسم (A-Z)</option>
+    <option value="name_desc">🔤 الاسم (Z-A)</option>
+  </select>
+
+  <button onclick="exportAllToExcel()" class="excelBtn">📊 Excel</button>
+  <button onclick="exportAllPDF()" class="pdfBtn">📄 PDF جماعي</button>
+
+</div>
+
+<!-- جدول النتائج -->
+<table class="results-table">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>اسم الموظف</th>
+      <th>الدرجة</th>
+      <th>وقت التسليم</th>
+      <th>عرض</th>
+      <th>PDF</th>
+      <th>إعادة ضبط</th>
+    </tr>
+  </thead>
+  <tbody id="resultsTableBody"></tbody>
+</table>
+
+<div id="detailsBox" class="details-box"></div>
+
+<script src="admin_exam.js"></script>
+<script src="excel_export.js"></script>
+<script src="bulk_pdf_export.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8">
+  <title>إدارة أسئلة الامتحان</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="global.css">
+
+  <style>
+    body {
+      font-family: "Cairo", sans-serif;
+      background: #eef3f9;
+    }
+
+    .builder-wrapper {
+      margin-left: 260px;
+      margin-top: 95px;
+      padding: 30px 40px 60px;
+    }
+
+    .builder-header {
+      margin-bottom: 20px;
+    }
+
+    .builder-header h1 {
+      font-size: 26px;
+      margin-bottom: 4px;
+    }
+
+    .builder-header p {
+      font-size: 14px;
+      color: #6b7280;
+    }
+
+    .top-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .btn-main {
+      padding: 10px 18px;
+      border-radius: 14px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      background: #4b6fff;
+      color: white;
+    }
+
+    .questions-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .q-card {
+      background: #ffffff;
+      border-radius: 16px;
+      border: 1px solid #d7dee9;
+      padding: 14px 16px;
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.05);
+      font-size: 14px;
+    }
+
+    .q-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .q-tags {
+      display: flex;
+      gap: 6px;
+      font-size: 12px;
+    }
+
+    .tag {
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #e5e7eb;
+    }
+
+    .tag.manual {
+      background: #f97316;
+      color: white;
+    }
+
+    .card-actions button {
+      padding: 4px 8px;
+      border-radius: 8px;
+      border: none;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .btn-edit {
+      background: #4b6fff;
+      color: white;
+    }
+
+    .btn-delete {
+      background: #ef4444;
+      color: white;
+      margin-right: 4px;
+    }
+
+    /* Popup */
+    .popup-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+
+    .popup-box {
+      background: #ffffff;
+      width: 460px;
+      max-width: 95%;
+      padding: 22px 22px 18px;
+      border-radius: 18px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.16);
+    }
+
+    .popup-box h2 {
+      margin-top: 0;
+      margin-bottom: 8px;
+    }
+
+    .popup-label {
+      font-size: 13px;
+      color: #4b5563;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .popup-input,
+    .popup-textarea,
+    .popup-select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      margin-bottom: 10px;
+      font-size: 13px;
+    }
+
+    .popup-textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    .row-flex {
+      display: flex;
+      gap: 8px;
+    }
+
+    .popup-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .popup-btns {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .btn-secondary {
+      padding: 8px 14px;
+      border-radius: 10px;
+      border: none;
+      font-size: 13px;
+      cursor: pointer;
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .btn-primary {
+      padding: 8px 14px;
+      border-radius: 10px;
+      border: none;
+      font-size: 13px;
+      cursor: pointer;
+      background: #4b6fff;
+      color: #ffffff;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Sidebar -->
+  <div id="sidebar"></div>
+  <script src="sidebar.js"></script>
+
+  <!-- Navbar -->
+  <div class="top-nav">
+    <div class="nav-left">
+      <h1>إدارة أسئلة الامتحان</h1>
+      <p class="nav-sub">إضافة وتعديل وحذف أسئلة الامتحان الشهري</p>
+    </div>
+
+    <div class="nav-center">
+      <h2 class="kb-title">Exam Builder</h2>
+    </div>
+  </div>
+
+  <main class="builder-wrapper">
+    <section class="builder-header">
+      <h1>بناء بنك الأسئلة</h1>
+      <p>الأسئلة هنا تستخدم في صفحة الامتحان (Exam). يتم حفظها في LocalStorage.</p>
+    </section>
+
+    <section class="top-actions">
+      <button id="addQuestionBtn" class="btn-main">+ إضافة سؤال جديد</button>
+      <small>عدد الأسئلة: <span id="countLabel">0</span></small>
+    </section>
+
+    <section class="questions-list" id="questionsList">
+      <!-- كروت الأسئلة من JS -->
+    </section>
+  </main>
+
+  <!-- Popup Question -->
+  <div class="popup-overlay" id="popup">
+    <div class="popup-box">
+      <h2 id="popupTitle">إضافة سؤال</h2>
+
+      <label class="popup-label">نص السؤال:</label>
+      <textarea id="qText" class="popup-textarea" placeholder="اكتب نص السؤال هنا..."></textarea>
+
+      <label class="popup-label">نوع السؤال:</label>
+      <select id="qType" class="popup-select">
+        <option value="choice">اختيار من متعدد</option>
+        <option value="text">إجابة نصية (مقالية)</option>
+      </select>
+
+      <div class="popup-checkbox">
+        <input type="checkbox" id="qManual">
+        <label for="qManual">تصحيح يدوي (Manual)؟</label>
+      </div>
+
+      <!-- خيارات الاختيار -->
+      <div id="choicesBox">
+        <label class="popup-label">الخيارات (اختيار من متعدد):</label>
+        <input id="opt1" class="popup-input" placeholder="الاختيار 1">
+        <input id="opt2" class="popup-input" placeholder="الاختيار 2">
+        <input id="opt3" class="popup-input" placeholder="الاختيار 3">
+        <input id="opt4" class="popup-input" placeholder="الاختيار 4">
+
+        <label class="popup-label">رقم الإجابة الصحيحة:</label>
+        <input id="correctIndex" type="number" min="1" max="4" class="popup-input" placeholder="مثال: 2">
+      </div>
+
+      <div class="popup-btns">
+        <button id="cancelBtn" class="btn-secondary">إلغاء</button>
+        <button id="saveBtn" class="btn-primary">حفظ</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="exam_builder.js"></script>
+</body>
+</html>

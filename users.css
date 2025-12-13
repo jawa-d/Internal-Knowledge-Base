@@ -1,0 +1,165 @@
+body {
+  font-family: "Cairo", sans-serif;
+  background: #eef2f7;
+}
+
+.users-container {
+  margin-left: 260px;
+  padding: 30px;
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background: white;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.users-table th {
+  background: #3b82f6;
+  color: white;
+  padding: 12px;
+  text-align: center;
+}
+
+.users-table td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  text-align: center;
+}
+
+.btn-edit {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+}
+
+.btn-delete {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+}
+
+.status-active {
+  color: #10b981;
+  font-weight: bold;
+}
+.status-pending {
+  color: #f59e0b;
+  font-weight: bold;
+}
+.status-disabled {
+  color: #ef4444;
+  font-weight: bold;
+}
+
+/* Popup */
+/* =====================
+   Popup Modern Glass 
+=====================*/
+
+.popup-overlay {
+  position: fixed;
+  top: 0; 
+  left: 0;
+  width: 100%; 
+  height: 100%;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(4px);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.3s ease;
+  z-index: 999;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.popup {
+  width: 400px;
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(18px);
+  padding: 30px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.25);
+  box-shadow: 0 10px 35px rgba(0,0,0,0.15);
+  animation: popUp 0.3s ease;
+  text-align: center;
+}
+
+@keyframes popUp {
+  from { opacity: 0; transform: scale(0.8); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.popup h3 {
+  font-size: 22px;
+  margin-bottom: 20px;
+  color: #fff;
+}
+
+.popup label {
+  display: block;
+  font-size: 15px;
+  color: #fff;
+  margin-bottom: 6px;
+  text-align: right;
+}
+
+.popup select {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 18px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(255,255,255,0.85);
+  font-size: 15px;
+  outline: none;
+}
+
+.popup-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+/* زر الحفظ */
+.btn-save {
+  background: #22c55e;
+  color: #fff;
+  padding: 12px 26px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.25s;
+}
+.btn-save:hover {
+  background: #16a34a;
+  transform: translateY(-2px);
+}
+
+/* زر الإلغاء */
+.btn-cancel {
+  background: #ef4444;
+  color: #fff;
+  padding: 12px 26px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.25s;
+}
+.btn-cancel:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+}

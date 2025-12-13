@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>الصفحة قيد التطوير</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+  body {
+    margin: 0;
+    height: 100vh;
+    overflow: hidden;
+    font-family: "Cairo", sans-serif;
+    background: linear-gradient(135deg, #0a0f2c, #1b255c, #283b80);
+    background-size: 300% 300%;
+    animation: gradientMove 12s ease infinite;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+  }
+
+  /* 🔥 خلفية متحركة */
+  @keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* ✨ الفقاعات */
+  .bubbles div {
+    position: absolute;
+    bottom: -80px;
+    width: 20px;
+    height: 20px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 50%;
+    animation: rise 10s infinite ease-in;
+  }
+  .bubbles div:nth-child(1) { left: 10%; width: 25px; height: 25px; animation-duration: 12s; }
+  .bubbles div:nth-child(2) { left: 30%; animation-duration: 9s; }
+  .bubbles div:nth-child(3) { left: 50%; width: 28px; height: 28px; animation-duration: 13s; }
+  .bubbles div:nth-child(4) { left: 70%; animation-duration: 8s; }
+  .bubbles div:nth-child(5) { left: 90%; width: 22px; height: 22px; animation-duration: 11s; }
+
+  @keyframes rise {
+    0% { bottom: -100px; opacity: 0; transform: translateX(0); }
+    50% { opacity: .8; }
+    100% { bottom: 110%; opacity: 0; transform: translateX(30px); }
+  }
+
+  /* 🔷 صندوق الرسالة */
+  .box {
+    position: relative;
+    background: rgba(255,255,255,0.08);
+    padding: 40px;
+    width: 450px;
+    backdrop-filter: blur(12px);
+    border-radius: 25px;
+    text-align: center;
+    box-shadow: 0 0 40px rgba(0,0,0,0.25);
+    animation: fadeIn .9s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(25px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ✨ النص المتوهج */
+  h2 {
+    font-size: 32px;
+    margin-bottom: 10px;
+    font-weight: 700;
+    animation: glow 2.2s infinite alternate ease-in-out;
+  }
+
+  @keyframes glow {
+    0% { text-shadow: 0 0 10px #ffffff55; }
+    100% { text-shadow: 0 0 25px #ffffffcc; }
+  }
+
+  p {
+    font-size: 17px;
+    opacity: .9;
+    margin-bottom: 25px;
+    line-height: 1.7;
+  }
+
+  /* 🔄 لودر جميل */
+  .loader {
+    width: 60px;
+    height: 60px;
+    border: 5px solid rgba(255,255,255,0.2);
+    border-top: 5px solid #4b6fff;
+    border-radius: 50%;
+    margin: 0 auto 25px;
+    animation: spin 1.2s linear infinite;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* 🔙 زر العودة */
+  a.back-btn {
+    display: inline-block;
+    padding: 12px 28px;
+    background: #4b6fff;
+    border-radius: 12px;
+    color: white;
+    text-decoration: none;
+    font-size: 17px;
+    transition: .3s;
+  }
+
+  a.back-btn:hover {
+    background: #1d37c4;
+    transform: translateY(-3px);
+  }
+</style>
+</head>
+
+<body>
+
+  <!-- فقاعات متحركة -->
+  <div class="bubbles">
+    <div></div><div></div><div></div><div></div><div></div>
+  </div>
+
+  <!-- محتوى الصفحة -->
+  <div class="box">
+    <div class="loader"></div>
+
+    <h2>الصفحة قيد التطوير</h2>
+
+    <p>
+      نقوم حالياً بإضافة تحديثات وتحسينات جديدة<br>
+      يرجى العودة لاحقاً ❤️
+    </p>
+
+    <a class="back-btn" href="dashboard.html">العودة للوحة التحكم</a>
+  </div>
+
+</body>
+</html>

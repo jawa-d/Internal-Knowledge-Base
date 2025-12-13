@@ -1,0 +1,280 @@
+body {
+  font-family: "Cairo", sans-serif;
+  background: #eef3f9;
+}
+
+/* الحاوية الرئيسية */
+.exam-wrapper {
+  margin-left: 260px;
+  margin-top: 95px;
+  padding: 30px 40px 60px;
+}
+
+/* الهيدر الأعلى */
+.exam-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: center;
+  margin-bottom: 20px;
+  animation: fadeUp 0.4s ease-out;
+}
+
+/* معلومات الموظف */
+.employee-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.employee-box label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.employee-box input {
+  max-width: 260px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+}
+
+.employee-box small {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* يمين الهيدر: التايمر + البروجريس */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+/* التايمر الدائري */
+.timer-circle {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background:
+    conic-gradient(#22c55e 0deg, #e5e7eb 0deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.timer-circle::after {
+  content: "";
+  position: absolute;
+  inset: 10px;
+  background: #ffffff;
+  border-radius: 50%;
+}
+
+#timerLabel {
+  position: relative;
+  font-weight: 700;
+  font-size: 18px;
+  z-index: 1;
+}
+
+/* البروجريس */
+.progress-area {
+  min-width: 260px;
+}
+
+.progress-top {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #4b5563;
+  margin-bottom: 4px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  overflow: hidden;
+}
+
+#progressFill {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #4b6fff, #22c55e);
+  transition: width 0.25s ease;
+}
+
+/* زر بدء الامتحان */
+.btn {
+  padding: 10px 20px;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s ease;
+}
+
+.btn.primary {
+  background: #4b6fff;
+  color: #ffffff;
+}
+
+.btn.primary:hover {
+  background: #3244d5;
+}
+
+.start-btn {
+  margin-top: 8px;
+  margin-bottom: 18px;
+}
+
+/* منطقة الأسئلة */
+.questions-area {
+  margin-top: 10px;
+}
+
+/* كارت السؤال */
+.question-card {
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid #d7dee9;
+  padding: 20px 22px;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: 0.25s ease;
+}
+
+.question-card.active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.question-title {
+  font-weight: 700;
+  margin-bottom: 12px;
+  font-size: 15px;
+}
+
+/* خيارات الاختيار */
+.choice-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.choice-row input[type="radio"] {
+  width: 16px;
+  height: 16px;
+}
+
+/* إجابة قصيرة */
+.short-answer-input {
+  width: 100%;
+  max-width: 400px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+}
+
+/* نص تحت السؤال (نوع السؤال) */
+.question-meta {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* التنقل بين الأسئلة */
+.question-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 18px;
+}
+
+.nav-btn {
+  background: #e5e7eb;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.nav-btn:hover {
+  background: #d1d5db;
+}
+
+.nav-btn:disabled {
+  background: #f3f4f6;
+  cursor: not-allowed;
+}
+
+.step-indicator {
+  font-size: 13px;
+  color: #4b5563;
+}
+
+/* زر تسليم الامتحان */
+.submit-btn {
+  background: #22c55e;
+  color: white;
+  width: 100%;
+  margin-top: 18px;
+  padding: 12px 0;
+  font-size: 16px;
+  border-radius: 16px;
+  box-shadow: 0 10px 20px rgba(22, 163, 74, 0.25);
+}
+
+.submit-btn:hover {
+  background: #16a34a;
+}
+
+/* صندوق النتيجة / الرسائل */
+.result-box {
+  margin-top: 22px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  font-size: 14px;
+  color: #111827;
+  display: none;
+}
+
+/* رسائل خاصة */
+.result-box.success {
+  border-right: 4px solid #22c55e;
+}
+
+.result-box.locked {
+  border-right: 4px solid #f97316;
+}
+
+.result-box.error {
+  border-right: 4px solid #ef4444;
+}
+
+/* أنميشن عامة */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

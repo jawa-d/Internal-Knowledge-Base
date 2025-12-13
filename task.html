@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>إدارة التاسكات | Task Management</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="global.css">
+  <link rel="stylesheet" href="task.css">
+</head>
+
+<body>
+
+  <!-- Sidebar -->
+  <div id="sidebar"></div>
+  <script src="sidebar.js"></script>
+
+  <!-- Navbar -->
+  <div class="top-nav">
+    <div class="nav-left">
+      <h1>Task Management</h1>
+      <p class="nav-sub">إنشاء ومتابعة أداء الموظفين</p>
+    </div>
+
+    <div class="nav-center">
+      <h2 class="kb-title">Employee Performance</h2>
+    </div>
+
+    <div class="nav-right">
+      <div class="toggle-box">
+        <span class="user-name">Jawad</span>
+        <div class="toggle">
+          <div class="knob"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="task-page">
+
+    <!-- ===== نموذج إنشاء تاسك ===== -->
+    <section class="task-form-card">
+      <h2 class="section-title">إنشاء تاسك جديد</h2>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>اسم الموظف</label>
+          <input type="text" id="empName" placeholder="مثال: جواد كاظم هادي">
+        </div>
+
+        <div class="form-group">
+          <label>اسم المؤشر (KPI)</label>
+          <input type="text" id="taskName" placeholder="مثال: جودة الاتصال">
+        </div>
+
+        <div class="form-group">
+          <label>القيمة المستهدفة</label>
+          <input type="number" id="targetValue" placeholder="مثال: 100">
+        </div>
+
+        <div class="form-group">
+          <label>القيمة الحالية</label>
+          <input type="number" id="currentValue" placeholder="مثال: 30">
+        </div>
+
+        <div class="form-group">
+          <label>الموعد النهائي</label>
+          <input type="datetime-local" id="deadline">
+        </div>
+
+        <div class="form-group">
+          <label>نسبة الإنجاز</label>
+          <input type="number" id="progressValue" readonly>
+        </div>
+      </div>
+
+      <!-- Progress preview -->
+      <div class="progress-preview">
+        <div class="progress">
+          <div id="progressFill" class="progress-fill"></div>
+        </div>
+        <span id="progressLabel">0%</span>
+      </div>
+
+      <button class="create-btn" id="createTaskBtn">إنشاء التاسك</button>
+    </section>
+
+    <!-- ===== لوحة التاسكات ===== -->
+    <section class="board">
+      <h2 class="section-title2">التاسكات الحالية</h2>
+
+      <div class="columns">
+        <!-- In Progress -->
+        <div class="column">
+          <div class="column-header">
+            <span class="col-title">In Progress</span>
+            <span class="col-count" id="countInProgress">0</span>
+          </div>
+          <div id="colInProgress" class="column-body"></div>
+        </div>
+
+        <!-- Done -->
+        <div class="column">
+          <div class="column-header">
+            <span class="col-title">Done</span>
+            <span class="col-count" id="countDone">0</span>
+          </div>
+          <div id="colDone" class="column-body"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== Popup تقييم المهمة عند الضغط على الكارد ===== -->
+  <div id="feedbackOverlay" class="fb-overlay">
+    <div class="fb-box">
+      <h2 id="fbTitle" class="fb-title"></h2>
+      <p id="fbMessage" class="fb-message"></p>
+
+      <div class="fb-details">
+        <p><strong>المهمة:</strong> <span id="fbTaskName"></span></p>
+        <p><strong>الموظف:</strong> <span id="fbEmpName"></span></p>
+        <p><strong>نسبة الإنجاز:</strong> <span id="fbPercent"></span>%</p>
+        <p><strong>الموعد النهائي:</strong> <span id="fbDeadline"></span></p>
+      </div>
+
+      <button id="fbCloseBtn" class="fb-close-btn">إغلاق</button>
+    </div>
+  </div>
+
+  <script src="task.js"></script>
+</body>
+
+</html>

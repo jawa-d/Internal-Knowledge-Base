@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard Home</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="global.css" />
+  <link rel="stylesheet" href="dashboard.css" />
+</head>
+
+<body>
+
+  <div id="sidebar"></div>
+  <script src="sidebar.js"></script>
+
+  <!-- NAVBAR -->
+  <div class="top-nav">
+
+    <div class="nav-left">
+      <h1>Dashboard Home</h1>
+    </div>
+
+    <div class="nav-center">
+      <h2 class="kb-title">Customer Care Knowledge Base</h2>
+    </div>
+
+    <div class="nav-right">
+      <span class="user-name" id="currentUser"></span>
+      <button id="logoutBtn" class="logout-btn">تسجيل الخروج</button>
+    </div>
+
+  </div>
+
+  <div class="dashboard-search-area">
+    <input type="text" class="dashboard-search" placeholder="ابحث داخل الـ Dashboard..." />
+  </div>
+
+  <main class="dashboard-content">
+
+    <div class="stats-grid">
+      <div class="stat-box">
+        <div class="icon"></div>
+        <p>عدد المستخدمين</p>
+        <span class="stat-number" data-target="128">0</span>
+      </div>
+
+      <div class="stat-box">
+        <div class="icon"></div>
+        <p>عدد الكتب</p>
+        <span class="stat-number" data-target="542">0</span>
+      </div>
+
+      <div class="stat-box">
+        <div class="icon"></div>
+        <p>عدد الرفوف</p>
+        <span class="stat-number" data-target="18">0</span>
+      </div>
+
+      <div class="stat-box">
+        <div class="icon"></div>
+        <p>التحديثات</p>
+        <span class="stat-number" data-target="32">0</span>
+      </div>
+    </div>
+
+    <div class="lower-grid">
+
+      <section class="general-stats">
+        <h3>إحصائيات عامة</h3>
+        <p class="sub">مخططات الأداء والمقارنات الشهرية</p>
+
+        <div class="visits-row">
+          <div class="visits-info">
+            <span class="label">زيارة للموقع</span>
+            <span class="value">25</span>
+          </div>
+
+          <div class="user-visits">
+            <span>عدد زيارات المستخدم</span>
+            <span class="badge">jawad</span>
+          </div>
+        </div>
+      </section>
+
+      <aside class="side-boxes">
+        <div class="side-card">
+          <h4>عنصر 1</h4>
+          <p>معلومات إضافية</p>
+        </div>
+
+        <div class="side-card">
+          <h4>عنصر 2</h4>
+          <p>معلومات إضافية</p>
+        </div>
+
+        <div class="side-card">
+          <h4>عنصر 3</h4>
+          <p>معلومات إضافية</p>
+        </div>
+      </aside>
+
+    </div>
+  </main>
+  <script src="dashboard.js"></script>
+<footer class="footer">
+  <p>Developed by <strong>Jawad Kadhim. ALL RIGHTS RESERVED.</strong> © 2025</p>
+</footer>
+
+</body>
+
+</html>

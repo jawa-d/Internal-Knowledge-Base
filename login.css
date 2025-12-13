@@ -1,0 +1,195 @@
+:root {
+  --bg: #020617;
+  --glass: rgba(255,255,255,0.06);
+  --border: rgba(255,255,255,0.12);
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --blue: #3b82f6;
+  --success: #22c55e;
+  --error: #ef4444;
+}
+
+* {
+  box-sizing: border-box;
+  font-family: 'Cairo', sans-serif;
+}
+
+body {
+  margin: 0;
+  height: 100vh;
+  background: var(--bg);
+  overflow: hidden;
+  color: var(--text);
+}
+
+/* Noise */
+.noise {
+  position: fixed;
+  inset: 0;
+  background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+  opacity: .05;
+  pointer-events: none;
+}
+
+/* Glow */
+.glow {
+  position: fixed;
+  width: 420px;
+  height: 420px;
+  filter: blur(140px);
+  opacity: .45;
+}
+
+.g1 {
+  background: #2563eb;
+  top: -120px;
+  right: -120px;
+}
+
+.g2 {
+  background: #22d3ee;
+  bottom: -140px;
+  left: -140px;
+}
+
+/* Center */
+.auth-root {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Card */
+.auth-card {
+  width: 380px;
+  padding: 38px 34px;
+  border-radius: 26px;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(22px);
+  box-shadow: 0 40px 120px rgba(0,0,0,.6);
+
+  animation: enter .9s cubic-bezier(.16,1,.3,1);
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Brand */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand .dot {
+  width: 12px;
+  height: 12px;
+  background: var(--blue);
+  border-radius: 50%;
+  box-shadow: 0 0 18px var(--blue);
+}
+
+.brand h1 {
+  font-size: 22px;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 12px 0 28px;
+  line-height: 1.6;
+}
+
+/* Inputs */
+.input-group {
+  position: relative;
+  margin-bottom: 18px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 15px 14px;
+  border-radius: 14px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  outline: none;
+  font-size: 15px;
+}
+
+.input-group span {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  pointer-events: none;
+  transition: .25s;
+  background: var(--bg);
+  padding: 0 6px;
+}
+
+.input-group input:focus + span,
+.input-group input:valid + span {
+  top: -7px;
+  font-size: 12px;
+  color: var(--blue);
+}
+
+/* Buttons */
+button {
+  width: 100%;
+  padding: 14px;
+  border-radius: 16px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 15px;
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  color: white;
+  transition: .25s;
+}
+
+button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 30px rgba(59,130,246,.35);
+}
+
+button.dark {
+  background: #020617;
+  border: 1px solid var(--border);
+}
+
+/* Code Box */
+.code-box {
+  margin-top: 20px;
+  animation: reveal .45s ease;
+}
+
+@keyframes reveal {
+  from { opacity: 0; transform: scale(.95); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Messages */
+.msg {
+  margin-top: 16px;
+  font-weight: 700;
+  min-height: 22px;
+}
+
+.msg.success { color: var(--success); }
+.msg.error { color: var(--error); }
+
+.hidden { display: none; }

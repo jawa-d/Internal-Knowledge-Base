@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8">
+  <title>تفاصيل الكتاب</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="global.css">
+
+  <style>
+    body { background:#eef3f9; font-family:"Cairo"; }
+
+    .editor-container {
+      margin-left:260px;
+      margin-top:100px;
+      padding:30px 40px;
+    }
+
+    .book-header {
+      margin-bottom: 15px;
+    }
+
+    .book-header h2 {
+      font-size: 20px;
+      margin-bottom: 6px;
+    }
+
+    .book-header p {
+      font-size: 14px;
+      color:#6b7280;
+    }
+
+    .toolbar {
+      background:white;
+      border:1px solid #ddd;
+      padding:10px;
+      border-radius:10px;
+      margin-bottom:10px;
+    }
+
+    .toolbar button {
+      padding:6px 12px;
+      border:none;
+      background:#f1f1f1;
+      border-radius:6px;
+      cursor:pointer;
+      margin-left:4px;
+    }
+
+    #editor {
+      background:white;
+      border:1px solid #ccc;
+      min-height:350px;
+      padding:20px;
+      border-radius:12px;
+      outline:none;
+    }
+
+    .actions {
+      margin-top:15px;
+      display:flex;
+      gap:10px;
+    }
+
+    .save-btn, .del-btn {
+      padding:10px 22px;
+      border-radius:12px;
+      color:white;
+      border:none;
+      cursor:pointer;
+      font-size:14px;
+    }
+
+    .save-btn { background:#4b6fff; }
+    .del-btn { background:#d93025; }
+  </style>
+
+</head>
+
+<body>
+
+  <div id="sidebar"></div>
+  <script src="sidebar.js"></script>
+
+  <div class="top-nav">
+    <div class="nav-left">
+      <h1>تفاصيل الكتاب</h1>
+      <p class="nav-sub">تحرير وكتابة المحتوى</p>
+    </div>
+
+    <div class="nav-center"><h2 class="kb-title">Knowledge Base</h2></div>
+
+    <div class="nav-right">
+      <div class="toggle-box">
+        <span class="user-name">Jawad</span>
+        <div class="toggle"><div class="knob"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="editor-container">
+
+    <div class="book-header">
+      <h2 id="bookTitle">—</h2>
+      <p id="bookDesc">—</p>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button onclick="execCmd('bold')">B</button>
+      <button onclick="execCmd('italic')">I</button>
+      <button onclick="execCmd('underline')">U</button>
+      <button onclick="execCmd('insertUnorderedList')">•</button>
+      <button onclick="execCmd('insertOrderedList')">1.</button>
+      <button onclick="execCmd('justifyRight')">يمين</button>
+      <button onclick="execCmd('justifyCenter')">وسط</button>
+      <button onclick="execCmd('justifyLeft')">يسار</button>
+    </div>
+
+    <!-- Editor -->
+    <div id="editor" contenteditable="true"></div>
+
+    <!-- Buttons -->
+    <div class="actions">
+      <button class="save-btn" onclick="saveContent()">حفظ</button>
+      <button class="del-btn" onclick="deleteContent()">حذف</button>
+    </div>
+
+  </div>
+
+  <script>
+    let id = localStorage.getItem("selectedBook");
+
+    const books = JSON.parse(localStorage.getItem("books_list")) || [];
+    const current = books[id];
+
+    if (current) {
+      document.getElementById("bookTitle").textContent = current.title || "بدون عنوان";
+      document.getElementById("bookDesc").textContent = current.desc || "";
+    }
+
+    function execCmd(cmd) {
+      document.execCommand(cmd, false, null);
+    }
+
+    function loadContent() {
+      const content = localStorage.getItem("book_content_" + id);
+      if (content) document.getElementById("editor").innerHTML = content;
+    }
+
+    function saveContent() {
+      const content = document.getElementById("editor").innerHTML;
+      localStorage.setItem("book_content_" + id, content);
+      alert("تم حفظ المحتوى بنجاح");
+    }
+
+    function deleteContent() {
+      if (confirm("هل تريد حذف المحتوى؟")) {
+        localStorage.removeItem("book_content_" + id);
+        document.getElementById("editor").innerHTML = "";
+      }
+    }
+
+    loadContent();
+  </script>
+
+</body>
+</html>

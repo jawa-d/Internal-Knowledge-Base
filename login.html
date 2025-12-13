@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>Earthlink | Employee Access</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="login.css">
+</head>
+
+<script>
+  if (localStorage.getItem("kb_logged_in") === "1") {
+    window.location.href = "dashboard.html";
+  }
+</script>
+
+<body>
+
+<!-- Background Effects -->
+<div class="noise"></div>
+<div class="glow g1"></div>
+<div class="glow g2"></div>
+
+<!-- Login -->
+<div class="auth-root">
+  <div class="auth-card">
+
+    <div class="brand">
+      <span class="dot"></span>
+      <h1>Earthlink</h1>
+    </div>
+
+    <p class="subtitle">
+      Internal Knowledge Base<br>
+      Employee Secure Access
+    </p>
+
+    <div class="input-group">
+      <input type="email" id="emailInput" required>
+      <span>Email Address</span>
+    </div>
+
+    <button id="sendCodeBtn">
+      <span>Continue</span>
+      <div class="loader"></div>
+    </button>
+
+    <div id="codeBox" class="code-box hidden">
+      <div class="input-group">
+        <input type="text" id="codeInput" maxlength="6" required>
+        <span>Verification Code</span>
+      </div>
+
+      <button id="verifyBtn" class="dark">
+        Verify & Enter
+      </button>
+    </div>
+
+    <div id="msg" class="msg"></div>
+
+  </div>
+</div>
+
+<script type="module" src="login.js"></script>
+</body>
+</html>

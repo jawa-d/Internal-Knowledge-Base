@@ -1,0 +1,64 @@
+body {
+  font-family: "Cairo", sans-serif;
+  background: #eef3fb;
+  margin: 0;
+}
+
+/* مساحة الصفحة بعد السايدبار */
+.settings-content {
+  margin-right: 260px;
+  padding: 120px 70px;
+}
+
+/* صف الإعداد */
+.setting-row {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  margin-bottom: 45px;
+}
+
+.label {
+  font-size: 22px;
+  font-weight: 700;
+  width: 200px;
+}
+
+/* النص الصغير */
+.sublabel {
+  font-size: 15px;
+  opacity: 0.75;
+}
+
+/* الزر */
+.switch {
+  width: 55px;
+  height: 26px;
+  background: #d9dfea;
+  border-radius: 20px;
+  padding: 4px;
+  cursor: pointer;
+  position: relative;
+  transition: 0.3s;
+}
+
+.switch .dot {
+  width: 19px;
+  height: 19px;
+  background: #4c74ff;
+  border-radius: 50%;
+  position: absolute;
+  right: 4px;
+  top: 3.5px;
+  transition: 0.3s;
+}
+
+/* حالة التشغيل */
+.switch.active {
+  background: #4c74ff;
+}
+
+.switch.active .dot {
+  background: white;
+  right: 30px;
+}
