@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
   <meta charset="UTF-8">
   <title>الرفوف</title>
@@ -35,7 +34,7 @@
 
   <!-- Add shelf button -->
   <div class="add-shelf-area">
-    <button class="add-btn" onclick="openAddShelf()">+ إضافة رف</button>
+    <button id="addShelfBtn" class="add-btn" onclick="openAddShelf()">+ إضافة رف</button>
   </div>
 
   <!-- Shelves Grid -->
@@ -83,6 +82,7 @@
     </div>
   </div>
 
-  <script src="shelves.js"></script>
+  <!-- ✅ مهم جداً: لازم Module -->
+  <script type="module" src="shelves.js"></script>
 </body>
 </html>

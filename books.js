@@ -1,139 +1,202 @@
-// تحميل الكتب من LocalStorage
-let books = JSON.parse(localStorage.getItem("books_list")) || [];
+import { db } from "./firebase.js";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc,
+  getDoc,
+  serverTimestamp,
+  query,
+  orderBy
+} from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
 
-// ====== Helper: Escape RegExp ======
+/* =========================
+   AUTH / ROLE
+========================= */
+let isAdmin = false;
+let currentEmail = "";
+
+async function checkAdmin() {
+  currentEmail = localStorage.getItem("kb_user_email") || "";
+  if (!currentEmail) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  const snap = await getDoc(doc(db, "users", currentEmail));
+  const role = snap.exists() ? snap.data().role : "";
+
+  isAdmin = String(role).toLowerCase() === "admin";
+
+  document.getElementById("addBookBtn").style.display =
+    isAdmin ? "inline-flex" : "none";
+}
+
+/* =========================
+   HELPERS
+========================= */
 function escapeRegExp(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-// ====== Helper: Highlight text ======
-function highlightText(text, search) {
+function highlight(text, search) {
   if (!search || !text) return text || "";
-  const pattern = new RegExp("(" + escapeRegExp(search) + ")", "gi");
-  return text.replace(pattern, '<span class="highlight">$1</span>');
+  const r = new RegExp("(" + escapeRegExp(search) + ")", "gi");
+  return text.replace(r, '<span class="highlight">$1</span>');
 }
 
-// ====== عرض كل الكتب ======
+/* =========================
+   LOAD BOOKS
+========================= */
+let books = [];
+
+async function loadBooks(search = "") {
+  const q = query(
+    collection(db, "books"),
+    orderBy("createdAt", "desc")
+  );
+
+  const snap = await getDocs(q);
+  books = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+  renderBooks(search);
+}
+
+/* =========================
+   RENDER
+========================= */
 function renderBooks(search = "") {
   const grid = document.getElementById("booksGrid");
   grid.innerHTML = "";
 
-  let filteredBooks = books;
+  let filtered = books;
 
-  if (search !== "") {
-    filteredBooks = books.filter(book =>
-      (book.title && book.title.includes(search)) ||
-      (book.desc && book.desc.includes(search))
+  if (search) {
+    filtered = books.filter(b =>
+      (b.title && b.title.includes(search)) ||
+      (b.desc && b.desc.includes(search))
     );
   }
 
-  filteredBooks.forEach((book, index) => {
-    const styleBg = book.image
-      ? `background-image:url('${book.image}');`
-      : "";
-    const noImgClass = book.image ? "" : "no-img";
+  filtered.forEach(book => {
+    const bg = book.image ? `background-image:url('${book.image}')` : "";
+    const noImg = book.image ? "" : "no-img";
 
-    const titleHTML = highlightText(book.title, search);
-    const descHTML = highlightText(book.desc, search);
+    const adminBtns = isAdmin ? `
+      <button class="edit-btn" onclick="editBook('${book.id}')">تعديل</button>
+      <button class="delete-btn" onclick="deleteBook('${book.id}')">حذف</button>
+    ` : "";
 
     grid.innerHTML += `
       <div class="book-card">
+        <div class="book-img ${noImg}" style="${bg}"></div>
 
-        <div class="book-img ${noImgClass}"
-             style="${styleBg}">
-        </div>
-
-        <h3>${titleHTML}</h3>
-        <p>${descHTML}</p>
+        <h3>${highlight(book.title, search)}</h3>
+        <p>${highlight(book.desc, search)}</p>
 
         <div class="btn-row">
-          <button class="view-btn" onclick="viewDetails(${index})">عرض التفاصيل</button>
-          <button class="edit-btn" onclick="editDetails(${index})">تعديل</button>
-          <button class="delete-btn" onclick="deleteBook(${index})">حذف</button>
+          <button class="view-btn" onclick="viewBook('${book.id}')">
+            عرض التفاصيل
+          </button>
+          ${adminBtns}
         </div>
       </div>
     `;
   });
 }
 
-// ====== البحث الحي ======
-const booksSearchInput = document.querySelector(".books-search");
-if (booksSearchInput) {
-  booksSearchInput.addEventListener("input", function () {
-    const keyword = this.value.trim();
-    renderBooks(keyword);
+/* =========================
+   SEARCH
+========================= */
+document.getElementById("searchInput")
+  .addEventListener("input", e => {
+    loadBooks(e.target.value.trim());
   });
-}
 
-// ====== عرض التفاصيل ======
-function viewDetails(index) {
-  localStorage.setItem("selectedBook", index);
+/* =========================
+   NAVIGATION
+========================= */
+function viewBook(id) {
+  localStorage.setItem("selectedBookId", id);
   window.location.href = "book_view.html";
 }
 
-// ====== التعديل ======
-function editDetails(index) {
-  localStorage.setItem("selectedBook", index);
+function editBook(id) {
+  if (!isAdmin) return;
+  localStorage.setItem("selectedBookId", id);
   window.location.href = "book_editor.html";
 }
 
-// ====== الحذف ======
-function deleteBook(index) {
-  if (!confirm("هل أنت متأكد من حذف هذا الكتاب ؟")) return;
+/* =========================
+   DELETE
+========================= */
+async function deleteBook(id) {
+  if (!isAdmin) return;
+  if (!confirm("هل تريد حذف هذا الكتاب؟")) return;
 
-  localStorage.removeItem("book_content_" + index);
-
-  books.splice(index, 1);
-
-  localStorage.setItem("books_list", JSON.stringify(books));
-
-  renderBooks(booksSearchInput ? booksSearchInput.value.trim() : "");
-  alert("تم حذف الكتاب بنجاح");
+  await deleteDoc(doc(db, "books", id));
+  loadBooks(document.getElementById("searchInput").value.trim());
 }
 
-// ==========================
-// 🎨 Popup الإضافة
-// ==========================
-
+/* =========================
+   ADD BOOK
+========================= */
 function openAddBook() {
-  document.getElementById("popupAdd").style.display = "flex";
+  if (!isAdmin) return;
+  popupAdd.style.display = "flex";
 }
 
 function closePopup() {
-  document.getElementById("popupAdd").style.display = "none";
-
-  document.getElementById("popupTitle").value = "";
-  document.getElementById("popupDesc").value = "";
-  document.getElementById("popupImage").value = "";
+  popupAdd.style.display = "none";
+  popupTitle.value = "";
+  popupDesc.value = "";
+  popupImage.value = "";
 }
 
-// إضافة كتاب جديد
-function confirmAdd() {
-  const title = document.getElementById("popupTitle").value.trim();
-  const desc = document.getElementById("popupDesc").value.trim();
-  const file = document.getElementById("popupImage").files[0];
+async function confirmAdd() {
+  if (!isAdmin) return;
+
+  const title = popupTitle.value.trim();
+  const desc = popupDesc.value.trim();
+  const file = popupImage.files[0];
 
   if (!title) return alert("أدخل عنوان الكتاب");
 
-  const reader = new FileReader();
-
-  reader.onloadend = () => {
-    const imageBase64 = file ? reader.result : "";
-
-    books.push({
+  const save = async (img = "") => {
+    await addDoc(collection(db, "books"), {
       title,
       desc,
-      image: imageBase64
+      image: img,
+      createdAt: serverTimestamp(),
+      createdBy: currentEmail
     });
 
-    localStorage.setItem("books_list", JSON.stringify(books));
-
     closePopup();
-    renderBooks(booksSearchInput ? booksSearchInput.value.trim() : "");
+    loadBooks();
   };
 
-  if (file) reader.readAsDataURL(file);
-  else reader.onloadend();
+  if (file) {
+    const r = new FileReader();
+    r.onloadend = () => save(r.result);
+    r.readAsDataURL(file);
+  } else {
+    save("");
+  }
 }
 
-renderBooks();
+/* =========================
+   EXPOSE (onclick)
+========================= */
+window.openAddBook = openAddBook;
+window.closePopup = closePopup;
+window.confirmAdd = confirmAdd;
+window.deleteBook = deleteBook;
+window.viewBook = viewBook;
+window.editBook = editBook;
+
+/* =========================
+   INIT
+========================= */
+await checkAdmin();
+await loadBooks();

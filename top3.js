@@ -1,11 +1,68 @@
-let top3 = JSON.parse(localStorage.getItem("top3_list")) || [];
+import { db } from "./firebase.js";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc,
+  getDoc,
+  updateDoc,
+  serverTimestamp,
+  query,
+  orderBy
+} from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
 
-// عرض
+/* =====================
+   AUTH / ROLE
+===================== */
+let isAdmin = false;
+let currentEmail = "";
+
+async function checkAdmin() {
+  currentEmail = localStorage.getItem("kb_user_email");
+  if (!currentEmail) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  const snap = await getDoc(doc(db, "users", currentEmail));
+  const role = snap.exists() ? snap.data().role : "";
+
+  isAdmin = String(role).toLowerCase() === "admin";
+  document.getElementById("addTopBtn").style.display =
+    isAdmin ? "inline-flex" : "none";
+}
+
+/* =====================
+   LOAD
+===================== */
+let top3 = [];
+
+async function loadTop3() {
+  const q = query(
+    collection(db, "top3"),
+    orderBy("rank", "asc")
+  );
+
+  const snap = await getDocs(q);
+  top3 = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+  renderTop3();
+}
+
+/* =====================
+   RENDER
+===================== */
 function renderTop3() {
   const grid = document.getElementById("top3Grid");
   grid.innerHTML = "";
 
-  top3.forEach((emp, index) => {
+  top3.forEach(emp => {
+    const adminBtns = isAdmin ? `
+      <button class="edit-btn" onclick="editTop('${emp.id}')">تعديل</button>
+      <button class="delete-btn" onclick="deleteTop('${emp.id}')">حذف</button>
+    ` : "";
+
     grid.innerHTML += `
       <div class="top-card">
 
@@ -21,8 +78,7 @@ function renderTop3() {
         <div class="rank-badge">المركز ${emp.rank}</div>
 
         <div class="btn-row">
-          <button class="edit-btn" onclick="editTop(${index})">تعديل</button>
-          <button class="delete-btn" onclick="deleteTop(${index})">حذف</button>
+          ${adminBtns}
         </div>
 
       </div>
@@ -30,111 +86,101 @@ function renderTop3() {
   });
 }
 
-// فتح Popup
+/* =====================
+   POPUP
+===================== */
 function openAddPopup() {
-  document.getElementById("popupTop3").style.display = "flex";
+  if (!isAdmin) return;
+  popupTop3.style.display = "flex";
 }
 
 function closePopup() {
-  document.getElementById("popupTop3").style.display = "none";
+  popupTop3.style.display = "none";
+  empName.value = "";
+  empId.value = "";
+  empImage.value = "";
 }
 
-// حفظ موظف
-function saveEmployee() {
-  let name = document.getElementById("empName").value.trim();
-  let empId = document.getElementById("empId").value.trim();
-  let rank = document.getElementById("empRank").value;
+/* =====================
+   ADD
+===================== */
+async function saveEmployee() {
+  if (!isAdmin) return;
 
-  let file = document.getElementById("empImage").files[0];
+  const name = empName.value.trim();
+  const id = empId.value.trim();
+  const rank = empRank.value;
+  const file = empImage.files[0];
 
-  if (!name || !empId || !rank) {
-    alert("املأ كل المعلومات");
+  if (!name || !id || !file) {
+    alert("أكمل جميع البيانات");
     return;
   }
 
   const reader = new FileReader();
-
-  reader.onloadend = () => {
-    const imgBase64 = reader.result;
-
-    top3.push({
+  reader.onloadend = async () => {
+    await addDoc(collection(db, "top3"), {
       name,
-      empId,
+      empId: id,
       rank,
-      image: imgBase64
+      image: reader.result,
+      createdAt: serverTimestamp(),
+      createdBy: currentEmail
     });
 
-    localStorage.setItem("top3_list", JSON.stringify(top3));
     closePopup();
-    renderTop3();
+    loadTop3();
   };
 
-  if (file) reader.readAsDataURL(file);
-  else alert("يجب اختيار صورة");
+  reader.readAsDataURL(file);
 }
 
-// تعديل
-function editTop(index) {
-  let emp = top3[index];
+/* =====================
+   EDIT
+===================== */
+async function editTop(docId) {
+  if (!isAdmin) return;
 
-  let newName = prompt("اسم الموظف:", emp.name);
-  if (!newName) return;
+  const emp = top3.find(e => e.id === docId);
+  if (!emp) return;
 
-  let newId = prompt("ID الموظف:", emp.empId);
+  const name = prompt("اسم الموظف:", emp.name);
+  if (!name) return;
 
-  let newRank = prompt("الترتيب (1 – 3):", emp.rank);
+  const empId = prompt("ID الموظف:", emp.empId);
+  const rank = prompt("الترتيب (1-3):", emp.rank);
 
-  emp.name = newName;
-  emp.empId = newId;
-  emp.rank = newRank;
+  await updateDoc(doc(db, "top3", docId), {
+    name,
+    empId,
+    rank
+  });
 
-  top3[index] = emp;
-
-  localStorage.setItem("top3_list", JSON.stringify(top3));
-  renderTop3();
+  loadTop3();
 }
 
-// حذف
-function deleteTop(index) {
+/* =====================
+   DELETE
+===================== */
+async function deleteTop(docId) {
+  if (!isAdmin) return;
   if (!confirm("هل تريد حذف هذا الموظف؟")) return;
 
-  top3.splice(index, 1);
-  localStorage.setItem("top3_list", JSON.stringify(top3));
-
-  renderTop3();
+  await deleteDoc(doc(db, "top3", docId));
+  loadTop3();
 }
 
-renderTop3();
-// =================== 3D Parallax Tilt =====================
-document.addEventListener("mousemove", function (e) {
-  const cards = document.querySelectorAll(".top-card");
+/* =====================
+   EXPOSE
+===================== */
+window.openAddPopup = openAddPopup;
+window.closePopup = closePopup;
+window.saveEmployee = saveEmployee;
+window.editTop = editTop;
+window.deleteTop = deleteTop;
 
-  cards.forEach(card => {
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;  
-    const y = e.clientY - rect.top;
-
-    const midX = rect.width / 2;
-    const midY = rect.height / 2;
-
-    const rotateX = ((y - midY) / midY) * 10; // درجة الميلان فوق/تحت
-    const rotateY = ((x - midX) / midX) * 10; // درجة الميلان يمين/يسار
-
-    card.classList.remove("reset-animation");
-
-    card.style.transform =
-      `rotateX(${rotateX * -1}deg) rotateY(${rotateY}deg) scale(1.05)`;
-
-    card.style.boxShadow =
-      `${rotateY * 2}px ${rotateX * 2}px 40px rgba(0,0,0,0.25)`;
-  });
-});
-
-// ===== رجوع الكارت عند خروج الماوس من الشاشة =====
-document.addEventListener("mouseleave", function () {
-  document.querySelectorAll(".top-card").forEach(card => {
-    card.classList.add("reset-animation");
-    card.style.transform = "rotateX(0deg) rotateY(0deg) scale(1)";
-    card.style.boxShadow = "0 10px 25px rgba(0,0,0,0.10)";
-  });
-});
+/* =====================
+   INIT
+===================== */
+await checkAdmin();
+await loadTop3();

@@ -1,78 +1,128 @@
-// تحميل الرفوف
-let shelves = JSON.parse(localStorage.getItem("shelves_list")) || [];
+import { db } from "./firebase.js";
 
-/* ===== Helper Functions ===== */
+import {
+  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  getDoc,
+  serverTimestamp,
+  query,
+  orderBy
+} from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
+
+// ===============================
+// Helpers (Search highlight)
+// ===============================
 function escapeRegExp(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
-
 function highlight(text, search) {
   if (!search || !text) return text;
   const pattern = new RegExp("(" + escapeRegExp(search) + ")", "gi");
   return text.replace(pattern, '<span class="highlight">$1</span>');
 }
 
-/* ===== Render Shelves ===== */
+// ===============================
+// Auth/Role (from Firestore users)
+// ===============================
+let isAdmin = false;
+let currentEmail = "";
+
+async function checkAdmin() {
+  currentEmail = localStorage.getItem("kb_user_email") || "";
+  if (!currentEmail) {
+    // اذا ماكو ايميل مخزن، رجّعه للّوجن
+    window.location.href = "login.html";
+    return;
+  }
+
+  const userRef = doc(db, "users", currentEmail);
+  const snap = await getDoc(userRef);
+
+  const role = (snap.exists() ? (snap.data().role || "") : "");
+  isAdmin = String(role).toLowerCase() === "admin";
+
+  // اخفاء زر الاضافة لغير الادمن
+  const addBtn = document.getElementById("addShelfBtn");
+  if (addBtn) addBtn.style.display = isAdmin ? "inline-flex" : "none";
+}
+
+// ===============================
+// Data
+// ===============================
+let shelves = []; // {id,title,desc,image}
+
+// ===============================
+// Load + Render
+// ===============================
+async function loadShelves() {
+  const q = query(collection(db, "shelves"), orderBy("createdAt", "desc"));
+  const snap = await getDocs(q);
+
+  shelves = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  renderShelves(document.querySelector(".shelves-search")?.value?.trim() || "");
+}
+
 function renderShelves(search = "") {
   const grid = document.getElementById("shelvesGrid");
   grid.innerHTML = "";
 
-  let filtered = shelves;
+  const s = search.trim();
+  const filtered = s
+    ? shelves.filter(x =>
+        (x.title || "").includes(s) || (x.desc || "").includes(s)
+      )
+    : shelves;
 
-  if (search !== "") {
-    filtered = shelves.filter(s =>
-      s.title.includes(search) || s.desc.includes(search)
-    );
-  }
-
-  filtered.forEach((shelf, index) => {
+  filtered.forEach((shelf) => {
     const bg = shelf.image ? `background-image:url('${shelf.image}')` : "";
     const noImg = shelf.image ? "" : "no-img";
+
+    // buttons حسب الصلاحية
+    const adminButtons = isAdmin ? `
+      <button class="edit-btn" onclick="editDetails('${shelf.id}')">تعديل</button>
+      <button class="delete-btn" onclick="deleteShelf('${shelf.id}')">حذف</button>
+    ` : "";
 
     grid.innerHTML += `
       <div class="shelf-card">
         <div class="shelf-img ${noImg}" style="${bg}"></div>
 
-        <h3>${highlight(shelf.title, search)}</h3>
-        <p>${highlight(shelf.desc, search)}</p>
+        <h3>${highlight(shelf.title || "", s)}</h3>
+        <p>${highlight(shelf.desc || "", s)}</p>
 
         <div class="btn-row">
-          <button class="view-btn" onclick="viewShelf(${index})">عرض التفاصيل</button>
-          <button class="edit-btn" onclick="editDetails(${index})">تعديل</button>
-          <button class="delete-btn" onclick="deleteShelf(${index})">حذف</button>
+          <button class="view-btn" onclick="viewShelf('${shelf.id}')">عرض التفاصيل</button>
+          ${adminButtons}
         </div>
       </div>
     `;
   });
 }
 
-/* ===== Live Search ===== */
-document.querySelector(".shelves-search").addEventListener("input", function () {
+// ===============================
+// Events
+// ===============================
+document.querySelector(".shelves-search")?.addEventListener("input", function () {
   renderShelves(this.value.trim());
 });
 
-/* ===== View Shelf ===== */
-function viewShelf(index) {
-  localStorage.setItem("selectedShelf", index);
+// ===============================
+// View shelf
+// ===============================
+function viewShelf(id) {
+  localStorage.setItem("selectedShelfId", id);
   window.location.href = "shelf_view.html";
 }
 
-/* ===== Delete Shelf ===== */
-function deleteShelf(index) {
-  if (!confirm("هل تريد حذف هذا الرف؟")) return;
-
-  localStorage.removeItem("shelf_content_" + index);
-  localStorage.removeItem("shelf_cards_" + index);
-
-  shelves.splice(index, 1);
-
-  localStorage.setItem("shelves_list", JSON.stringify(shelves));
-
-  renderShelves();
-}
-
-/* ===== Add Shelf Popup ===== */
+// ===============================
+// Add shelf (Admin only)
+// ===============================
 function openAddShelf() {
+  if (!isAdmin) return;
   document.getElementById("popupAdd").style.display = "flex";
 }
 
@@ -83,40 +133,54 @@ function closePopup() {
   document.getElementById("popupImage").value = "";
 }
 
-function confirmAdd() {
+async function confirmAdd() {
+  if (!isAdmin) return;
+
   const title = document.getElementById("popupTitle").value.trim();
   const desc = document.getElementById("popupDesc").value.trim();
   const file = document.getElementById("popupImage").files[0];
 
   if (!title) return alert("أدخل اسم الرف");
 
-  const reader = new FileReader();
-
-  reader.onloadend = () => {
-    shelves.push({
+  const saveDoc = async (imageData = "") => {
+    await addDoc(collection(db, "shelves"), {
       title,
       desc,
-      image: file ? reader.result : ""
+      image: imageData,
+      createdAt: serverTimestamp(),
+      createdBy: currentEmail
     });
-
-    localStorage.setItem("shelves_list", JSON.stringify(shelves));
-
     closePopup();
-    renderShelves();
+    await loadShelves();
   };
 
-  if (file) reader.readAsDataURL(file);
-  else reader.onloadend();
+  if (file) {
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      await saveDoc(reader.result);
+    };
+    reader.readAsDataURL(file);
+  } else {
+    await saveDoc("");
+  }
 }
 
-/* ===== Edit Shelf Popup ===== */
-function editDetails(index) {
-  const s = shelves[index];
+// ===============================
+// Edit shelf (Admin only)
+// ===============================
+let currentEditId = null;
 
-  document.getElementById("editTitle").value = s.title;
-  document.getElementById("editDesc").value = s.desc;
+async function editDetails(id) {
+  if (!isAdmin) return;
 
-  window.currentEditIndex = index;
+  const shelf = shelves.find(x => x.id === id);
+  if (!shelf) return;
+
+  currentEditId = id;
+
+  document.getElementById("editTitle").value = shelf.title || "";
+  document.getElementById("editDesc").value = shelf.desc || "";
+  document.getElementById("editImage").value = "";
 
   document.getElementById("popupEdit").style.display = "flex";
 }
@@ -126,10 +190,12 @@ function closeEditPopup() {
   document.getElementById("editTitle").value = "";
   document.getElementById("editDesc").value = "";
   document.getElementById("editImage").value = "";
+  currentEditId = null;
 }
 
-function saveEdit() {
-  const index = window.currentEditIndex;
+async function saveEdit() {
+  if (!isAdmin) return;
+  if (!currentEditId) return;
 
   const title = document.getElementById("editTitle").value.trim();
   const desc = document.getElementById("editDesc").value.trim();
@@ -137,27 +203,50 @@ function saveEdit() {
 
   if (!title) return alert("أدخل اسم الرف");
 
-  shelves[index].title = title;
-  shelves[index].desc = desc;
+  const ref = doc(db, "shelves", currentEditId);
 
   if (file) {
     const reader = new FileReader();
-
-    reader.onloadend = () => {
-      shelves[index].image = reader.result;
-
-      localStorage.setItem("shelves_list", JSON.stringify(shelves));
-
+    reader.onloadend = async () => {
+      await updateDoc(ref, { title, desc, image: reader.result });
       closeEditPopup();
-      renderShelves();
+      await loadShelves();
     };
-
     reader.readAsDataURL(file);
   } else {
-    localStorage.setItem("shelves_list", JSON.stringify(shelves));
+    await updateDoc(ref, { title, desc });
     closeEditPopup();
-    renderShelves();
+    await loadShelves();
   }
 }
 
-renderShelves();
+// ===============================
+// Delete shelf (Admin only)
+// ===============================
+async function deleteShelf(id) {
+  if (!isAdmin) return;
+  if (!confirm("هل تريد حذف هذا الرف؟")) return;
+
+  await deleteDoc(doc(db, "shelves", id));
+  await loadShelves();
+}
+
+// ===============================
+// Expose for HTML onclick (Important)
+// ===============================
+window.openAddShelf = openAddShelf;
+window.closePopup = closePopup;
+window.confirmAdd = confirmAdd;
+
+window.editDetails = editDetails;
+window.saveEdit = saveEdit;
+window.closeEditPopup = closeEditPopup;
+
+window.deleteShelf = deleteShelf;
+window.viewShelf = viewShelf;
+
+// ===============================
+// INIT
+// ===============================
+await checkAdmin();
+await loadShelves();

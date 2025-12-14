@@ -1,129 +1,153 @@
+import { db } from "./firebase.js";
+import {
+  doc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
+
+// ===============================
+// 🔐 Admin Guard (LocalStorage)
+// ===============================
+const unauthorizedBox = document.getElementById("unauthorizedBox");
+const adminContent = document.getElementById("adminContent");
+
+async function checkAdminAccess() {
+  const email = localStorage.getItem("kb_user_email");
+
+  // غير مسجل
+  if (!email) {
+    window.location.href = "login.html";
+    return false;
+  }
+
+  try {
+    const snap = await getDoc(doc(db, "users", email.toLowerCase()));
+
+    if (!snap.exists()) {
+      showUnauthorized();
+      return false;
+    }
+
+    const data = snap.data();
+    const role = (data.role || "").toLowerCase();
+    const status = (data.status || "").toLowerCase();
+
+    if (role !== "admin" || status !== "active") {
+      showUnauthorized();
+      return false;
+    }
+
+    // Admin ✔
+    adminContent.style.display = "block";
+    unauthorizedBox.style.display = "none";
+    return true;
+
+  } catch (err) {
+    console.error(err);
+    showUnauthorized();
+    return false;
+  }
+}
+
+function showUnauthorized() {
+  adminContent.style.display = "none";
+  unauthorizedBox.style.display = "block";
+}
+
+// ===============================
+// 📊 منطق الصفحة
+// ===============================
 const RESULTS_KEY = "kb_exam_results";
 let results = [];
 
-// DOM
 const tableBody = document.getElementById("resultsTableBody");
 const detailsBox = document.getElementById("detailsBox");
 const searchBox = document.getElementById("searchBox");
 const sortSelect = document.getElementById("sortSelect");
 
-// تحميل النتائج
 function loadResults() {
   results = JSON.parse(localStorage.getItem(RESULTS_KEY) || "[]");
   applyFilters();
 }
 
-// فلترة + فرز
-function applyFilters() {
-  let filtered = [...results];
+function getManualScore(r) {
+  return (r.answers || [])
+    .filter(a => a.manual)
+    .reduce((s, q) => s + Number(q.manualScore || 0), 0);
+}
 
-  // بحث
+function applyFilters() {
+  let list = [...results];
   const search = searchBox.value.trim();
+
   if (search) {
-    filtered = filtered.filter(r =>
-      r.employeeName.includes(search)
-    );
+    list = list.filter(r => (r.employeeName || "").includes(search));
   }
 
-  // فرز
-  const sort = sortSelect.value;
-  filtered.sort((a, b) => {
-    if (sort === "date_desc") return new Date(b.submittedAt) - new Date(a.submittedAt);
-    if (sort === "date_asc") return new Date(a.submittedAt) - new Date(b.submittedAt);
-    if (sort === "score_desc") return (b.autoScore + getManualScore(b)) - (a.autoScore + getManualScore(a));
-    if (sort === "score_asc") return (a.autoScore + getManualScore(a)) - (b.autoScore + getManualScore(b));
-    if (sort === "name_asc") return a.employeeName.localeCompare(b.employeeName);
-    if (sort === "name_desc") return b.employeeName.localeCompare(a.employeeName);
+  list.sort((a, b) => {
+    if (sortSelect.value === "date_desc") return new Date(b.submittedAt) - new Date(a.submittedAt);
+    if (sortSelect.value === "date_asc") return new Date(a.submittedAt) - new Date(b.submittedAt);
+    if (sortSelect.value === "score_desc") return (b.autoScore + getManualScore(b)) - (a.autoScore + getManualScore(a));
+    if (sortSelect.value === "score_asc") return (a.autoScore + getManualScore(a)) - (b.autoScore + getManualScore(b));
+    if (sortSelect.value === "name_asc") return a.employeeName.localeCompare(b.employeeName);
+    if (sortSelect.value === "name_desc") return b.employeeName.localeCompare_toggle(a.employeeName);
   });
 
-  renderTable(filtered);
+  renderTable(list);
 }
 
-// حساب الدرجات اليدوية
-function getManualScore(r) {
-  return r.answers
-    .filter(a => a.manual)
-    .reduce((sum, q) => sum + Number(q.manualScore || 0), 0);
-}
-
-// عرض النتائج في الجدول
 function renderTable(list) {
   tableBody.innerHTML = "";
 
   list.forEach((r, i) => {
-    const finalScore = r.autoScore + getManualScore(r);
+    const score = Number(r.autoScore || 0) + getManualScore(r);
 
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${i + 1}</td>
-      <td>${r.employeeName}</td>
-      <td>${finalScore}</td>
-      <td>${new Date(r.submittedAt).toLocaleString("ar-IQ")}</td>
-      <td><button class="viewBtn" onclick="viewDetails(${r.id})">👁 عرض</button></td>
-      <td><button class="pdfBtn" onclick="exportSingleToPDF(${r.id})">📄</button></td>
-      <td><button class="delBtn" onclick="resetExam(${r.id})">🗑</button></td>
+    tableBody.innerHTML += `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${r.employeeName}</td>
+        <td>${score}</td>
+        <td>${new Date(r.submittedAt).toLocaleString("ar-IQ")}</td>
+        <td><button onclick="viewDetails(${r.id})">👁</button></td>
+        <td><button onclick="exportSingleToPDF(${r.id})">📄</button></td>
+        <td><button onclick="resetExam(${r.id})">🗑</button></td>
+      </tr>
     `;
-    tableBody.appendChild(tr);
   });
 }
 
-// عرض التفاصيل
-function viewDetails(id) {
+window.viewDetails = function(id) {
   const r = results.find(x => x.id === id);
   if (!r) return;
 
-  const finalScore = r.autoScore + getManualScore(r);
-
-  let html = `
-    <h2>الاسم: ${r.employeeName}</h2>
-    <p>الدرجة النهائية: <b>${finalScore}</b></p>
-    <p>وقت التسليم: ${new Date(r.submittedAt).toLocaleString("ar-IQ")}</p>
-    <hr>
-    <h3>الإجابات:</h3>
-  `;
-
+  let html = `<h3>${r.employeeName}</h3>`;
   r.answers.forEach((a, i) => {
-    html += `
-      <p><b>${i + 1}) ${a.text}</b></p>
-      <p>إجابة الموظف: ${a.userAnswer}</p>
-      ${a.correctAnswer ? `<p>الصحيح: ${a.correctAnswer}</p>` : ""}
-      ${a.manual ? `<p>تصحيح يدوي: ${a.manualScore} / 10</p>` : ""}
-      <hr>
-    `;
+    html += `<p>${i + 1}) ${a.text}</p>`;
   });
 
   detailsBox.innerHTML = html;
-  detailsBox.style.display = "block";
-}
+};
 
-// حذف النتيجة
-function resetExam(id) {
-  if (!confirm("هل تريد حذف النتيجة؟")) return;
-
+window.resetExam = function(id) {
+  if (!confirm("حذف النتيجة؟")) return;
   results = results.filter(r => r.id !== id);
   localStorage.setItem(RESULTS_KEY, JSON.stringify(results));
+  loadResults();
+};
+
+window.exportSingleToPDF = id =>
+  window.open(`pdf_export.html?id=${id}`, "_blank");
+
+window.exportAllToExcel = () => exportExcelFromAdmin();
+window.exportAllPDF = () => exportAllReportsAsPDF(results);
+
+// ===============================
+// 🚀 Start
+// ===============================
+(async function init() {
+  const allowed = await checkAdminAccess();
+  if (!allowed) return;
 
   loadResults();
-}
-
-// PDF لموظف واحد
-function exportSingleToPDF(id) {
-  window.open(`pdf_export.html?id=${id}`, "_blank");
-}
-
-// Excel (نفس الملف السابق)
-function exportAllToExcel() {
-  exportExcelFromAdmin();
-}
-
-// PDF جماعي
-function exportAllPDF() {
-  exportAllReportsAsPDF(results);
-}
-
-// Events
-searchBox.addEventListener("input", applyFilters);
-sortSelect.addEventListener("change", applyFilters);
-
-// بدء التحميل
-loadResults();
+  searchBox.addEventListener("input", applyFilters);
+  sortSelect.addEventListener("change", applyFilters);
+})();

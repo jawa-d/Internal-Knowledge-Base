@@ -157,11 +157,6 @@
       resize: vertical;
     }
 
-    .row-flex {
-      display: flex;
-      gap: 8px;
-    }
-
     .popup-checkbox {
       display: flex;
       align-items: center;
@@ -196,6 +191,15 @@
       background: #4b6fff;
       color: #ffffff;
     }
+
+    /* Unauthorized */
+    .unauthorized {
+      margin-left: 260px;
+      margin-top: 120px;
+      padding: 40px;
+      text-align: center;
+      color: #b91c1c;
+    }
   </style>
 </head>
 
@@ -217,10 +221,11 @@
     </div>
   </div>
 
-  <main class="builder-wrapper">
+  <!-- ===== المحتوى الرئيسي (يُخفى لغير Admin) ===== -->
+  <main id="builderContent" class="builder-wrapper">
     <section class="builder-header">
       <h1>بناء بنك الأسئلة</h1>
-      <p>الأسئلة هنا تستخدم في صفحة الامتحان (Exam). يتم حفظها في LocalStorage.</p>
+      <p>الأسئلة هنا تستخدم في صفحة الامتحان (Exam).</p>
     </section>
 
     <section class="top-actions">
@@ -228,40 +233,40 @@
       <small>عدد الأسئلة: <span id="countLabel">0</span></small>
     </section>
 
-    <section class="questions-list" id="questionsList">
-      <!-- كروت الأسئلة من JS -->
-    </section>
+    <section class="questions-list" id="questionsList"></section>
   </main>
 
-  <!-- Popup Question -->
+  <!-- ===== رسالة غير مخوّل ===== -->
+  <div id="unauthorizedBox" class="unauthorized" style="display:none">
+    <h2>🚫 غير مخوّل</h2>
+    <p>أنت غير مخوّل للدخول، تواصل مع مدير النظام</p>
+  </div>
+
+  <!-- Popup -->
   <div class="popup-overlay" id="popup">
     <div class="popup-box">
       <h2 id="popupTitle">إضافة سؤال</h2>
 
       <label class="popup-label">نص السؤال:</label>
-      <textarea id="qText" class="popup-textarea" placeholder="اكتب نص السؤال هنا..."></textarea>
+      <textarea id="qText" class="popup-textarea"></textarea>
 
       <label class="popup-label">نوع السؤال:</label>
       <select id="qType" class="popup-select">
         <option value="choice">اختيار من متعدد</option>
-        <option value="text">إجابة نصية (مقالية)</option>
+        <option value="text">إجابة نصية</option>
       </select>
 
       <div class="popup-checkbox">
         <input type="checkbox" id="qManual">
-        <label for="qManual">تصحيح يدوي (Manual)؟</label>
+        <label for="qManual">تصحيح يدوي</label>
       </div>
 
-      <!-- خيارات الاختيار -->
       <div id="choicesBox">
-        <label class="popup-label">الخيارات (اختيار من متعدد):</label>
         <input id="opt1" class="popup-input" placeholder="الاختيار 1">
         <input id="opt2" class="popup-input" placeholder="الاختيار 2">
         <input id="opt3" class="popup-input" placeholder="الاختيار 3">
         <input id="opt4" class="popup-input" placeholder="الاختيار 4">
-
-        <label class="popup-label">رقم الإجابة الصحيحة:</label>
-        <input id="correctIndex" type="number" min="1" max="4" class="popup-input" placeholder="مثال: 2">
+        <input id="correctIndex" type="number" class="popup-input" placeholder="رقم الإجابة الصحيحة">
       </div>
 
       <div class="popup-btns">
@@ -271,6 +276,6 @@
     </div>
   </div>
 
-  <script src="exam_builder.js"></script>
+  <script type="module" src="exam_builder.js"></script>
 </body>
 </html>

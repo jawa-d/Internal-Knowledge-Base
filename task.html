@@ -16,29 +16,35 @@
   <div id="sidebar"></div>
   <script src="sidebar.js"></script>
 
-  <!-- Navbar -->
-  <div class="top-nav">
-    <div class="nav-left">
-      <h1>Task Management</h1>
-      <p class="nav-sub">إنشاء ومتابعة أداء الموظفين</p>
-    </div>
-
-    <div class="nav-center">
-      <h2 class="kb-title">Employee Performance</h2>
-    </div>
-
-    <div class="nav-right">
-      <div class="toggle-box">
-        <span class="user-name">Jawad</span>
-        <div class="toggle">
-          <div class="knob"></div>
-        </div>
-      </div>
-    </div>
+  <!-- ===== رسالة عدم التخويل ===== -->
+  <div id="unauthorizedBox" style="
+    display:none;
+    margin-left:260px;
+    margin-top:120px;
+    padding:40px;
+    text-align:center;
+  ">
+    <h2 style="color:#e11d48;">🚫 غير مخوّل للدخول</h2>
+    <p style="font-size:16px; margin-top:10px;">
+      أنت غير مخوّل للوصول إلى هذه الصفحة<br>
+      يرجى التواصل مع مدير النظام
+    </p>
   </div>
 
-  <!-- Main Content -->
-  <main class="task-page">
+  <!-- ===== محتوى الصفحة (Admin فقط) ===== -->
+  <main id="taskPageContent" class="task-page">
+
+    <!-- Navbar -->
+    <div class="top-nav">
+      <div class="nav-left">
+        <h1>Task Management</h1>
+        <p class="nav-sub">إنشاء ومتابعة أداء الموظفين</p>
+      </div>
+
+      <div class="nav-center">
+        <h2 class="kb-title">Employee Performance</h2>
+      </div>
+    </div>
 
     <!-- ===== نموذج إنشاء تاسك ===== -->
     <section class="task-form-card">
@@ -47,22 +53,22 @@
       <div class="form-grid">
         <div class="form-group">
           <label>اسم الموظف</label>
-          <input type="text" id="empName" placeholder="مثال: جواد كاظم هادي">
+          <input type="text" id="empName">
         </div>
 
         <div class="form-group">
           <label>اسم المؤشر (KPI)</label>
-          <input type="text" id="taskName" placeholder="مثال: جودة الاتصال">
+          <input type="text" id="taskName">
         </div>
 
         <div class="form-group">
           <label>القيمة المستهدفة</label>
-          <input type="number" id="targetValue" placeholder="مثال: 100">
+          <input type="number" id="targetValue">
         </div>
 
         <div class="form-group">
           <label>القيمة الحالية</label>
-          <input type="number" id="currentValue" placeholder="مثال: 30">
+          <input type="number" id="currentValue">
         </div>
 
         <div class="form-group">
@@ -76,7 +82,6 @@
         </div>
       </div>
 
-      <!-- Progress preview -->
       <div class="progress-preview">
         <div class="progress">
           <div id="progressFill" class="progress-fill"></div>
@@ -92,7 +97,6 @@
       <h2 class="section-title2">التاسكات الحالية</h2>
 
       <div class="columns">
-        <!-- In Progress -->
         <div class="column">
           <div class="column-header">
             <span class="col-title">In Progress</span>
@@ -101,7 +105,6 @@
           <div id="colInProgress" class="column-body"></div>
         </div>
 
-        <!-- Done -->
         <div class="column">
           <div class="column-header">
             <span class="col-title">Done</span>
@@ -113,24 +116,15 @@
     </section>
   </main>
 
-  <!-- ===== Popup تقييم المهمة عند الضغط على الكارد ===== -->
+  <!-- Popup -->
   <div id="feedbackOverlay" class="fb-overlay">
     <div class="fb-box">
-      <h2 id="fbTitle" class="fb-title"></h2>
-      <p id="fbMessage" class="fb-message"></p>
-
-      <div class="fb-details">
-        <p><strong>المهمة:</strong> <span id="fbTaskName"></span></p>
-        <p><strong>الموظف:</strong> <span id="fbEmpName"></span></p>
-        <p><strong>نسبة الإنجاز:</strong> <span id="fbPercent"></span>%</p>
-        <p><strong>الموعد النهائي:</strong> <span id="fbDeadline"></span></p>
-      </div>
-
-      <button id="fbCloseBtn" class="fb-close-btn">إغلاق</button>
+      <h2 id="fbTitle"></h2>
+      <p id="fbMessage"></p>
+      <button id="fbCloseBtn">إغلاق</button>
     </div>
   </div>
 
-  <script src="task.js"></script>
+  <script type="module" src="task.js"></script>
 </body>
-
 </html>

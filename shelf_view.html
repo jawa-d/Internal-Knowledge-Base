@@ -29,7 +29,10 @@
 
     <hr>
 
-    <button class="add-card-btn" onclick="openAddCard()">+ إضافة بطاقة داخل الرف</button>
+    <!-- زر الإضافة (Admin فقط) -->
+    <button id="addCardBtn" class="add-card-btn" onclick="openAddCard()">
+      + إضافة بطاقة داخل الرف
+    </button>
 
     <div class="cards-grid" id="cardsGrid"></div>
   </div>
@@ -54,6 +57,7 @@
     </div>
   </div>
 
-  <script src="shelf_view.js"></script>
+  <!-- مهم جداً -->
+  <script type="module" src="shelf_view.js"></script>
 </body>
 </html>

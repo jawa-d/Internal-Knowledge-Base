@@ -1,111 +1,200 @@
-// تحميل الأخبار
-let news = JSON.parse(localStorage.getItem("news_list")) || [];
+import { db } from "./firebase.js";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc,
+  getDoc,
+  serverTimestamp,
+  query,
+  orderBy
+} from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
 
-// Helper
-function escapeRegExp(str){return str.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");}
-function highlight(text, search){
-  if(!search || !text) return text;
-  const pattern = new RegExp("(" + escapeRegExp(search) + ")", "gi");
-  return text.replace(pattern,'<span class="highlight">$1</span>');
+/* =========================
+   AUTH / ROLE
+========================= */
+let isAdmin = false;
+let currentEmail = "";
+
+async function checkAdmin() {
+  currentEmail = localStorage.getItem("kb_user_email");
+  if (!currentEmail) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  const snap = await getDoc(doc(db, "users", currentEmail));
+  const role = snap.exists() ? snap.data().role : "";
+
+  isAdmin = String(role).toLowerCase() === "admin";
+
+  document.getElementById("addNewsBtn").style.display =
+    isAdmin ? "inline-flex" : "none";
 }
 
-// عرض الأخبار
-function renderNews(search = ""){
+/* =========================
+   HELPERS
+========================= */
+function escapeRegExp(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function highlight(text, search) {
+  if (!search || !text) return text || "";
+  const r = new RegExp("(" + escapeRegExp(search) + ")", "gi");
+  return text.replace(r, '<span class="highlight">$1</span>');
+}
+
+/* =========================
+   LOAD NEWS
+========================= */
+let news = [];
+
+async function loadNews(search = "") {
+  const q = query(
+    collection(db, "news"),
+    orderBy("createdAt", "desc")
+  );
+
+  const snap = await getDocs(q);
+  news = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+  renderNews(search);
+}
+
+/* =========================
+   RENDER
+========================= */
+function renderNews(search = "") {
   const grid = document.getElementById("newsGrid");
   grid.innerHTML = "";
 
   let filtered = news;
 
-  if(search !== ""){
+  if (search) {
     filtered = news.filter(n =>
-      n.title.includes(search) ||
-      n.desc.includes(search)
+      (n.title && n.title.includes(search)) ||
+      (n.desc && n.desc.includes(search))
     );
   }
 
-  filtered.forEach((item, index) => {
-    const styleBg = item.image ? `background-image:url('${item.image}')` : "";
-    const noImgClass = item.image ? "" : "no-img";
+  filtered.forEach(item => {
+    const bg = item.image ? `background-image:url('${item.image}')` : "";
+    const noImg = item.image ? "" : "no-img";
+
+    const adminBtns = isAdmin ? `
+      <button class="edit-btn" onclick="editNews('${item.id}')">تعديل</button>
+      <button class="delete-btn" onclick="deleteNews('${item.id}')">حذف</button>
+    ` : "";
 
     grid.innerHTML += `
       <div class="news-card">
-        <div class="news-img ${noImgClass}" style="${styleBg}"></div>
+        <div class="news-img ${noImg}" style="${bg}"></div>
 
         <h3>${highlight(item.title, search)}</h3>
         <p>${highlight(item.desc, search)}</p>
 
         <div class="btn-row">
-          <button class="view-btn" onclick="viewDetails(${index})">عرض</button>
-          <button class="edit-btn" onclick="editNews(${index})">تعديل</button>
-          <button class="delete-btn" onclick="deleteNews(${index})">حذف</button>
+          <button class="view-btn" onclick="viewNews('${item.id}')">عرض</button>
+          ${adminBtns}
         </div>
       </div>
     `;
   });
 }
 
-// بحث حي
-document.querySelector(".news-search").addEventListener("input", function(){
-  renderNews(this.value.trim());
-});
+/* =========================
+   SEARCH
+========================= */
+document.getElementById("searchInput")
+  .addEventListener("input", e => {
+    loadNews(e.target.value.trim());
+  });
 
-// عرض التفاصيل
-function viewDetails(index){
-  localStorage.setItem("selectedNews", index);
+/* =========================
+   NAVIGATION
+========================= */
+function viewNews(id) {
+  localStorage.setItem("selectedNewsId", id);
   window.location.href = "news_view.html";
 }
 
-// التعديل
-function editNews(index){
-  localStorage.setItem("selectedNews", index);
+function editNews(id) {
+  if (!isAdmin) return;
+  localStorage.setItem("selectedNewsId", id);
   window.location.href = "news_editor.html";
 }
 
-// حذف
-function deleteNews(index){
-  if(!confirm("هل تريد حذف هذا الخبر؟")) return;
+/* =========================
+   DELETE
+========================= */
+async function deleteNews(id) {
+  if (!isAdmin) return;
+  if (!confirm("هل تريد حذف هذا الخبر؟")) return;
 
-  localStorage.removeItem("news_content_" + index);
-  news.splice(index,1);
-  localStorage.setItem("news_list", JSON.stringify(news));
-
-  renderNews();
+  await deleteDoc(doc(db, "news", id));
+  loadNews(document.getElementById("searchInput").value.trim());
 }
 
-// Popup
-function openAddNews(){
-  document.getElementById("popupAdd").style.display = "flex";
+/* =========================
+   ADD
+========================= */
+function openAddNews() {
+  if (!isAdmin) return;
+  popupAdd.style.display = "flex";
 }
 
-function closePopup(){
-  document.getElementById("popupAdd").style.display = "none";
-  document.getElementById("popupTitle").value = "";
-  document.getElementById("popupDesc").value = "";
-  document.getElementById("popupImage").value = "";
+function closePopup() {
+  popupAdd.style.display = "none";
+  popupTitle.value = "";
+  popupDesc.value = "";
+  popupImage.value = "";
 }
 
-function confirmAdd(){
-  const title = document.getElementById("popupTitle").value.trim();
-  const desc = document.getElementById("popupDesc").value.trim();
-  const file = document.getElementById("popupImage").files[0];
+async function confirmAdd() {
+  if (!isAdmin) return;
 
-  if(!title) return alert("أدخل عنوان الخبر");
+  const title = popupTitle.value.trim();
+  const desc = popupDesc.value.trim();
+  const file = popupImage.files[0];
 
-  const reader = new FileReader();
+  if (!title) return alert("أدخل عنوان الخبر");
 
-  reader.onloadend = () =>{
-    const img = file ? reader.result : "";
-
-    news.push({ title, desc, image: img });
-
-    localStorage.setItem("news_list", JSON.stringify(news));
+  const save = async (img = "") => {
+    await addDoc(collection(db, "news"), {
+      title,
+      desc,
+      image: img,
+      createdAt: serverTimestamp(),
+      createdBy: currentEmail
+    });
 
     closePopup();
-    renderNews();
+    loadNews();
   };
 
-  if(file) reader.readAsDataURL(file);
-  else reader.onloadend();
+  if (file) {
+    const r = new FileReader();
+    r.onloadend = () => save(r.result);
+    r.readAsDataURL(file);
+  } else {
+    save("");
+  }
 }
 
-renderNews();
+/* =========================
+   EXPOSE
+========================= */
+window.openAddNews = openAddNews;
+window.closePopup = closePopup;
+window.confirmAdd = confirmAdd;
+window.deleteNews = deleteNews;
+window.viewNews = viewNews;
+window.editNews = editNews;
+
+/* =========================
+   INIT
+========================= */
+await checkAdmin();
+await loadNews();

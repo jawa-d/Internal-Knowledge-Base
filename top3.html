@@ -26,20 +26,23 @@
 
   <main class="top3-container">
 
-    <button class="add-btn-main" onclick="openAddPopup()">+ إضافة موظف</button>
+    <!-- Admin only -->
+    <button id="addTopBtn" class="add-btn-main" onclick="openAddPopup()">
+      + إضافة موظف
+    </button>
 
     <div class="cards-grid" id="top3Grid"></div>
 
   </main>
 
-  <!-- Popup إضافة -->
+  <!-- Popup -->
   <div class="popup-overlay" id="popupTop3">
     <div class="popup-box">
 
       <h2 class="popup-title">إضافة موظف</h2>
 
-      <input type="text" id="empName" class="popup-input" placeholder="اسم الموظف...">
-      <input type="text" id="empId" class="popup-input" placeholder="ID الموظف...">
+      <input id="empName" class="popup-input" placeholder="اسم الموظف...">
+      <input id="empId" class="popup-input" placeholder="ID الموظف...">
 
       <select id="empRank" class="popup-input">
         <option value="1">المركز الأول</option>
@@ -59,7 +62,6 @@
     </div>
   </div>
 
-  <script src="top3.js"></script>
-
+  <script type="module" src="top3.js"></script>
 </body>
 </html>
