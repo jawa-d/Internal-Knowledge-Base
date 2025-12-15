@@ -1,54 +1,31 @@
 import { db } from "./firebase.js";
-import {
-  doc,
-  setDoc,
-  getDoc
-} from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
+import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
 
-/* ================================
-   Settings
-================================ */
 const COMPANY_DOMAIN = "@earthlink.iq";
 let generatedCode = "";
 
-/* ================================
-   Elements
-================================ */
-const emailInput  = document.getElementById("emailInput");
-const codeInput   = document.getElementById("codeInput");
+const emailInput = document.getElementById("emailInput");
+const codeInput = document.getElementById("codeInput");
 const sendCodeBtn = document.getElementById("sendCodeBtn");
-const verifyBtn   = document.getElementById("verifyBtn");
-const codeBox     = document.getElementById("codeBox");
-const msg         = document.getElementById("msg");
+const verifyBtn = document.getElementById("verifyBtn");
+const codeBox = document.getElementById("codeBox");
+const msg = document.getElementById("msg");
 
-/* ================================
-   Helpers
-================================ */
-function showMessage(text, type = "success") {
+function showMessage(text, type="") {
   msg.textContent = text;
-  msg.className = `msg ${type}`;
+  msg.className = "msg " + type;
 }
 
-/* ================================
-   Firestore – Check User
-================================ */
 async function isUserRegistered(email) {
-  const userRef = doc(db, "users", email);
-  const snap = await getDoc(userRef);
+  const snap = await getDoc(doc(db, "users", email));
   return snap.exists();
 }
 
-/* ================================
-   Firestore – Register User
-================================ */
 async function registerUser(email) {
-  const userRef = doc(db, "users", email);
-  const snap = await getDoc(userRef);
-
-  if (!snap.exists()) {
-    await setDoc(userRef, {
-      name: email.split("@")[0],
-      email: email,
+  const ref = doc(db, "users", email);
+  if (!(await getDoc(ref)).exists()) {
+    await setDoc(ref, {
+      email,
       role: "none",
       status: "pending",
       createdAt: new Date().toISOString()
@@ -56,77 +33,39 @@ async function registerUser(email) {
   }
 }
 
-/* ================================
-   Send Code / Direct Login
-================================ */
-sendCodeBtn.addEventListener("click", async () => {
-  const email = emailInput.value.trim();
-
-  // Reset
+sendCodeBtn.onclick = async () => {
+  const email = emailInput.value.trim().toLowerCase();
   showMessage("");
-  sendCodeBtn.disabled = true;
-  sendCodeBtn.classList.add("loading");
 
-  /* Validate domain */
   if (!email.endsWith(COMPANY_DOMAIN)) {
     showMessage("❌ يسمح فقط باستخدام بريد الشركة", "error");
-    resetButton();
     return;
   }
 
-  /* Check existing user */
-  const exists = await isUserRegistered(email);
-
-  // ✅ Direct login
-  if (exists) {
-    showMessage("✔ تم تسجيل الدخول بنجاح", "success");
-
+  if (await isUserRegistered(email)) {
+    showMessage("✔ تم تسجيل الدخول", "success");
     localStorage.setItem("kb_logged_in", "1");
     localStorage.setItem("kb_user_email", email);
-
-    return setTimeout(() => {
-      window.location.href = "dashboard.html";
-    }, 700);
+    return setTimeout(() => location.href = "dashboard.html", 600);
   }
 
-  // 🆕 New user → Send code
   generatedCode = String(Math.floor(100000 + Math.random() * 900000));
-  console.log("Verification Code:", generatedCode); // dev only
+  console.log("Verification Code:", generatedCode);
 
-  showMessage("✔ تم إرسال رمز التحقق", "success");
   codeBox.classList.remove("hidden");
+  showMessage("✔ تم إرسال رمز التحقق", "success");
+};
 
-  resetButton();
-});
-
-/* ================================
-   Verify Code
-================================ */
-verifyBtn.addEventListener("click", async () => {
-  const code  = codeInput.value.trim();
-  const email = emailInput.value.trim();
-
-  if (code !== generatedCode) {
-    showMessage("❌ رمز التحقق غير صحيح", "error");
+verifyBtn.onclick = async () => {
+  if (codeInput.value !== generatedCode) {
+    showMessage("❌ رمز غير صحيح", "error");
     return;
   }
 
-  showMessage("✔ تم التحقق بنجاح", "success");
-
-  await registerUser(email);
-
+  await registerUser(emailInput.value.trim());
   localStorage.setItem("kb_logged_in", "1");
-  localStorage.setItem("kb_user_email", email);
+  localStorage.setItem("kb_user_email", emailInput.value.trim());
+  showMessage("✔ تم التحقق", "success");
 
-  setTimeout(() => {
-    window.location.href = "dashboard.html";
-  }, 700);
-});
-
-/* ================================
-   UI Helpers
-================================ */
-function resetButton() {
-  sendCodeBtn.disabled = false;
-  sendCodeBtn.classList.remove("loading");
-}
+  setTimeout(() => location.href = "dashboard.html", 600);
+};
