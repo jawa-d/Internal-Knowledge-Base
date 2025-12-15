@@ -1,8 +1,8 @@
 import { db } from "./firebase.js";
 import {
   collection,
-  addDoc,
   getDocs,
+  addDoc,
   deleteDoc,
   doc,
   getDoc,
@@ -11,148 +11,125 @@ import {
   orderBy
 } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
 
-/* =========================
-   AUTH / ROLE
-========================= */
+/* ===============================
+   Helpers
+=============================== */
+function escapeRegExp(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+function highlight(text, search) {
+  if (!search || !text) return text;
+  const pattern = new RegExp("(" + escapeRegExp(search) + ")", "gi");
+  return text.replace(pattern, '<span class="highlight">$1</span>');
+}
+
+/* ===============================
+   Auth / Role
+=============================== */
 let isAdmin = false;
 let currentEmail = "";
 
 async function checkAdmin() {
-  currentEmail = localStorage.getItem("kb_user_email");
+  currentEmail = localStorage.getItem("kb_user_email") || "";
   if (!currentEmail) {
     window.location.href = "login.html";
     return;
   }
 
   const snap = await getDoc(doc(db, "users", currentEmail));
-  const role = snap.exists() ? snap.data().role : "";
-
+  const role = snap.exists() ? (snap.data().role || "") : "";
   isAdmin = String(role).toLowerCase() === "admin";
 
-  document.getElementById("addNewsBtn").style.display =
-    isAdmin ? "inline-flex" : "none";
+  const addBtn = document.getElementById("addNewsBtn");
+  if (addBtn) addBtn.style.display = isAdmin ? "inline-flex" : "none";
 }
 
-/* =========================
-   HELPERS
-========================= */
-function escapeRegExp(str) {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function highlight(text, search) {
-  if (!search || !text) return text || "";
-  const r = new RegExp("(" + escapeRegExp(search) + ")", "gi");
-  return text.replace(r, '<span class="highlight">$1</span>');
-}
-
-/* =========================
-   LOAD NEWS
-========================= */
+/* ===============================
+   Data
+=============================== */
 let news = [];
 
-async function loadNews(search = "") {
-  const q = query(
-    collection(db, "news"),
-    orderBy("createdAt", "desc")
-  );
-
+/* ===============================
+   Load + Render
+=============================== */
+async function loadNews() {
+  const q = query(collection(db, "news"), orderBy("createdAt", "desc"));
   const snap = await getDocs(q);
   news = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-
-  renderNews(search);
+  renderNews(document.getElementById("searchInput")?.value?.trim() || "");
 }
 
-/* =========================
-   RENDER
-========================= */
 function renderNews(search = "") {
   const grid = document.getElementById("newsGrid");
   grid.innerHTML = "";
 
-  let filtered = news;
-
-  if (search) {
-    filtered = news.filter(n =>
-      (n.title && n.title.includes(search)) ||
-      (n.desc && n.desc.includes(search))
-    );
-  }
+  const filtered = search
+    ? news.filter(n =>
+        (n.title || "").includes(search) ||
+        (n.desc || "").includes(search)
+      )
+    : news;
 
   filtered.forEach(item => {
     const bg = item.image ? `background-image:url('${item.image}')` : "";
     const noImg = item.image ? "" : "no-img";
 
     const adminBtns = isAdmin ? `
-      <button class="edit-btn" onclick="editNews('${item.id}')">تعديل</button>
-      <button class="delete-btn" onclick="deleteNews('${item.id}')">حذف</button>
+      <button class="edit-btn" data-id="${item.id}">✏ تعديل المقال</button>
+      <button class="delete-btn" data-id="${item.id}">حذف</button>
     ` : "";
 
     grid.innerHTML += `
       <div class="news-card">
         <div class="news-img ${noImg}" style="${bg}"></div>
 
-        <h3>${highlight(item.title, search)}</h3>
-        <p>${highlight(item.desc, search)}</p>
+        <h3>${highlight(item.title || "", search)}</h3>
+        <p>${highlight(item.desc || "", search)}</p>
 
         <div class="btn-row">
-          <button class="view-btn" onclick="viewNews('${item.id}')">عرض</button>
+          <button class="view-btn" data-id="${item.id}">عرض التفاصيل</button>
           ${adminBtns}
         </div>
       </div>
     `;
   });
+
+  // events
+  grid.querySelectorAll(".view-btn").forEach(b =>
+    b.addEventListener("click", () => {
+      localStorage.setItem("selectedNewsId", b.dataset.id);
+      window.location.href = "news_view.html";
+    })
+  );
+
+  grid.querySelectorAll(".edit-btn").forEach(b =>
+    b.addEventListener("click", () => {
+      localStorage.setItem("selectedNewsId", b.dataset.id);
+      window.location.href = "news_editor.html";
+    })
+  );
+
+  grid.querySelectorAll(".delete-btn").forEach(b =>
+    b.addEventListener("click", () => deleteNews(b.dataset.id))
+  );
 }
 
-/* =========================
-   SEARCH
-========================= */
-document.getElementById("searchInput")
-  .addEventListener("input", e => {
-    loadNews(e.target.value.trim());
-  });
-
-/* =========================
-   NAVIGATION
-========================= */
-function viewNews(id) {
-  localStorage.setItem("selectedNewsId", id);
-  window.location.href = "news_view.html";
-}
-
-function editNews(id) {
+/* ===============================
+   Add (Admin)
+=============================== */
+window.openAddNews = function () {
   if (!isAdmin) return;
-  localStorage.setItem("selectedNewsId", id);
-  window.location.href = "news_editor.html";
-}
+  document.getElementById("popupAdd").style.display = "flex";
+};
 
-/* =========================
-   DELETE
-========================= */
-async function deleteNews(id) {
-  if (!isAdmin) return;
-  if (!confirm("هل تريد حذف هذا الخبر؟")) return;
-
-  await deleteDoc(doc(db, "news", id));
-  loadNews(document.getElementById("searchInput").value.trim());
-}
-
-/* =========================
-   ADD
-========================= */
-function openAddNews() {
-  if (!isAdmin) return;
-  popupAdd.style.display = "flex";
-}
-
-function closePopup() {
-  popupAdd.style.display = "none";
+window.closePopup = function () {
+  document.getElementById("popupAdd").style.display = "none";
   popupTitle.value = "";
   popupDesc.value = "";
   popupImage.value = "";
-}
+};
 
-async function confirmAdd() {
+window.confirmAdd = async function () {
   if (!isAdmin) return;
 
   const title = popupTitle.value.trim();
@@ -161,40 +138,40 @@ async function confirmAdd() {
 
   if (!title) return alert("أدخل عنوان الخبر");
 
-  const save = async (img = "") => {
+  const saveDoc = async (imageData = "") => {
     await addDoc(collection(db, "news"), {
       title,
       desc,
-      image: img,
+      image: imageData,
+      content: "",            // ✅ محتوى خاص بكل خبر
       createdAt: serverTimestamp(),
       createdBy: currentEmail
     });
-
     closePopup();
     loadNews();
   };
 
   if (file) {
     const r = new FileReader();
-    r.onloadend = () => save(r.result);
+    r.onloadend = () => saveDoc(r.result);
     r.readAsDataURL(file);
   } else {
-    save("");
+    await saveDoc("");
   }
+};
+
+/* ===============================
+   Delete
+=============================== */
+async function deleteNews(id) {
+  if (!isAdmin) return;
+  if (!confirm("هل تريد حذف الخبر؟")) return;
+  await deleteDoc(doc(db, "news", id));
+  loadNews();
 }
 
-/* =========================
-   EXPOSE
-========================= */
-window.openAddNews = openAddNews;
-window.closePopup = closePopup;
-window.confirmAdd = confirmAdd;
-window.deleteNews = deleteNews;
-window.viewNews = viewNews;
-window.editNews = editNews;
-
-/* =========================
+/* ===============================
    INIT
-========================= */
+=============================== */
 await checkAdmin();
 await loadNews();

@@ -1,140 +1,155 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
   <meta charset="UTF-8">
-  <title>تعديل الخبر</title>
+  <title>تحرير الخبر</title>
 
+  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Global Style -->
   <link rel="stylesheet" href="global.css">
 
+  <!-- CKEditor -->
+  <script src="https://cdn.ckeditor.com/ckeditor5/40.2.0/classic/ckeditor.js"></script>
+
   <style>
-    body { background:#eef3f9; font-family:"Cairo"; }
+    body {
+      background:#eef3f9;
+      font-family:"Cairo",sans-serif;
+    }
 
     .editor-container {
       margin-left:260px;
       margin-top:100px;
-      padding:30px 40px;
+      background:#fff;
+      padding:30px;
+      border-radius:20px;
+      width:75%;
     }
 
-    .toolbar {
-      background:white;
-      border:1px solid #ddd;
-      padding:10px;
-      border-radius:10px;
-      margin-bottom:10px;
+    .editor-container h2 {
+      margin-bottom:6px;
     }
 
-    .toolbar button {
-      padding:6px 12px;
-      border:none;
-      background:#f1f1f1;
-      border-radius:6px;
-      cursor:pointer;
-      margin-left:4px;
-    }
-
-    #editor {
-      background:white;
-      border:1px solid #ccc;
-      min-height:350px;
-      padding:20px;
-      border-radius:12px;
-      outline:none;
+    .editor-container .desc {
+      color:#666;
+      margin-bottom:20px;
     }
 
     .actions {
-      margin-top:15px;
+      margin-top:20px;
       display:flex;
       gap:10px;
     }
 
-    .save-btn,.del-btn{
+    .save-btn {
+      background:#4b6fff;
+      color:white;
       padding:10px 22px;
       border-radius:12px;
-      color:white;
       border:none;
       cursor:pointer;
-      font-size:14px;
     }
 
-    .save-btn{ background:#4b6fff; }
-    .del-btn{ background:#d93025; }
+    .delete-btn {
+      background:#ff4b4b;
+      color:white;
+      padding:10px 22px;
+      border-radius:12px;
+      border:none;
+      cursor:pointer;
+    }
   </style>
-
 </head>
 
 <body>
 
-  <div id="sidebar"></div>
-  <script src="sidebar.js"></script>
+<!-- Sidebar -->
+<div id="sidebar"></div>
+<script src="sidebar.js"></script>
 
-  <div class="top-nav">
-    <div class="nav-left">
-      <h1>تعديل الخبر</h1>
-      <p class="nav-sub">تحرير وكتابة المحتوى</p>
-    </div>
+<!-- Navbar -->
+<div class="top-nav">
+  <div class="nav-left">
+    <h1>تحرير الخبر</h1>
   </div>
+</div>
 
-  <div class="editor-container">
+<!-- Editor -->
+<div class="editor-container">
+  <h2 id="newsTitle">—</h2>
+  <p id="newsDesc" class="desc">—</p>
 
-    <h2 id="newsTitle">—</h2>
-    <p id="newsDesc">—</p>
+  <div id="editor"></div>
 
-    <div class="toolbar">
-      <button onclick="execCmd('bold')">B</button>
-      <button onclick="execCmd('italic')">I</button>
-      <button onclick="execCmd('underline')">U</button>
-      <button onclick="execCmd('insertUnorderedList')">•</button>
-      <button onclick="execCmd('insertOrderedList')">1.</button>
-      <button onclick="execCmd('justifyRight')">يمين</button>
-      <button onclick="execCmd('justifyCenter')">وسط</button>
-      <button onclick="execCmd('justifyLeft')">يسار</button>
-    </div>
-
-    <div id="editor" contenteditable="true"></div>
-
-    <div class="actions">
-      <button class="save-btn" onclick="saveContent()">حفظ</button>
-      <button class="del-btn" onclick="deleteContent()">حذف</button>
-    </div>
-
+  <div class="actions">
+    <button class="save-btn" onclick="saveArticle()">حفظ</button>
+    <button class="delete-btn" onclick="deleteArticle()">حذف</button>
   </div>
+</div>
 
-  <script>
-    let id = localStorage.getItem("selectedNews");
-    const newsList = JSON.parse(localStorage.getItem("news_list")) || [];
-    const current = newsList[id];
+<script type="module">
+import { db } from "./firebase.js";
+import {
+  doc,
+  getDoc,
+  updateDoc
+} from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
 
-    if(current){
-      document.getElementById("newsTitle").textContent = current.title;
-      document.getElementById("newsDesc").textContent = current.desc;
+// ===============================
+// Get selected news
+// ===============================
+const newsId = localStorage.getItem("selectedNewsId");
+
+if (!newsId) {
+  alert("لم يتم تحديد الخبر");
+  location.href = "news.html";
+}
+
+const ref = doc(db, "news", newsId);
+
+// ===============================
+// CKEditor Init
+// ===============================
+let editorInstance;
+
+ClassicEditor.create(document.querySelector("#editor"))
+  .then(async editor => {
+    editorInstance = editor;
+
+    const snap = await getDoc(ref);
+    if (snap.exists()) {
+      const data = snap.data();
+      document.getElementById("newsTitle").innerText = data.title || "—";
+      document.getElementById("newsDesc").innerText  = data.desc  || "—";
+      editor.setData(data.content || "");
     }
+  });
 
-    function execCmd(cmd){
-      document.execCommand(cmd,false,null);
-    }
+// ===============================
+// Save
+// ===============================
+window.saveArticle = async () => {
+  await updateDoc(ref, {
+    content: editorInstance.getData()
+  });
+  alert("✅ تم حفظ الخبر");
+};
 
-    function loadContent(){
-      const content = localStorage.getItem("news_content_" + id);
-      if(content) document.getElementById("editor").innerHTML = content;
-    }
+// ===============================
+// Delete
+// ===============================
+window.deleteArticle = async () => {
+  if (!confirm("حذف محتوى الخبر؟")) return;
 
-    function saveContent(){
-      const content = document.getElementById("editor").innerHTML;
-      localStorage.setItem("news_content_" + id, content);
-      alert("تم حفظ المحتوى");
-    }
+  await updateDoc(ref, {
+    content: ""
+  });
 
-    function deleteContent(){
-      if(confirm("هل تريد حذف المحتوى؟")){
-        localStorage.removeItem("news_content_" + id);
-        document.getElementById("editor").innerHTML = "";
-      }
-    }
-
-    loadContent();
-  </script>
+  editorInstance.setData("");
+};
+</script>
 
 </body>
 </html>
