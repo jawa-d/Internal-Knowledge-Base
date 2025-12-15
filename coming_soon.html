@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>الصفحة قيد التطوير</title>
+<title>الصفحة قيد التطوير | Earthlink</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
 
@@ -28,39 +28,67 @@
     100% { background-position: 0% 50%; }
   }
 
-  /* ✨ الفقاعات */
-  .bubbles div {
+  /* ⚙️ Maintenance Gears */
+  .gears {
     position: absolute;
-    bottom: -80px;
-    width: 20px;
-    height: 20px;
-    background: rgba(255,255,255,0.15);
-    border-radius: 50%;
-    animation: rise 10s infinite ease-in;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
   }
-  .bubbles div:nth-child(1) { left: 10%; width: 25px; height: 25px; animation-duration: 12s; }
-  .bubbles div:nth-child(2) { left: 30%; animation-duration: 9s; }
-  .bubbles div:nth-child(3) { left: 50%; width: 28px; height: 28px; animation-duration: 13s; }
-  .bubbles div:nth-child(4) { left: 70%; animation-duration: 8s; }
-  .bubbles div:nth-child(5) { left: 90%; width: 22px; height: 22px; animation-duration: 11s; }
 
-  @keyframes rise {
-    0% { bottom: -100px; opacity: 0; transform: translateX(0); }
-    50% { opacity: .8; }
-    100% { bottom: 110%; opacity: 0; transform: translateX(30px); }
+  .gear {
+    position: absolute;
+    border-radius: 50%;
+    border: 6px solid rgba(255,255,255,0.15);
+    box-shadow: inset 0 0 25px rgba(255,255,255,0.1);
+  }
+
+  .gear::before {
+    content: "";
+    position: absolute;
+    inset: -12px;
+    border-radius: 50%;
+    border: 4px dashed rgba(255,255,255,0.25);
+  }
+
+  .gear.big {
+    width: 200px;
+    height: 200px;
+    animation: rotateCW 18s linear infinite;
+  }
+
+  .gear.small {
+    width: 120px;
+    height: 120px;
+    margin-left: 150px;
+    margin-top: 130px;
+    animation: rotateCCW 12s linear infinite;
+  }
+
+  @keyframes rotateCW {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes rotateCCW {
+    from { transform: rotate(360deg); }
+    to { transform: rotate(0deg); }
   }
 
   /* 🔷 صندوق الرسالة */
   .box {
     position: relative;
     background: rgba(255,255,255,0.08);
-    padding: 40px;
-    width: 450px;
-    backdrop-filter: blur(12px);
-    border-radius: 25px;
+    padding: 42px 40px;
+    width: 460px;
+    backdrop-filter: blur(14px);
+    border-radius: 26px;
     text-align: center;
-    box-shadow: 0 0 40px rgba(0,0,0,0.25);
+    box-shadow: 0 0 45px rgba(0,0,0,0.28);
     animation: fadeIn .9s ease-out;
+    z-index: 2;
   }
 
   @keyframes fadeIn {
@@ -68,35 +96,53 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
-  /* ✨ النص المتوهج */
+  /* 🟦 Brand */
+  .brand {
+    margin-bottom: 18px;
+  }
+
+  .brand .main {
+    font-size: 34px;
+    font-weight: 700;
+    color: #4b6fff;
+    letter-spacing: 1px;
+  }
+
+  .brand .sub {
+    font-size: 14px;
+    color: #c7d2fe;
+    opacity: .9;
+  }
+
+  /* ✨ العنوان */
   h2 {
-    font-size: 32px;
-    margin-bottom: 10px;
+    font-size: 30px;
+    margin: 15px 0 10px;
     font-weight: 700;
     animation: glow 2.2s infinite alternate ease-in-out;
   }
 
   @keyframes glow {
     0% { text-shadow: 0 0 10px #ffffff55; }
-    100% { text-shadow: 0 0 25px #ffffffcc; }
+    100% { text-shadow: 0 0 26px #ffffffcc; }
   }
 
   p {
-    font-size: 17px;
-    opacity: .9;
-    margin-bottom: 25px;
+    font-size: 16px;
+    opacity: .92;
+    margin-bottom: 26px;
     line-height: 1.7;
   }
 
-  /* 🔄 لودر جميل */
+  /* 🔄 Loader */
   .loader {
-    width: 60px;
-    height: 60px;
+    width: 56px;
+    height: 56px;
     border: 5px solid rgba(255,255,255,0.2);
     border-top: 5px solid #4b6fff;
     border-radius: 50%;
-    margin: 0 auto 25px;
-    animation: spin 1.2s linear infinite;
+    margin: 0 auto 22px;
+    animation: spin 1.6s linear infinite;
   }
 
   @keyframes spin {
@@ -107,42 +153,81 @@
   /* 🔙 زر العودة */
   a.back-btn {
     display: inline-block;
-    padding: 12px 28px;
+    padding: 12px 30px;
     background: #4b6fff;
-    border-radius: 12px;
+    border-radius: 14px;
     color: white;
     text-decoration: none;
-    font-size: 17px;
+    font-size: 16px;
     transition: .3s;
   }
 
   a.back-btn:hover {
     background: #1d37c4;
     transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(75,111,255,.45);
+  }
+
+  /* 👨‍💻 Developer Signature */
+  .dev-signature {
+    position: absolute;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 18px;
+    letter-spacing: 4px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.35);
+    animation: devFloat 6s ease-in-out infinite,
+               devGlow 2.5s ease-in-out infinite alternate;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  @keyframes devFloat {
+    0%   { transform: translate(-50%, 0); }
+    50%  { transform: translate(-50%, -10px); }
+    100% { transform: translate(-50%, 0); }
+  }
+
+  @keyframes devGlow {
+    from { text-shadow: 0 0 6px rgba(75,111,255,0.3); }
+    to   { text-shadow: 0 0 18px rgba(75,111,255,0.9); }
   }
 </style>
 </head>
 
 <body>
 
-  <!-- فقاعات متحركة -->
-  <div class="bubbles">
-    <div></div><div></div><div></div><div></div><div></div>
+  <!-- ⚙️ Gears Animation -->
+  <div class="gears">
+    <div class="gear big"></div>
+    <div class="gear small"></div>
   </div>
 
   <!-- محتوى الصفحة -->
   <div class="box">
+
+    <!-- Brand -->
+    <div class="brand">
+      <div class="main">Earthlink</div>
+      <div class="sub">الوطني للإنترنت</div>
+    </div>
+
     <div class="loader"></div>
 
     <h2>الصفحة قيد التطوير</h2>
 
     <p>
-      نقوم حالياً بإضافة تحديثات وتحسينات جديدة<br>
-      يرجى العودة لاحقاً ❤️
+      نعمل حالياً على تطوير هذه الصفحة<br>
+      لتقديم تجربة أفضل لموظفي الشركة
     </p>
 
     <a class="back-btn" href="dashboard.html">العودة للوحة التحكم</a>
   </div>
+
+  <!-- 👨‍💻 Developer Name -->
+  <div class="dev-signature">JAWADKADHIM</div>
 
 </body>
 </html>
