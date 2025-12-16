@@ -126,6 +126,7 @@ const clearReportBtn = document.getElementById("clearReportBtn");
 const rEmpName = document.getElementById("rEmpName");
 const rEmpId = document.getElementById("rEmpId");
 const reportResult = document.getElementById("reportResult");
+const exportExcelBtn = document.getElementById("exportExcelBtn");
 
 // ===============================
 // Helpers
@@ -790,6 +791,64 @@ reportCloseX.onclick = () => closeModal(reportOverlay);
 reportCloseBtn.onclick = () => closeModal(reportOverlay);
 runReportBtn.onclick = runReport;
 clearReportBtn.onclick = clearReport;
+if (exportExcelBtn) {
+  exportExcelBtn.onclick = exportReportToExcel;
+}
+// ===============================
+// ✅ NEW: Export Report to Excel
+// ===============================
+function exportReportToExcel() {
+  if (typeof XLSX === "undefined") {
+    showInfo("⚠️ تنبيه", "مكتبة Excel غير محملة.");
+    return;
+  }
+
+  const name = (rEmpName.value || "").trim().toLowerCase();
+  const id = (rEmpId.value || "").trim().toLowerCase();
+
+  if (!name && !id) {
+    showInfo("⚠️ تنبيه", "الرجاء إدخال اسم الموظف أو Employee ID قبل التصدير.");
+    return;
+  }
+
+  const list = tasks.filter(t => {
+    const tName = (t.employee || "").toLowerCase();
+    const tId = (t.employeeId || "").toLowerCase();
+    const okName = name ? tName.includes(name) : true;
+    const okId = id ? tId === id : true;
+    return okName && okId;
+  });
+
+  if (!list.length) {
+    showInfo("⚠️ تنبيه", "لا توجد بيانات لهذا الموظف.");
+    return;
+  }
+
+  const data = list.map((t, i) => ({
+    "#": i + 1,
+    "اسم الموظف": t.employee,
+    "Employee ID": t.employeeId || "",
+    "المهمة": t.name,
+    "الهدف": t.target,
+    "الحالي": t.current,
+    "نسبة الإنجاز %": t.percent,
+    "الحالة":
+      t.status === "done" ? "مكتمل" :
+      t.status === "failed" ? "فشل" : "قيد التنفيذ",
+    "الموعد النهائي": formatDateTime(t.deadline)
+  }));
+
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Tasks");
+
+  XLSX.writeFile(
+    wb,
+    `Employee_Report_${rEmpName.value || "Employee"}_${rEmpId.value || ""}.xlsx`
+  );
+
+  showInfo("✅ تم", "تم تصدير ملف Excel بنجاح", "success");
+}
 
 // ===============================
 // Init

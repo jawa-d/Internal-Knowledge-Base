@@ -11,6 +11,7 @@
 </head>
 
 <body>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <!-- Sidebar -->
   <div id="sidebar"></div>
@@ -276,10 +277,12 @@
             <label>Employee ID</label>
             <input type="text" id="rEmpId" placeholder="مثال: 1001">
           </div>
-          <div class="report-actions">
-            <button id="runReportBtn" class="btn-primary">عرض التقرير</button>
-            <button id="clearReportBtn" class="btn-ghost">مسح</button>
-          </div>
+         <div class="report-actions">
+  <button id="runReportBtn" class="btn-primary">عرض التقرير</button>
+  <button id="exportExcelBtn" class="btn-primary">📥 تنزيل Excel</button>
+  <button id="clearReportBtn" class="btn-ghost">مسح</button>
+</div>
+
         </div>
 
         <div id="reportResult" class="report-result">
