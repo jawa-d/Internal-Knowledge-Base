@@ -1,5 +1,8 @@
-// taskem.js  (Firebase Realtime Version) ✅
+// taskem.js  (MERGED: Code #1 + Code #2)
 // =======================================
+// ⚠️ IMPORTANT:
+// - Base: Code #1 (UNCHANGED)
+// - Additions: Code #2 (ONLY ADDITIONS, clearly marked)
 
 import { db } from "./firebase.js";
 import {
@@ -9,10 +12,47 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
 
-// ===============================
-// 🔐 Admin Access Guard (Firebase)
-// ===============================
+/* ===============================
+   🔐 Admin Access Guard (ORIGINAL - Code #1)
+================================ */
 async function checkAdminAccess() {
+  const email = localStorage.getItem("kb_user_email");
+
+  // مو مسجّل دخول
+  if (!email) {
+    window.location.href = "login.html";
+    return false;
+  }
+
+  try {
+    const userRef = doc(db, "users", email);
+    const snap = await getDoc(userRef);
+
+    // المستخدم غير موجود أو مو admin
+    if (!snap.exists() || snap.data().role !== "admin") {
+      document.getElementById("taskPageContent").style.display = "none";
+      document.getElementById("unauthorizedBox").style.display = "flex";
+      return false;
+    }
+
+    // Admin
+    document.getElementById("taskPageContent").style.display = "block";
+    document.getElementById("unauthorizedBox").style.display = "none";
+    return true;
+
+  } catch (err) {
+    console.error("Admin check error:", err);
+    document.getElementById("taskPageContent").style.display = "none";
+    document.getElementById("unauthorizedBox").style.display = "flex";
+    return false;
+  }
+}
+
+/* ======================================================
+   🔁 ADDED FROM CODE #2 (Fallback / Clean Version Guard)
+   ❗️مضاف فقط – غير مستخدم افتراضيًا
+====================================================== */
+async function checkAdminAccess_CLEAN() {
   const email = localStorage.getItem("kb_user_email");
 
   if (!email) {
@@ -22,130 +62,56 @@ async function checkAdminAccess() {
 
   try {
     const snap = await getDoc(doc(db, "users", email));
+
     if (!snap.exists() || snap.data().role !== "admin") {
       document.getElementById("taskPageContent").style.display = "none";
-      document.getElementById("unauthorizedBox").style.display = "block";
+      document.getElementById("unauthorizedBox").style.display = "flex";
       return false;
     }
+
+    document.getElementById("taskPageContent").style.display = "block";
+    document.getElementById("unauthorizedBox").style.display = "none";
     return true;
+
   } catch (err) {
-    console.error("Permission check error:", err);
-    showInfo("⚠️ خطأ", "حدث خطأ في التحقق من الصلاحيات. حاول مرة أخرى.", "danger");
+    console.error("Admin check error (CLEAN):", err);
+    document.getElementById("taskPageContent").style.display = "none";
+    document.getElementById("unauthorizedBox").style.display = "flex";
     return false;
   }
 }
 
-// ===============================
-// ✅ Settings (Logo for Print/PDF)
-// ===============================
+/* ===============================
+   ✅ Settings (Logo for Print/PDF)
+================================ */
 const REPORT_LOGO_URL = "assets/logo.png";
 const REPORT_TITLE = "Employee Performance Report";
 
-// ===============================
-// ✅ Firestore Collection
-// ===============================
+/* ===============================
+   ✅ Firestore Collection
+================================ */
 const TASKS_COL = "tasks";
 let unsubTasks = null;
 
-// ===============================
-// In-memory cache
-// ===============================
+/* ===============================
+   In-memory cache
+================================ */
 let tasks = [];
 
-// ===============================
-// Timers
-// ===============================
+/* ===============================
+   Timers
+================================ */
 let countdownTimer = null;
 
-// ===============================
-// Board elements
-// ===============================
+/* ===============================
+   Board elements
+================================ */
 const colInProgress = document.getElementById("colInProgress");
 const colDone = document.getElementById("colDone");
 const countInProgress = document.getElementById("countInProgress");
 const countDone = document.getElementById("countDone");
-
-// Top buttons
-const openCreateBtn = document.getElementById("openCreateBtn");
-const openReportBtn = document.getElementById("openReportBtn");
-
 // ===============================
-// Modals - Create
-// ===============================
-const createOverlay = document.getElementById("createOverlay");
-const createCloseX = document.getElementById("createCloseX");
-const createCancelBtn = document.getElementById("createCancelBtn");
-const createSaveBtn = document.getElementById("createSaveBtn");
-
-const cEmpName = document.getElementById("cEmpName");
-const cEmpId = document.getElementById("cEmpId");
-const cTaskName = document.getElementById("cTaskName");
-const cTargetValue = document.getElementById("cTargetValue");
-const cCurrentValue = document.getElementById("cCurrentValue");
-const cDeadline = document.getElementById("cDeadline");
-const cProgressValue = document.getElementById("cProgressValue");
-const cProgressFill = document.getElementById("cProgressFill");
-const cProgressLabel = document.getElementById("cProgressLabel");
-
-// ===============================
-// Modals - Update
-// ===============================
-const updateOverlay = document.getElementById("updateOverlay");
-const updateCloseX = document.getElementById("updateCloseX");
-const updateCancelBtn = document.getElementById("updateCancelBtn");
-const updateSaveBtn = document.getElementById("updateSaveBtn");
-
-const uTaskId = document.getElementById("uTaskId");
-const uEmpName = document.getElementById("uEmpName");
-const uEmpId = document.getElementById("uEmpId");
-const uTaskName = document.getElementById("uTaskName");
-const uTargetValue = document.getElementById("uTargetValue");
-const uCurrentValue = document.getElementById("uCurrentValue");
-const uDeadline = document.getElementById("uDeadline");
-const uProgressValue = document.getElementById("uProgressValue");
-const uProgressFill = document.getElementById("uProgressFill");
-const uProgressLabel = document.getElementById("uProgressLabel");
-
-// ===============================
-// Modals - Confirm Delete
-// ===============================
-const confirmOverlay = document.getElementById("confirmOverlay");
-const confirmCloseX = document.getElementById("confirmCloseX");
-const confirmCancelBtn = document.getElementById("confirmCancelBtn");
-const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
-const confirmInfo = document.getElementById("confirmInfo");
-const confirmTaskId = document.getElementById("confirmTaskId");
-
-// ===============================
-// Modal - Feedback / Status
-// ===============================
-const fbOverlay = document.getElementById("feedbackOverlay");
-const fbBox = document.getElementById("fbBox");
-const fbTitle = document.getElementById("fbTitle");
-const fbMessage = document.getElementById("fbMessage");
-const fbTaskName = document.getElementById("fbTaskName");
-const fbEmpName = document.getElementById("fbEmpName");
-const fbEmpId = document.getElementById("fbEmpId");
-const fbPercent = document.getElementById("fbPercent");
-const fbDeadline = document.getElementById("fbDeadline");
-const fbCloseBtn = document.getElementById("fbCloseBtn");
-
-// ===============================
-// Modal - Report
-// ===============================
-const reportOverlay = document.getElementById("reportOverlay");
-const reportCloseX = document.getElementById("reportCloseX");
-const reportCloseBtn = document.getElementById("reportCloseBtn");
-const runReportBtn = document.getElementById("runReportBtn");
-const clearReportBtn = document.getElementById("clearReportBtn");
-const exportExcelBtn = document.getElementById("exportExcelBtn");
-
-const rEmpName = document.getElementById("rEmpName");
-const rEmpId = document.getElementById("rEmpId");
-const reportResult = document.getElementById("reportResult");
-
-// ===============================
-// Helpers
+// Helpers (ORIGINAL - Code #1)
 // ===============================
 function openModal(overlay) { overlay.classList.add("active"); }
 function closeModal(overlay) { overlay.classList.remove("active"); }
@@ -154,6 +120,7 @@ function clampPercent(n) {
   if (!Number.isFinite(n)) return 0;
   return Math.max(0, Math.min(100, Math.floor(n)));
 }
+
 function computePercent(current, target) {
   const t = Number(target);
   const c = Number(current);
@@ -189,7 +156,39 @@ function statusBadge(task) {
 }
 
 // ===============================
-// Countdown
+// 🔁 ADDED FROM CODE #2
+// Simple helpers (fallback usage)
+// ===============================
+function computePercent_SIMPLE(current, target) {
+  if (!target || target <= 0) return 0;
+  return Math.min(100, Math.floor((current / target) * 100));
+}
+
+function computeStatus_SIMPLE(percent, deadline) {
+  if (percent >= 100) return "done";
+  if (deadline && new Date() > new Date(deadline)) return "failed";
+  return "in-progress";
+}
+
+function formatDateTime_SIMPLE(d) {
+  try {
+    return new Date(d).toLocaleString("ar-IQ");
+  } catch {
+    return "—";
+  }
+}
+
+// ===============================
+// Local status compute (ORIGINAL)
+// ===============================
+function computeStatus(percent, deadlineISO) {
+  if ((percent ?? 0) >= 100) return "done";
+  if (deadlineISO && new Date() > new Date(deadlineISO)) return "failed";
+  return "in-progress";
+}
+
+// ===============================
+// Countdown helpers (ORIGINAL)
 // ===============================
 function formatRemaining(ms) {
   if (!Number.isFinite(ms)) return "—";
@@ -214,7 +213,7 @@ function updateCountdownLabels() {
 }
 
 // ===============================
-// History helpers
+// History helpers (ORIGINAL)
 // ===============================
 function ensureHistory(task) {
   if (!task.history || !Array.isArray(task.history)) task.history = [];
@@ -223,9 +222,22 @@ function ensureHistory(task) {
   if (typeof task.lastBeforePercent === "undefined") task.lastBeforePercent = task.percent ?? 0;
   if (typeof task.lastAfterPercent === "undefined") task.lastAfterPercent = task.percent ?? 0;
 }
+// ===============================
+// Modal - Feedback / Status (ORIGINAL)
+// ===============================
+const fbOverlay = document.getElementById("feedbackOverlay");
+const fbBox = document.getElementById("fbBox");
+const fbTitle = document.getElementById("fbTitle");
+const fbMessage = document.getElementById("fbMessage");
+const fbTaskName = document.getElementById("fbTaskName");
+const fbEmpName = document.getElementById("fbEmpName");
+const fbEmpId = document.getElementById("fbEmpId");
+const fbPercent = document.getElementById("fbPercent");
+const fbDeadline = document.getElementById("fbDeadline");
+const fbCloseBtn = document.getElementById("fbCloseBtn");
 
 // ===============================
-// Feedback modal
+// Feedback modal helper
 // ===============================
 function showInfo(title, message, mode = "info") {
   fbTitle.textContent = title;
@@ -243,10 +255,22 @@ function showInfo(title, message, mode = "info") {
 
   openModal(fbOverlay);
 }
+
 fbCloseBtn.onclick = () => closeModal(fbOverlay);
+
 // ===============================
-// Live Preview progress
+// Live Preview progress (CREATE)
 // ===============================
+const cEmpName = document.getElementById("cEmpName");
+const cEmpId = document.getElementById("cEmpId");
+const cTaskName = document.getElementById("cTaskName");
+const cTargetValue = document.getElementById("cTargetValue");
+const cCurrentValue = document.getElementById("cCurrentValue");
+const cDeadline = document.getElementById("cDeadline");
+const cProgressValue = document.getElementById("cProgressValue");
+const cProgressFill = document.getElementById("cProgressFill");
+const cProgressLabel = document.getElementById("cProgressLabel");
+
 function calcCreatePreview() {
   const p = computePercent(cCurrentValue.value, cTargetValue.value);
   cProgressValue.value = p;
@@ -254,93 +278,18 @@ function calcCreatePreview() {
   cProgressFill.className = "progress-fill " + progressClass(p);
   cProgressLabel.textContent = p + "%";
 }
-cCurrentValue.addEventListener("input", calcCreatePreview);
-cTargetValue.addEventListener("input", calcCreatePreview);
 
-function calcUpdatePreview() {
-  const p = computePercent(uCurrentValue.value, uTargetValue.value);
-  uProgressValue.value = p;
-  uProgressFill.style.width = p + "%";
-  uProgressFill.className = "progress-fill " + progressClass(p);
-  uProgressLabel.textContent = p + "%";
-}
-uCurrentValue.addEventListener("input", calcUpdatePreview);
-uTargetValue.addEventListener("input", calcUpdatePreview);
+if (cCurrentValue) cCurrentValue.addEventListener("input", calcCreatePreview);
+if (cTargetValue) cTargetValue.addEventListener("input", calcCreatePreview);
 
 // ===============================
-// Local status compute
+// Create Task Modal (ORIGINAL)
 // ===============================
-function computeStatus(percent, deadlineISO) {
-  if ((percent ?? 0) >= 100) return "done";
-  if (deadlineISO && new Date() > new Date(deadlineISO)) return "failed";
-  return "in-progress";
-}
+const createOverlay = document.getElementById("createOverlay");
+const createCloseX = document.getElementById("createCloseX");
+const createCancelBtn = document.getElementById("createCancelBtn");
+const createSaveBtn = document.getElementById("createSaveBtn");
 
-// ===============================
-// Firestore: subscribe tasks (Realtime)
-// ===============================
-function subscribeTasks() {
-  if (unsubTasks) unsubTasks();
-
-  const qy = query(collection(db, TASKS_COL), orderBy("createdAt", "desc"));
-
-  unsubTasks = onSnapshot(
-    qy,
-    (snap) => {
-      const list = [];
-      snap.forEach((d) => {
-        const data = d.data() || {};
-
-        const createdAtISO =
-          data.createdAt?.toDate ? data.createdAt.toDate().toISOString() :
-          (typeof data.createdAt === "string" ? data.createdAt : "");
-
-        const deadlineISO =
-          data.deadline?.toDate ? data.deadline.toDate().toISOString() :
-          (data.deadline instanceof Date ? data.deadline.toISOString() :
-          (typeof data.deadline === "string" ? data.deadline : ""));
-
-        const current = Number(data.current ?? 0);
-        const target = Number(data.target ?? 0);
-        const percent = typeof data.percent === "number" ? data.percent : computePercent(current, target);
-
-        const task = {
-          id: d.id,
-          name: data.name ?? "",
-          employee: data.employee ?? "",
-          employeeId: data.employeeId ?? "",
-          target,
-          current,
-          percent,
-          createdAt: createdAtISO,
-          deadline: deadlineISO,
-          history: Array.isArray(data.history) ? data.history : [],
-          lastBeforeCurrent: data.lastBeforeCurrent ?? current,
-          lastAfterCurrent: data.lastAfterCurrent ?? current,
-          lastBeforePercent: data.lastBeforePercent ?? percent,
-          lastAfterPercent: data.lastAfterPercent ?? percent,
-        };
-
-        task.status = data.status ?? computeStatus(task.percent, task.deadline);
-
-        ensureHistory(task);
-        list.push(task);
-      });
-
-      tasks = list;
-      renderBoard();
-      updateCountdownLabels();
-    },
-    (err) => {
-      console.error("Tasks subscribe error:", err);
-      showInfo("⚠️ خطأ", "تعذر تحميل التاسكات من Firebase. تحقق من الصلاحيات.", "danger");
-    }
-  );
-}
-
-// ===============================
-// Create Task (Firestore)
-// ===============================
 function resetCreateModal() {
   cEmpName.value = "";
   cEmpId.value = "";
@@ -363,7 +312,7 @@ async function createTaskFromModal() {
   const deadlineValue = cDeadline.value;
 
   if (!employee || !name || !target || target <= 0 || !deadlineValue) {
-    showInfo("⚠️ تنبيه", "الرجاء إدخال (اسم الموظف + KPI + الهدف + الموعد النهائي) بشكل صحيح.");
+    showInfo("⚠️ تنبيه", "الرجاء إدخال جميع الحقول المطلوبة.");
     return;
   }
 
@@ -391,21 +340,46 @@ async function createTaskFromModal() {
     await addDoc(collection(db, TASKS_COL), payload);
     closeModal(createOverlay);
     resetCreateModal();
-    showInfo("✅ تم الإنشاء", "تم إنشاء التاسك بنجاح (Firebase).", "success");
+    showInfo("✅ تم الإنشاء", "تم إنشاء التاسك بنجاح.", "success");
   } catch (err) {
     console.error("Create task error:", err);
-    showInfo("⚠️ خطأ", "فشل إنشاء التاسك. تحقق من صلاحيات Firestore.", "danger");
+    showInfo("⚠️ خطأ", "فشل إنشاء التاسك.", "danger");
   }
 }
 
-openCreateBtn.onclick = () => { resetCreateModal(); openModal(createOverlay); };
-createCloseX.onclick = () => closeModal(createOverlay);
-createCancelBtn.onclick = () => closeModal(createOverlay);
-createSaveBtn.onclick = createTaskFromModal;
+if (createCloseX) createCloseX.onclick = () => closeModal(createOverlay);
+if (createCancelBtn) createCancelBtn.onclick = () => closeModal(createOverlay);
+if (createSaveBtn) createSaveBtn.onclick = createTaskFromModal;
+// ===============================
+// Update Task Modal (ORIGINAL)
+// ===============================
+const updateOverlay = document.getElementById("updateOverlay");
+const updateCloseX = document.getElementById("updateCloseX");
+const updateCancelBtn = document.getElementById("updateCancelBtn");
+const updateSaveBtn = document.getElementById("updateSaveBtn");
 
-// ===============================
-// Update Task (Firestore) - Edit
-// ===============================
+const uTaskId = document.getElementById("uTaskId");
+const uEmpName = document.getElementById("uEmpName");
+const uEmpId = document.getElementById("uEmpId");
+const uTaskName = document.getElementById("uTaskName");
+const uTargetValue = document.getElementById("uTargetValue");
+const uCurrentValue = document.getElementById("uCurrentValue");
+const uDeadline = document.getElementById("uDeadline");
+const uProgressValue = document.getElementById("uProgressValue");
+const uProgressFill = document.getElementById("uProgressFill");
+const uProgressLabel = document.getElementById("uProgressLabel");
+
+function calcUpdatePreview() {
+  const p = computePercent(uCurrentValue.value, uTargetValue.value);
+  uProgressValue.value = p;
+  uProgressFill.style.width = p + "%";
+  uProgressFill.className = "progress-fill " + progressClass(p);
+  uProgressLabel.textContent = p + "%";
+}
+
+if (uCurrentValue) uCurrentValue.addEventListener("input", calcUpdatePreview);
+if (uTargetValue) uTargetValue.addEventListener("input", calcUpdatePreview);
+
 function openUpdateModal(task) {
   uTaskId.value = task.id;
   uEmpName.value = task.employee || "";
@@ -431,7 +405,7 @@ async function saveUpdateModal() {
   const deadlineValue = uDeadline.value;
 
   if (!employee || !name || !target || target <= 0 || !deadlineValue) {
-    showInfo("⚠️ تنبيه", "الرجاء إدخال (اسم الموظف + KPI + الهدف + الموعد النهائي) بشكل صحيح.");
+    showInfo("⚠️ تنبيه", "الرجاء إدخال جميع الحقول المطلوبة.");
     return;
   }
 
@@ -471,32 +445,32 @@ async function saveUpdateModal() {
   try {
     await updateDoc(doc(db, TASKS_COL, id), payload);
     closeModal(updateOverlay);
-    showInfo("✅ تم الحفظ", "تم حفظ التعديل بنجاح (Firebase).", "success");
+    showInfo("✅ تم الحفظ", "تم حفظ التعديلات بنجاح.", "success");
   } catch (err) {
     console.error("Update task error:", err);
-    showInfo("⚠️ خطأ", "فشل حفظ التعديل. تحقق من صلاحيات Firestore.", "danger");
+    showInfo("⚠️ خطأ", "فشل حفظ التعديلات.", "danger");
   }
 }
 
-updateCloseX.onclick = () => closeModal(updateOverlay);
-updateCancelBtn.onclick = () => closeModal(updateOverlay);
-updateSaveBtn.onclick = saveUpdateModal;
+if (updateCloseX) updateCloseX.onclick = () => closeModal(updateOverlay);
+if (updateCancelBtn) updateCancelBtn.onclick = () => closeModal(updateOverlay);
+if (updateSaveBtn) updateSaveBtn.onclick = saveUpdateModal;
 
 // ===============================
-// Incremental Update (Firestore) - Update button
+// Incremental Update (ORIGINAL)
 // ===============================
 async function incrementalUpdate(task) {
   if (task.status === "done") {
-    showInfo("ℹ️ تنبيه", "هذه المهمة مكتملة بالفعل (100%).");
+    showInfo("ℹ️ تنبيه", "المهمة مكتملة بالفعل.");
     return;
   }
 
-  const incStr = prompt("أدخل مقدار الإنجاز الجديد (سيتم جمعه مع الحالي):", "1");
+  const incStr = prompt("أدخل مقدار الإنجاز الجديد:", "1");
   if (incStr === null) return;
 
   const inc = Number(incStr);
   if (!Number.isFinite(inc) || inc <= 0) {
-    showInfo("⚠️ تنبيه", "الرجاء إدخال رقم صحيح أكبر من 0.");
+    showInfo("⚠️ تنبيه", "الرجاء إدخال رقم صحيح.");
     return;
   }
 
@@ -530,22 +504,29 @@ async function incrementalUpdate(task) {
 
   try {
     await updateDoc(doc(db, TASKS_COL, task.id), payload);
-    showInfo("✅ تم التحديث", `تمت إضافة +${inc} إلى القيمة الحالية (Firebase).`, "success");
+    showInfo("✅ تم التحديث", "تم تحديث الإنجاز بنجاح.", "success");
   } catch (err) {
     console.error("Increment error:", err);
-    showInfo("⚠️ خطأ", "فشل تحديث القيمة. تحقق من صلاحيات Firestore.", "danger");
+    showInfo("⚠️ خطأ", "فشل تحديث الإنجاز.", "danger");
   }
 }
 
 // ===============================
-// Delete Task (Firestore)
+// Delete Task Confirm (ORIGINAL)
 // ===============================
+const confirmOverlay = document.getElementById("confirmOverlay");
+const confirmCloseX = document.getElementById("confirmCloseX");
+const confirmCancelBtn = document.getElementById("confirmCancelBtn");
+const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+const confirmInfo = document.getElementById("confirmInfo");
+const confirmTaskId = document.getElementById("confirmTaskId");
+
 function openDeleteConfirm(task) {
   confirmTaskId.value = task.id;
   confirmInfo.innerHTML = `
     <div><strong>المهمة:</strong> ${task.name}</div>
-    <div><strong>الموظف:</strong> ${task.employee} ${task.employeeId ? `(ID: ${task.employeeId})` : ""}</div>
-    <div><strong>الإنجاز:</strong> ${task.percent ?? 0}%</div>
+    <div><strong>الموظف:</strong> ${task.employee}</div>
+    <div><strong>الإنجاز:</strong> ${task.percent}%</div>
   `;
   openModal(confirmOverlay);
 }
@@ -555,18 +536,112 @@ async function confirmDelete() {
   try {
     await deleteDoc(doc(db, TASKS_COL, id));
     closeModal(confirmOverlay);
-    showInfo("🗑️ تم الحذف", "تم حذف التاسك بنجاح (Firebase).", "success");
+    showInfo("🗑️ تم الحذف", "تم حذف التاسك بنجاح.", "success");
   } catch (err) {
     console.error("Delete error:", err);
-    showInfo("⚠️ خطأ", "فشل حذف التاسك. تحقق من صلاحيات Firestore.", "danger");
+    showInfo("⚠️ خطأ", "فشل حذف التاسك.", "danger");
   }
 }
 
-confirmCloseX.onclick = () => closeModal(confirmOverlay);
-confirmCancelBtn.onclick = () => closeModal(confirmOverlay);
-confirmDeleteBtn.onclick = confirmDelete;
+if (confirmCloseX) confirmCloseX.onclick = () => closeModal(confirmOverlay);
+if (confirmCancelBtn) confirmCancelBtn.onclick = () => closeModal(confirmOverlay);
+if (confirmDeleteBtn) confirmDeleteBtn.onclick = confirmDelete;
 // ===============================
-// Card click: Status Feedback
+// Firestore: subscribe tasks (Realtime) - ORIGINAL (Code #1)
+// ===============================
+function subscribeTasks() {
+  if (unsubTasks) unsubTasks();
+
+  const qy = query(collection(db, TASKS_COL), orderBy("createdAt", "desc"));
+
+  unsubTasks = onSnapshot(
+    qy,
+    (snap) => {
+      const list = [];
+      snap.forEach((d) => {
+        const data = d.data() || {};
+
+        const createdAtISO =
+          data.createdAt?.toDate ? data.createdAt.toDate().toISOString() :
+          (typeof data.createdAt === "string" ? data.createdAt : "");
+
+        const deadlineISO =
+          data.deadline?.toDate ? data.deadline.toDate().toISOString() :
+          (data.deadline instanceof Date ? data.deadline.toISOString() :
+          (typeof data.deadline === "string" ? data.deadline : ""));
+
+        const current = Number(data.current ?? 0);
+        const target  = Number(data.target ?? 0);
+        const percent = typeof data.percent === "number" ? data.percent : computePercent(current, target);
+
+        const task = {
+          id: d.id,
+          name: data.name ?? "",
+          employee: data.employee ?? "",
+          employeeId: data.employeeId ?? "",
+          target,
+          current,
+          percent,
+          createdAt: createdAtISO,
+          deadline: deadlineISO,
+          history: Array.isArray(data.history) ? data.history : [],
+          lastBeforeCurrent: data.lastBeforeCurrent ?? current,
+          lastAfterCurrent: data.lastAfterCurrent ?? current,
+          lastBeforePercent: data.lastBeforePercent ?? percent,
+          lastAfterPercent: data.lastAfterPercent ?? percent,
+        };
+
+        task.status = data.status ?? computeStatus(task.percent, task.deadline);
+
+        ensureHistory(task);
+        list.push(task);
+      });
+
+      tasks = list;
+      renderBoard();
+      updateCountdownLabels();
+    },
+    (err) => {
+      console.error("Tasks subscribe error:", err);
+      showInfo("⚠️ خطأ", "تعذر تحميل التاسكات من Firebase. تحقق من الصلاحيات.", "danger");
+    }
+  );
+}
+
+// ===================================================
+// 🔁 ADDED FROM CODE #2 (Clean Subscribe - Optional)
+// ❗️مضاف فقط – غير مستخدم افتراضيًا
+// ===================================================
+function subscribeTasks_CLEAN() {
+  if (unsubTasks) unsubTasks();
+
+  const qy = query(collection(db, TASKS_COL), orderBy("createdAt", "desc"));
+
+  unsubTasks = onSnapshot(qy, (snap) => {
+    const list = [];
+
+    snap.forEach(docSnap => {
+      const d = docSnap.data() || {};
+      const percent = computePercent_SIMPLE(d.current || 0, d.target || 0);
+
+      list.push({
+        id: docSnap.id,
+        ...d,
+        percent,
+        deadline: d.deadline?.toDate
+          ? d.deadline.toDate().toISOString()
+          : d.deadline,
+        status: computeStatus_SIMPLE(percent, d.deadline)
+      });
+    });
+
+    tasks = list;
+    renderBoard();
+  });
+}
+
+// ===============================
+// Card click: Status Feedback (ORIGINAL)
 // ===============================
 function showTaskFeedback(task) {
   if (task.status === "done") {
@@ -593,7 +668,7 @@ function showTaskFeedback(task) {
 }
 
 // ===============================
-// Render Board
+// Render Board (ORIGINAL)
 // ===============================
 function renderBoard() {
   colInProgress.innerHTML = "";
@@ -685,9 +760,22 @@ function renderBoard() {
 
   updateCountdownLabels();
 }
+// ===============================
+// Modal - Report (ORIGINAL)
+// ===============================
+const reportOverlay = document.getElementById("reportOverlay");
+const reportCloseX = document.getElementById("reportCloseX");
+const reportCloseBtn = document.getElementById("reportCloseBtn");
+const runReportBtn = document.getElementById("runReportBtn");
+const clearReportBtn = document.getElementById("clearReportBtn");
+const exportExcelBtn = document.getElementById("exportExcelBtn");
+
+const rEmpName = document.getElementById("rEmpName");
+const rEmpId = document.getElementById("rEmpId");
+const reportResult = document.getElementById("reportResult");
 
 // ===============================
-// Report + Excel
+// Report + Excel (ORIGINAL)
 // ===============================
 function renderReportSummary(list, employeeLabel) {
   const total = list.length;
@@ -787,11 +875,10 @@ function clearReport() {
   reportResult.innerHTML = `<div class="report-empty">اختر موظف لعرض التقرير</div>`;
 }
 
-openReportBtn.onclick = () => { clearReport(); openModal(reportOverlay); };
-reportCloseX.onclick = () => closeModal(reportOverlay);
-reportCloseBtn.onclick = () => closeModal(reportOverlay);
-runReportBtn.onclick = runReport;
-clearReportBtn.onclick = clearReport;
+if (reportCloseX) reportCloseX.onclick = () => closeModal(reportOverlay);
+if (reportCloseBtn) reportCloseBtn.onclick = () => closeModal(reportOverlay);
+if (runReportBtn) runReportBtn.onclick = runReport;
+if (clearReportBtn) clearReportBtn.onclick = clearReport;
 
 function exportReportToExcel() {
   if (typeof XLSX === "undefined") {
@@ -845,7 +932,16 @@ function exportReportToExcel() {
 if (exportExcelBtn) exportExcelBtn.onclick = exportReportToExcel;
 
 // ===============================
-// Init
+// Top buttons (ORIGINAL)
+// ===============================
+const openCreateBtn = document.getElementById("openCreateBtn");
+const openReportBtn = document.getElementById("openReportBtn");
+
+if (openCreateBtn) openCreateBtn.onclick = () => { resetCreateModal(); openModal(createOverlay); };
+if (openReportBtn) openReportBtn.onclick = () => { clearReport(); openModal(reportOverlay); };
+
+// ===============================
+// INIT (FINAL) ✅ واحدة فقط
 // ===============================
 async function initTasksPage() {
   const allowed = await checkAdminAccess();

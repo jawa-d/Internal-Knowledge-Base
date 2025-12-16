@@ -36,7 +36,7 @@
 
 .stat-box span {
   font-size: 24px;
-  color: #e90404;
+  color: #4da3ff;
   font-weight: 700;
 }
 
@@ -122,7 +122,7 @@
 }
 
 .side-card {
-  background: #ffffff;
+  background: #00ffd0;
   padding: 18px 20px;
   border-radius: 20px;
   border: 1px solid #d7dee9;
@@ -148,7 +148,7 @@
   padding: 30px;
 }
 .logout-btn {
-  background: #ff4d4f;
+  background: #00ffd0;
   color: white;
   border: none;
   padding: 8px 16px;
