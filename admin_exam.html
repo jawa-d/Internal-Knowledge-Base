@@ -2,68 +2,45 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>لوحة نتائج الامتحانات</title>
-  <link rel="stylesheet" href="admin_exam.css">
+  <title>Admin – الامتحانات</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="global.css">
   <link rel="stylesheet" href="sidebar.css">
-
+  <link rel="stylesheet" href="admin_exam.css">
 </head>
-
 <body>
 
-<!-- ===== غير مخوّل ===== -->
-<div id="unauthorizedBox" style="
-  display:none;
-  margin-left:260px;
-  margin-top:120px;
-  padding:40px;
-  text-align:center;
-">
-  <h2 style="color:#e11d48;">🚫 غير مخوّل</h2>
-  <p>أنت غير مخوّل للدخول، تواصل مع مدير النظام</p>
+<div id="sidebar"></div>
+<script src="sidebar.js"></script>
+
+<div class="top-nav">
+  <h1>إدارة الامتحانات</h1>
 </div>
 
-<!-- ===== محتوى الأدمن ===== -->
-<div id="adminContent" style="display:none">
+<div class="page">
 
-  <h1 class="title">🔍 لوحة نتائج الامتحانات</h1>
+  <div class="card">
+    <h2>الموظفون المشاركون</h2>
 
-  <div class="controls">
-    <input type="text" id="searchBox" placeholder="🔎 ابحث عن موظف..." class="search-input">
-
-    <select id="sortSelect" class="sort-select">
-      <option value="date_desc">📅 الأحدث أولاً</option>
-      <option value="date_asc">📅 الأقدم أولاً</option>
-      <option value="score_desc">🏆 الأعلى درجة</option>
-      <option value="score_asc">📉 الأقل درجة</option>
-      <option value="name_asc">🔤 الاسم (A-Z)</option>
-      <option value="name_desc">🔤 الاسم (Z-A)</option>
-    </select>
-
-    <button onclick="exportAllToExcel()" class="excelBtn">📊 Excel</button>
-    <button onclick="exportAllPDF()" class="pdfBtn">📄 PDF جماعي</button>
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>الاسم</th>
+          <th>Employee ID</th>
+          <th>الإيميل</th>
+          <th>الحالة</th>
+          <th>الغش</th>
+          <th>الدرجة</th>
+          <th>تفاصيل</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
   </div>
-
-  <table class="results-table">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>اسم الموظف</th>
-        <th>الدرجة</th>
-        <th>وقت التسليم</th>
-        <th>عرض</th>
-        <th>PDF</th>
-        <th>إعادة ضبط</th>
-      </tr>
-    </thead>
-    <tbody id="resultsTableBody"></tbody>
-  </table>
-
-  <div id="detailsBox" class="details-box"></div>
 
 </div>
 
 <script type="module" src="admin_exam.js"></script>
-<script src="excel_export.js"></script>
-<script src="bulk_pdf_export.js"></script>
 </body>
 </html>

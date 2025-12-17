@@ -1,218 +1,330 @@
-// ===============================
-// 🔐 Admin Access Guard (مثل task.js)
-// ===============================
 import { db } from "./firebase.js";
 import {
-  doc,
-  getDoc
+  doc, getDoc, setDoc, updateDoc, deleteDoc,
+  collection, addDoc,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
 
+/* ===============================
+  Admin Guard
+=============================== */
+let currentEmail = "";
+let isAdmin = false;
+
 async function checkAdminAccess() {
-  const email = localStorage.getItem("kb_user_email");
+  currentEmail = localStorage.getItem("kb_user_email") || "";
+  if (!currentEmail) { location.href = "login.html"; return; }
 
-  if (!email) {
-    window.location.href = "login.html";
-    return false;
-  }
+  const snap = await getDoc(doc(db, "users", currentEmail));
+  const role = snap.exists() ? (snap.data().role || "") : "";
+  isAdmin = String(role).toLowerCase() === "admin";
 
-  try {
-    const snap = await getDoc(doc(db, "users", email));
-
-    if (!snap.exists() || snap.data().role !== "admin") {
-      document.getElementById("builderContent").style.display = "none";
-      document.getElementById("unauthorizedBox").style.display = "flex";
-      return false;
-    }
-
-    return true;
-  } catch (e) {
-    console.error(e);
-    alert("خطأ في التحقق من الصلاحيات");
-    return false;
+  if (!isAdmin) {
+    alert("غير مخول للدخول إلى Exam Builder");
+    location.href = "dashboard.html";
   }
 }
 
-// ===============================
-// ===== Exam Builder Logic =====
-// ===============================
-const QUESTIONS_KEY = "kb_exam_questions";
-let questions = [];
-let editingId = null;
+/* ===============================
+  UI Refs
+=============================== */
+const examTitle = document.getElementById("examTitle");
+const examDesc = document.getElementById("examDesc");
+const durationMin = document.getElementById("durationMin");
+const passScore = document.getElementById("passScore");
+const btnNewExam = document.getElementById("btnNewExam");
+const btnClone = document.getElementById("btnClone");
+const btnAddQ = document.getElementById("btnAddQ");
+const btnSave = document.getElementById("btnSave");
+const btnDelete = document.getElementById("btnDelete");
+const questionsWrap = document.getElementById("questionsWrap");
+const examStatus = document.getElementById("examStatus");
+const currentExamHint = document.getElementById("currentExamHint");
 
-// DOM
-const questionsList = document.getElementById("questionsList");
-const countLabel = document.getElementById("countLabel");
-const popup = document.getElementById("popup");
-const popupTitle = document.getElementById("popupTitle");
-const qTextInput = document.getElementById("qText");
-const qTypeSelect = document.getElementById("qType");
-const qManualCheckbox = document.getElementById("qManual");
-const choicesBox = document.getElementById("choicesBox");
-const opt1Input = document.getElementById("opt1");
-const opt2Input = document.getElementById("opt2");
-const opt3Input = document.getElementById("opt3");
-const opt4Input = document.getElementById("opt4");
-const correctIndexInput = document.getElementById("correctIndex");
-const addQuestionBtn = document.getElementById("addQuestionBtn");
-const saveBtn = document.getElementById("saveBtn");
-const cancelBtn = document.getElementById("cancelBtn");
+/* ===============================
+  State
+=============================== */
+let examId = localStorage.getItem("selectedExamId") || "";
+let examData = null;
 
-// تحميل
-function loadQuestions() {
-  questions = JSON.parse(localStorage.getItem(QUESTIONS_KEY) || "[]");
+function uid() { return "q_" + Math.random().toString(16).slice(2) + Date.now(); }
+
+function enableEditing(on) {
+  btnAddQ.disabled = !on;
+  btnSave.disabled = !on;
+  btnDelete.disabled = !on;
+  btnClone.disabled = !on;
+  examStatus.disabled = !on;
 }
 
-// حفظ
-function saveQuestions() {
-  localStorage.setItem(QUESTIONS_KEY, JSON.stringify(questions));
+function normalizeQuestion(q){
+  return {
+    id: q.id || uid(),
+    type: q.type || "mcq",
+    title: q.title || "",
+    options: Array.isArray(q.options) ? q.options : [],
+    correctAnswer: q.correctAnswer ?? "",
+    points: Number(q.points ?? 1),
+    requiresManual: Boolean(q.requiresManual ?? (q.type === "essay" || q.type === "short"))
+  };
 }
 
-// عرض
 function renderQuestions() {
-  questionsList.innerHTML = "";
-  countLabel.textContent = questions.length;
+  questionsWrap.innerHTML = "";
+  const qs = (examData?.questions || []).map(normalizeQuestion);
 
-  if (questions.length === 0) {
-    questionsList.innerHTML =
-      `<p style="font-size:13px;color:#6b7280;">لا توجد أسئلة بعد.</p>`;
-    return;
-  }
+  qs.forEach((q, idx) => {
+    const el = document.createElement("div");
+    el.className = "qcard";
+    el.dataset.qid = q.id;
 
-  questions.forEach((q, index) => {
-    const card = document.createElement("div");
-    card.className = "q-card";
-
-    card.innerHTML = `
-      <div class="q-card-header">
-        <div><b>${index + 1}) ${q.text}</b></div>
-        <div class="q-tags">
-          <span class="tag">${q.type === "choice" ? "اختيارات" : "نصي"}</span>
-          <span class="tag ${q.manual ? "manual" : ""}">
-            ${q.manual ? "Manual" : "Auto"}
-          </span>
+    el.innerHTML = `
+      <div class="qtop">
+        <div class="qmeta">
+          <span class="badge">#${idx+1}</span>
+          <span class="small">ID: ${q.id}</span>
+        </div>
+        <div class="qmeta">
+          <select class="select qType">
+            <option value="mcq" ${q.type==="mcq"?"selected":""}>MCQ</option>
+            <option value="tf" ${q.type==="tf"?"selected":""}>True/False</option>
+            <option value="short" ${q.type==="short"?"selected":""}>Short</option>
+            <option value="essay" ${q.type==="essay"?"selected":""}>Essay</option>
+          </select>
+          <input class="qPoints" type="number" min="0" value="${q.points}" style="width:120px" />
+          <button class="btn danger qDel">حذف</button>
         </div>
       </div>
-      <div style="font-size:13px;color:#6b7280;margin:4px 0;">
-        ${q.type === "choice"
-          ? q.options.map((o, i) => `${i + 1}) ${o}`).join(" | ")
-          : "سؤال نصي"}
+
+      <div class="row">
+        <div class="field" style="min-width:320px">
+          <label>نص السؤال</label>
+          <input class="qTitle" value="${escapeHtml(q.title)}" placeholder="اكتب السؤال...">
+        </div>
+        <div class="field" style="min-width:240px">
+          <label>التصحيح</label>
+          <select class="select qManual">
+            <option value="auto" ${q.requiresManual ? "" : "selected"}>تلقائي</option>
+            <option value="manual" ${q.requiresManual ? "selected" : ""}>يدوي</option>
+          </select>
+        </div>
       </div>
-      <div class="card-actions">
-        <button class="btn-edit">تعديل</button>
-        <button class="btn-delete">حذف</button>
-      </div>
+
+      <div class="qopts"></div>
     `;
 
-    card.querySelector(".btn-edit").onclick = () => openEditQuestion(q.id);
-    card.querySelector(".btn-delete").onclick = () => deleteQuestion(q.id);
+    const optsBox = el.querySelector(".qopts");
+    const typeSel = el.querySelector(".qType");
+    const manualSel = el.querySelector(".qManual");
 
-    questionsList.appendChild(card);
+    function renderOptions() {
+      optsBox.innerHTML = "";
+
+      const t = typeSel.value;
+      if (t === "mcq") {
+        const opts = q.options.length ? q.options : ["", "", "", ""];
+        optsBox.innerHTML = `
+          <label class="small">الخيارات</label>
+          ${opts.map((o,i)=>`
+            <div class="optRow">
+              <input class="opt" data-i="${i}" value="${escapeHtml(o)}" placeholder="خيار ${i+1}">
+            </div>`).join("")}
+          <div class="row">
+            <button class="btn addOpt">+ خيار</button>
+            <button class="btn delOpt">- خيار</button>
+            <div class="field" style="min-width:240px">
+              <label>الإجابة الصحيحة (نص الخيار)</label>
+              <input class="qCorrect" value="${escapeHtml(String(q.correctAnswer||""))}" placeholder="مثال: خيار 1">
+            </div>
+          </div>
+        `;
+      } else if (t === "tf") {
+        optsBox.innerHTML = `
+          <div class="row">
+            <div class="field" style="min-width:240px">
+              <label>الإجابة الصحيحة</label>
+              <select class="select qCorrect">
+                <option value="true" ${String(q.correctAnswer)==="true"?"selected":""}>True</option>
+                <option value="false" ${String(q.correctAnswer)==="false"?"selected":""}>False</option>
+              </select>
+            </div>
+          </div>
+        `;
+      } else {
+        optsBox.innerHTML = `
+          <div class="row">
+            <div class="field" style="min-width:320px">
+              <label>إجابة نموذجية (اختياري)</label>
+              <input class="qCorrect" value="${escapeHtml(String(q.correctAnswer||""))}" placeholder="للمقارنة أو للمصحح">
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    renderOptions();
+
+    // listeners
+    el.querySelector(".qDel").onclick = () => {
+      examData.questions = examData.questions.filter(x => x.id !== q.id);
+      renderQuestions();
+    };
+
+    typeSel.onchange = () => { q.type = typeSel.value; q.requiresManual = (q.type==="essay"||q.type==="short"); manualSel.value = q.requiresManual ? "manual":"auto"; renderOptions(); };
+
+    el.querySelector(".qTitle").oninput = (e) => { q.title = e.target.value; };
+    el.querySelector(".qPoints").oninput = (e) => { q.points = Number(e.target.value||0); };
+    manualSel.onchange = () => { q.requiresManual = manualSel.value === "manual"; };
+
+    optsBox.addEventListener("input", (e) => {
+      if (e.target.classList.contains("opt")) {
+        const i = Number(e.target.dataset.i);
+        q.options[i] = e.target.value;
+      }
+      if (e.target.classList.contains("qCorrect")) {
+        q.correctAnswer = e.target.value;
+      }
+    });
+
+    optsBox.addEventListener("click", (e) => {
+      if (e.target.classList.contains("addOpt")) {
+        q.options.push("");
+        renderOptions();
+      }
+      if (e.target.classList.contains("delOpt")) {
+        q.options.pop();
+        renderOptions();
+      }
+    });
+
+    // sync back to examData
+    const idxIn = examData.questions.findIndex(x => x.id === q.id);
+    examData.questions[idxIn] = q;
+
+    questionsWrap.appendChild(el);
   });
 }
 
-// Popup
-function openAddQuestion() {
-  editingId = null;
-  popupTitle.textContent = "إضافة سؤال جديد";
-  qTextInput.value = "";
-  qTypeSelect.value = "choice";
-  qManualCheckbox.checked = false;
-  opt1Input.value = opt2Input.value = opt3Input.value = opt4Input.value = "";
-  correctIndexInput.value = "";
-  choicesBox.style.display = "block";
-  popup.style.display = "flex";
+function escapeHtml(s){
+  return String(s ?? "")
+    .replaceAll("&","&amp;").replaceAll("<","&lt;")
+    .replaceAll(">","&gt;").replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
 }
 
-function openEditQuestion(id) {
-  const q = questions.find(x => x.id === id);
-  if (!q) return;
+/* ===============================
+  CRUD
+=============================== */
+async function createNewExam() {
+  const title = examTitle.value.trim();
+  if (!title) return alert("اكتب عنوان الامتحان");
 
-  editingId = id;
-  popupTitle.textContent = "تعديل السؤال";
-  qTextInput.value = q.text;
-  qTypeSelect.value = q.type;
-  qManualCheckbox.checked = !!q.manual;
+  const ref = await addDoc(collection(db, "exams"), {
+    title,
+    description: examDesc.value.trim(),
+    durationMin: Number(durationMin.value || 20),
+    passScore: Number(passScore.value || 60),
+    status: "draft",
+    questions: [],
+    createdAt: serverTimestamp(),
+    createdBy: currentEmail
+  });
 
-  if (q.type === "choice") {
-    choicesBox.style.display = "block";
-    opt1Input.value = q.options?.[0] || "";
-    opt2Input.value = q.options?.[1] || "";
-    opt3Input.value = q.options?.[2] || "";
-    opt4Input.value = q.options?.[3] || "";
-    correctIndexInput.value = (q.correctIndex + 1);
-  } else {
-    choicesBox.style.display = "none";
+  examId = ref.id;
+  localStorage.setItem("selectedExamId", examId);
+  await loadExam();
+}
+
+async function loadExam() {
+  if (!examId) {
+    enableEditing(false);
+    currentExamHint.textContent = "لا يوجد Exam محدد. أنشئ امتحان جديد.";
+    return;
   }
 
-  popup.style.display = "flex";
-}
+  const snap = await getDoc(doc(db, "exams", examId));
+  if (!snap.exists()) {
+    enableEditing(false);
+    currentExamHint.textContent = "الامتحان غير موجود.";
+    return;
+  }
 
-function deleteQuestion(id) {
-  if (!confirm("هل تريد حذف السؤال؟")) return;
-  questions = questions.filter(q => q.id !== id);
-  saveQuestions();
+  examData = { id: examId, ...snap.data() };
+  examTitle.value = examData.title || "";
+  examDesc.value = examData.description || "";
+  durationMin.value = examData.durationMin ?? 20;
+  passScore.value = examData.passScore ?? 60;
+  examStatus.value = examData.status || "draft";
+
+  currentExamHint.textContent = `ExamID: ${examId} | Status: ${examData.status}`;
+  enableEditing(true);
   renderQuestions();
 }
 
-function saveQuestion() {
-  const text = qTextInput.value.trim();
-  const type = qTypeSelect.value;
-  const manual = qManualCheckbox.checked;
+async function saveExam() {
+  if (!examId || !examData) return;
 
-  if (!text) return alert("أدخل نص السؤال");
+  examData.title = examTitle.value.trim();
+  examData.description = examDesc.value.trim();
+  examData.durationMin = Number(durationMin.value || 20);
+  examData.passScore = Number(passScore.value || 60);
+  examData.status = examStatus.value;
 
-  const q = {
-    id: editingId || Date.now(),
-    text,
-    type,
-    manual
-  };
+  // normalize
+  examData.questions = (examData.questions || []).map(normalizeQuestion);
 
-  if (type === "choice") {
-    const opts = [
-      opt1Input.value.trim(),
-      opt2Input.value.trim(),
-      opt3Input.value.trim(),
-      opt4Input.value.trim()
-    ].filter(Boolean);
+  await updateDoc(doc(db, "exams", examId), {
+    title: examData.title,
+    description: examData.description,
+    durationMin: examData.durationMin,
+    passScore: examData.passScore,
+    status: examData.status,
+    questions: examData.questions
+  });
 
-    if (opts.length < 2) return alert("أدخل خيارين على الأقل");
-
-    const correct = Number(correctIndexInput.value);
-    if (correct < 1 || correct > opts.length) {
-      return alert("رقم الإجابة غير صحيح");
-    }
-
-    q.options = opts;
-    q.correctIndex = correct - 1;
-  }
-
-  if (editingId) {
-    const idx = questions.findIndex(x => x.id === editingId);
-    questions[idx] = q;
-  } else {
-    questions.push(q);
-  }
-
-  saveQuestions();
-  renderQuestions();
-  popup.style.display = "none";
+  alert("✅ تم الحفظ");
 }
 
-// Events
-addQuestionBtn.onclick = openAddQuestion;
-saveBtn.onclick = saveQuestion;
-cancelBtn.onclick = () => popup.style.display = "none";
-qTypeSelect.onchange = () =>
-  choicesBox.style.display = qTypeSelect.value === "choice" ? "block" : "none";
+async function deleteExam() {
+  if (!examId) return;
+  if (!confirm("حذف الامتحان؟")) return;
 
-// Init
-async function initExamBuilder() {
-  const allowed = await checkAdminAccess();
-  if (!allowed) return;
-
-  loadQuestions();
-  renderQuestions();
+  await deleteDoc(doc(db, "exams", examId));
+  localStorage.removeItem("selectedExamId");
+  examId = "";
+  examData = null;
+  questionsWrap.innerHTML = "";
+  enableEditing(false);
+  currentExamHint.textContent = "تم حذف الامتحان.";
 }
 
-initExamBuilder();
+async function cloneExam() {
+  if (!examData) return;
+  const ref = await addDoc(collection(db, "exams"), {
+    ...examData,
+    status: "draft",
+    title: (examData.title || "Exam") + " (Copy)",
+    createdAt: serverTimestamp(),
+    createdBy: currentEmail
+  });
+  examId = ref.id;
+  localStorage.setItem("selectedExamId", examId);
+  await loadExam();
+}
+
+/* ===============================
+  Init
+=============================== */
+await checkAdminAccess();
+await loadExam();
+
+btnNewExam.onclick = createNewExam;
+btnAddQ.onclick = () => {
+  if (!examData) return;
+  examData.questions.push(normalizeQuestion({}));
+  renderQuestions();
+};
+btnSave.onclick = saveExam;
+btnDelete.onclick = deleteExam;
+btnClone.onclick = cloneExam;
+examStatus.onchange = () => { if (examData) examData.status = examStatus.value; };
