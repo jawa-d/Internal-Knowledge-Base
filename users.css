@@ -163,3 +163,37 @@ body {
   background: #dc2626;
   transform: translateY(-2px);
 }
+/* =====================
+   Unauthorized Mask
+===================== */
+
+.users-mask {
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.65);
+  backdrop-filter: blur(6px);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mask-box {
+  background: rgba(0,0,0,0.75);
+  color: white;
+  padding: 22px 28px;
+  border-radius: 14px;
+  text-align: center;
+  font-size: 15px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+
+.mask-box h4 {
+  margin-bottom: 8px;
+  font-size: 18px;
+}
+
+.blurred td {
+  filter: blur(5px);
+  user-select: none;
+}

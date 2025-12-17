@@ -67,15 +67,23 @@ function renderUsers() {
       : `<span style="opacity:.4">—</span>`;
 
     tableBody.innerHTML += `
-      <tr>
-        <td>${u.name || "-"}</td>
-        <td>${u.email}</td>
-        <td>${(u.role || "none").toUpperCase()}</td>
-        <td>${u.status || "pending"}</td>
+      <tr class="${isAdmin ? "" : "blurred"}">
+        <td>${isAdmin ? (u.name || "-") : "██████"}</td>
+        <td>${isAdmin ? u.email : "████████@████"}</td>
+        <td>${isAdmin ? (u.role || "none").toUpperCase() : "████"}</td>
+        <td>${isAdmin ? (u.status || "pending") : "████"}</td>
         <td>${editBtn}</td>
       </tr>
     `;
   });
+
+  // 🔐 Show mask if not admin
+  const mask = document.getElementById("usersMask");
+  if (!isAdmin) {
+    mask.style.display = "flex";
+  } else {
+    mask.style.display = "none";
+  }
 }
 
 /* =====================

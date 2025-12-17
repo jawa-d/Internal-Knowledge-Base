@@ -9,7 +9,6 @@
   <link rel="stylesheet" href="global.css">
   <link rel="stylesheet" href="users.css">
   <link rel="stylesheet" href="sidebar.css">
-
 </head>
 
 <body>
@@ -28,53 +27,66 @@
 
     <h2>المستخدمين</h2>
 
-    <table class="users-table">
-      <thead>
-        <tr>
-          <th>الاسم</th>
-          <th>الإيميل</th>
-          <th>الصلاحية</th>
-          <th>الحالة</th>
-          <th>إجراءات</th>
-        </tr>
-      </thead>
+    <!-- ✅ wrapper جديد (هذا هو التعديل فقط) -->
+    <div class="users-table-wrapper" style="position: relative;">
 
-      <tbody id="usersTableBody">
-        <!-- يتم تعبئتها عبر users.js -->
-      </tbody>
-    </table>
-  </div>
+      <table class="users-table">
+        <thead>
+          <tr>
+            <th>الاسم</th>
+            <th>الإيميل</th>
+            <th>الصلاحية</th>
+            <th>الحالة</th>
+            <th>إجراءات</th>
+          </tr>
+        </thead>
 
-  <!-- ==== Popup Edit ==== -->
- <!-- ==== Popup Edit User ==== -->
-<div id="popupOverlay" class="popup-overlay">
-  <div class="popup">
+        <tbody id="usersTableBody">
+          <!-- يتم تعبئتها عبر users.js -->
+        </tbody>
+      </table>
 
-    <h3>تعديل المستخدم</h3>
+      <!-- 🔒 Mask لغير المخولين -->
+      <div id="usersMask" class="users-mask" style="display:none;">
+        <div class="mask-box">
+          <h4>🔒 Access Restricted</h4>
+          <p>You don’t have permission to view users data</p>
+        </div>
+      </div>
 
-    <label>الصلاحية</label>
-    <select id="editRole">
-      <option value="none">بدون</option>
-      <option value="viewer">Viewer</option>
-      <option value="editor">Editor</option>
-      <option value="admin">Admin</option>
-    </select>
-
-    <label>الحالة</label>
-    <select id="editStatus">
-      <option value="pending">Pending</option>
-      <option value="active">Active</option>
-      <option value="disabled">Disabled</option>
-    </select>
-
-    <div class="popup-actions">
-      <button onclick="saveUser()" class="btn-save">حفظ</button>
-      <button onclick="closePopup()" class="btn-cancel">إلغاء</button>
     </div>
+    <!-- نهاية التعديل -->
 
   </div>
-</div>
 
+  <!-- ==== Popup Edit User ==== -->
+  <div id="popupOverlay" class="popup-overlay">
+    <div class="popup">
+
+      <h3>تعديل المستخدم</h3>
+
+      <label>الصلاحية</label>
+      <select id="editRole">
+        <option value="none">بدون</option>
+        <option value="viewer">Viewer</option>
+        <option value="editor">Editor</option>
+        <option value="admin">Admin</option>
+      </select>
+
+      <label>الحالة</label>
+      <select id="editStatus">
+        <option value="pending">Pending</option>
+        <option value="active">Active</option>
+        <option value="disabled">Disabled</option>
+      </select>
+
+      <div class="popup-actions">
+        <button onclick="saveUser()" class="btn-save">حفظ</button>
+        <button onclick="closePopup()" class="btn-cancel">إلغاء</button>
+      </div>
+
+    </div>
+  </div>
 
   <script type="module" src="users.js"></script>
 
