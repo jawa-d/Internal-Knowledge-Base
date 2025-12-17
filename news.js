@@ -12,6 +12,12 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
 
 /* ===============================
+   Google Sheet API
+=============================== */
+const SHEET_API_URL =
+  "https://script.google.com/macros/s/AKfycbzgcbyspaxGDESJAV6MKFO3_WPuZA4oYdaH8vLYbkbR9kEWcgFIY586fId7ARzN6Zo/exec";
+
+/* ===============================
    Helpers
 =============================== */
 function escapeRegExp(str) {
@@ -94,14 +100,39 @@ function renderNews(search = "") {
     `;
   });
 
-  // events
+  /* ===============================
+     View (Log to Google Sheet)
+  =============================== */
   grid.querySelectorAll(".view-btn").forEach(b =>
-    b.addEventListener("click", () => {
-      localStorage.setItem("selectedNewsId", b.dataset.id);
+    b.addEventListener("click", async () => {
+
+      const newsId = b.dataset.id;
+      const item = news.find(n => n.id === newsId);
+
+      // 🔐 تسجيل القراءة (FIXED)
+      try {
+        await fetch(SHEET_API_URL, {
+          method: "POST",
+          mode: "no-cors", // ⭐ الحل الجذري
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: currentEmail,
+            newsId: newsId,
+            newsTitle: item?.title || ""
+          })
+        });
+      } catch (err) {
+        console.warn("Google Sheet log failed", err);
+      }
+
+      localStorage.setItem("selectedNewsId", newsId);
       window.location.href = "news_view.html";
     })
   );
 
+  /* ===============================
+     Edit / Delete (Admin)
+  =============================== */
   grid.querySelectorAll(".edit-btn").forEach(b =>
     b.addEventListener("click", () => {
       localStorage.setItem("selectedNewsId", b.dataset.id);
@@ -143,7 +174,7 @@ window.confirmAdd = async function () {
       title,
       desc,
       image: imageData,
-      content: "",            // ✅ محتوى خاص بكل خبر
+      content: "",
       createdAt: serverTimestamp(),
       createdBy: currentEmail
     });
