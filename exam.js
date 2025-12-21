@@ -44,80 +44,41 @@ let attemptRef = null;
 let answers = {};
 let violations = 0;
 let endAt = 0;
-let timerInterval = null;
 
 /* ===============================
    Load Active Exam
 =============================== */
 async function loadActiveExam() {
-  try {
-    const q = query(
-      collection(db, "exams"),
-      where("status", "==", "active")
-    );
+  const q = query(collection(db, "exams"), where("status", "==", "active"));
+  const snap = await getDocsFromServer(q);
 
-    const snap = await getDocsFromServer(q);
-
-    // ❌ لا يوجد امتحان
-    if (snap.empty) {
-      exam = null;
-
-      examTitleEl.textContent = "";
-      examDescEl.textContent  = "";
-
-      btnEnter.disabled = true;
-
-      identityBox.innerHTML = `
-        <div class="no-exam-box">
-          ⚠️ لا يوجد امتحان حاليًا
-        </div>
-      `;
-
-      return;
-    }
-
-    // ✅ يوجد امتحان
-    exam = snap.docs
-      .map(d => ({ id: d.id, ...d.data() }))
-      .sort((a, b) =>
-        (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)
-      )[0];
-
-    examTitleEl.textContent = exam.title || "";
-    examDescEl.textContent  = exam.description || "";
-
-    btnEnter.disabled = false;
-
-  } catch (err) {
-    console.error(err);
-
-    exam = null;
-    btnEnter.disabled = true;
-
-    identityBox.innerHTML = `
-      <div class="no-exam-box">
-        ❌ خطأ في تحميل الامتحان
-      </div>
-    `;
+  if (snap.empty) {
+    identityBox.innerHTML = "⚠️ لا يوجد امتحان حاليًا";
+    return;
   }
+
+  exam = snap.docs[0].data();
+  exam.id = snap.docs[0].id;
+
+  examTitleEl.textContent = exam.title;
+  examDescEl.textContent  = exam.description;
+  btnEnter.disabled = false;
 }
 
-
 /* ===============================
-   Enter Exam
+   Enter Exam (NO REPEAT)
 =============================== */
 btnEnter.onclick = async () => {
-  if (!exam) return;
-
   const name = empNameEl.value.trim();
   const empId = empIdEl.value.trim();
-  if (!name || !empId) return alert("يرجى إدخال الاسم والرقم الوظيفي");
+  if (!name || !empId) return alert("أدخل البيانات");
 
   const attemptId = `${exam.id}_${empId}`;
   attemptRef = doc(db, "exam_attempts", attemptId);
 
   if ((await getDoc(attemptRef)).exists()) {
-    alert("❌ تم أداء الامتحان مسبقًا");
+    alert("❌ لا يمكنك أداء الامتحان أكثر من مرة");
+    btnEnter.disabled = true;
     return;
   }
 
@@ -134,113 +95,62 @@ btnEnter.onclick = async () => {
 
   identityBox.style.display = "none";
   examBox.style.display = "block";
-
   renderQuestions();
-  startTimer();
 };
 
 /* ===============================
-   Render Questions (FIXED)
+   Render Questions
 =============================== */
 function renderQuestions() {
   questionsEl.innerHTML = "";
   answers = {};
 
-  exam.questions.forEach((q, index) => {
-    const box = document.createElement("div");
-    box.className = "q";
+  exam.questions.forEach((q, i) => {
+    const div = document.createElement("div");
+    div.innerHTML = `<h4>${i + 1}. ${q.title}</h4>`;
 
-    box.innerHTML = `<h4>${index + 1}. ${q.title}</h4>`;
-
-    // ✅ MCQ
     if (q.type === "mcq") {
-      q.options.forEach(opt => {
-        box.innerHTML += `
+      q.options.forEach(o => {
+        div.innerHTML += `
           <label>
-            <input type="radio" name="${q.id}" value="${opt}">
-            ${opt}
-          </label>
-        `;
+            <input type="radio" name="${q.id}" value="${o}">
+            ${o}
+          </label>`;
       });
-    }
-
-    // ✅ TRUE / FALSE (FIX)
-    else if (q.type === "tf") {
-      box.innerHTML += `
-        <label>
-          <input type="radio" name="${q.id}" value="true">
-          ✔️ صح
-        </label>
-        <label>
-          <input type="radio" name="${q.id}" value="false">
-          ❌ خطأ
-        </label>
-      `;
-    }
-
-    // ✅ TEXT
-    else {
+    } else if (q.type === "tf") {
+      div.innerHTML += `
+        <label><input type="radio" name="${q.id}" value="true"> صح</label>
+        <label><input type="radio" name="${q.id}" value="false"> خطأ</label>`;
+    } else {
       const ta = document.createElement("textarea");
-      ta.placeholder = "اكتب إجابتك هنا...";
       ta.oninput = () => answers[q.id] = ta.value;
-      box.appendChild(ta);
+      div.appendChild(ta);
     }
 
-    box.addEventListener("change", () => {
-      const checked = box.querySelector("input:checked");
-      if (checked) answers[q.id] = checked.value;
+    div.addEventListener("change", () => {
+      const c = div.querySelector("input:checked");
+      if (c) answers[q.id] = c.value;
     });
 
-    questionsEl.appendChild(box);
+    questionsEl.appendChild(div);
   });
 }
 
 /* ===============================
-   Timer
+   Submit
 =============================== */
-function startTimer() {
-  endAt = Date.now() + (exam.durationMin || 10) * 60000;
-  timerInterval = setInterval(() => {
-    const diff = endAt - Date.now();
-    if (diff <= 0) {
-      clearInterval(timerInterval);
-      submitExam();
-      return;
-    }
-    timerEl.textContent =
-      Math.floor(diff / 60000) + ":" +
-      String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");
-  }, 1000);
-}
-
-/* ===============================
-   Save / Submit
-=============================== */
-btnSave.onclick = async () => submitExam();
-
-async function submitExam() {
-  if (!attemptRef) return;
+btnSave.onclick = async () => {
   await updateDoc(attemptRef, {
     answers,
     violations,
     status: "submitted",
     submittedAt: serverTimestamp()
   });
-  document.getElementById("finishPopup").style.display = "flex";
-  setTimeout(() => location.href = "dashboard.html", 3000);
-}
+  alert("تم إرسال الامتحان");
+  location.href = "dashboard.html";
+};
 
 /* ===============================
-   Anti Cheat
+   Start
 =============================== */
-document.addEventListener("visibilitychange", async () => {
-  if (document.hidden && attemptRef) {
-    violations++;
-    await updateDoc(attemptRef, { violations });
-  }
-});
-
-/* ===============================
-   Init
-=============================== */
-await loadActiveExam();
+loadActiveExam();

@@ -5,7 +5,6 @@
   <title>إدارة الامتحانات</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-
   <link rel="stylesheet" href="global.css">
   <link rel="stylesheet" href="sidebar.css">
   <link rel="stylesheet" href="admin_exam.css">
@@ -16,21 +15,16 @@
 <script src="sidebar.js"></script>
 
 <div class="top-nav">
-  <h1>إدارة الامتحانات</h1>
+  <h1>الموظفون المشاركون</h1>
 </div>
 
 <div class="page">
-
   <div class="card">
 
-    <div class="card-header">
-      <h2>الموظفون المشاركون</h2>
-
-      <div class="actions">
-        <button class="btn primary" id="btnExcel">📊 Excel</button>
-        <button class="btn pdf" id="btnPDF">📄 PDF</button>
-        <button class="btn danger" id="btnClear">🗑️ حذف الكل</button>
-      </div>
+    <div class="actions">
+      <button id="btnClear" class="danger">🗑 حذف الكل</button>
+      <button id="btnPDF">📄 PDF</button>
+      <button id="btnExcel">📊 Excel</button>
     </div>
 
     <table class="tbl">
@@ -41,7 +35,8 @@
           <th>الإيميل</th>
           <th>الحالة</th>
           <th>الغش</th>
-          <th>الدرجة</th>
+          <th>الدرجة / 100</th>
+          <th>النتيجة</th>
           <th>تفاصيل</th>
         </tr>
       </thead>
@@ -55,10 +50,9 @@
   <p>Developed by <strong>Jawad Kadhim</strong> © 2025</p>
 </footer>
 
-<!-- Libraries -->
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.5.29/dist/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
 <script type="module" src="admin_exam.js"></script>
 </body>

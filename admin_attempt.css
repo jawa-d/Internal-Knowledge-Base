@@ -1,88 +1,42 @@
-body {
-  background: #eef3f9;
-  font-family: "Cairo", sans-serif;
-}
+body { background:#eef3f9; font-family:"Cairo"; }
 
 .page {
-  margin-left: 260px;
-  margin-top: 90px;
-  padding: 30px;
-  display: grid;
-  gap: 25px;
+  margin-left:260px;
+  margin-top:90px;
+  padding:30px;
+  display:grid;
+  gap:20px;
 }
 
 .card {
-  background: white;
-  border-radius: 18px;
-  padding: 25px;
-  box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+  background:#fff;
+  border-radius:18px;
+  padding:25px;
+  box-shadow:0 12px 30px rgba(0,0,0,.08);
 }
 
-.card h3 {
-  margin-bottom: 15px;
-  color: #4da3ff;
-}
-
-/* معلومات الموظف */
-#infoBox p {
-  margin: 6px 0;
-}
-
-/* سؤال */
 .question {
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  padding: 18px;
-  margin-bottom: 15px;
+  border:1px solid #e2e8f0;
+  border-radius:14px;
+  padding:16px;
+  margin-bottom:14px;
 }
 
-.question.correct {
-  border-color: #00c897;
-  background: #f0fffa;
-}
-
-.question.wrong {
-  border-color: #ff4b4b;
-  background: #fff5f5;
-}
-
-.question h4 {
-  margin-bottom: 8px;
-}
-
-.answer {
-  background: #f7f9fd;
-  padding: 10px;
-  border-radius: 10px;
-  margin-bottom: 8px;
-}
+.question.correct { border-color:#00c897; background:#f0fffa; }
+.question.wrong { border-color:#ff4b4b; background:#fff5f5; }
 
 .manual-input {
-  width: 120px;
-  padding: 8px;
-  border-radius: 10px;
-  border: 1px solid #cdd5e2;
+  width:120px;
+  padding:8px;
+  border-radius:10px;
+  border:1px solid #ccc;
 }
 
 .btn-final {
-  background: #00ffd0;
-  color: #003b33;
-  padding: 12px 26px;
-  border-radius: 14px;
-  border: none;
-  font-size: 15px;
-  cursor: pointer;
-}
-.footer {
-  text-align: center;
-  padding: 18px 0;
-  font-size: 14px;
-  color: #777;
-  margin-top: 40px;
-  border-top: 1px solid #e5e7eb;
-}
-
-.footer strong {
-  color: #4b6fff;
-  font-weight: 700;
+  background:#00ffd0;
+  padding:12px 26px;
+  border:none;
+  border-radius:14px;
+  cursor:pointer;
+  font-weight:700;
 }
