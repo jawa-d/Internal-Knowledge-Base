@@ -1,6 +1,6 @@
 import { db } from "./firebase.js";
 import {
-  doc, getDoc, setDoc, updateDoc, deleteDoc,
+  doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc,
   collection, addDoc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
@@ -13,7 +13,10 @@ let isAdmin = false;
 
 async function checkAdminAccess() {
   currentEmail = localStorage.getItem("kb_user_email") || "";
-  if (!currentEmail) { location.href = "login.html"; return; }
+  if (!currentEmail) {
+    location.href = "login.html";
+    return;
+  }
 
   const snap = await getDoc(doc(db, "users", currentEmail));
   const role = snap.exists() ? (snap.data().role || "") : "";
@@ -26,17 +29,37 @@ async function checkAdminAccess() {
 }
 
 /* ===============================
+  Close Other Active Exams
+=============================== */
+async function deactivateOtherExams(activeId) {
+  const snap = await getDocs(collection(db, "exams"));
+
+  const jobs = [];
+  snap.forEach(d => {
+    if (d.id !== activeId && d.data().status === "active") {
+      jobs.push(
+        updateDoc(doc(db, "exams", d.id), { status: "closed" })
+      );
+    }
+  });
+
+  await Promise.all(jobs);
+}
+
+/* ===============================
   UI Refs
 =============================== */
 const examTitle = document.getElementById("examTitle");
 const examDesc = document.getElementById("examDesc");
 const durationMin = document.getElementById("durationMin");
 const passScore = document.getElementById("passScore");
+
 const btnNewExam = document.getElementById("btnNewExam");
 const btnClone = document.getElementById("btnClone");
 const btnAddQ = document.getElementById("btnAddQ");
 const btnSave = document.getElementById("btnSave");
 const btnDelete = document.getElementById("btnDelete");
+
 const questionsWrap = document.getElementById("questionsWrap");
 const examStatus = document.getElementById("examStatus");
 const currentExamHint = document.getElementById("currentExamHint");
@@ -47,7 +70,12 @@ const currentExamHint = document.getElementById("currentExamHint");
 let examId = localStorage.getItem("selectedExamId") || "";
 let examData = null;
 
-function uid() { return "q_" + Math.random().toString(16).slice(2) + Date.now(); }
+/* ===============================
+  Helpers
+=============================== */
+function uid() {
+  return "q_" + Math.random().toString(16).slice(2) + Date.now();
+}
 
 function enableEditing(on) {
   btnAddQ.disabled = !on;
@@ -57,7 +85,7 @@ function enableEditing(on) {
   examStatus.disabled = !on;
 }
 
-function normalizeQuestion(q){
+function normalizeQuestion(q) {
   return {
     id: q.id || uid(),
     type: q.type || "mcq",
@@ -65,12 +93,27 @@ function normalizeQuestion(q){
     options: Array.isArray(q.options) ? q.options : [],
     correctAnswer: q.correctAnswer ?? "",
     points: Number(q.points ?? 1),
-    requiresManual: Boolean(q.requiresManual ?? (q.type === "essay" || q.type === "short"))
+    requiresManual: Boolean(
+      q.requiresManual ?? (q.type === "essay" || q.type === "short")
+    )
   };
 }
 
+function escapeHtml(s) {
+  return String(s ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+/* ===============================
+  Render Questions
+=============================== */
 function renderQuestions() {
   questionsWrap.innerHTML = "";
+
   const qs = (examData?.questions || []).map(normalizeQuestion);
 
   qs.forEach((q, idx) => {
@@ -81,15 +124,15 @@ function renderQuestions() {
     el.innerHTML = `
       <div class="qtop">
         <div class="qmeta">
-          <span class="badge">#${idx+1}</span>
+          <span class="badge">#${idx + 1}</span>
           <span class="small">ID: ${q.id}</span>
         </div>
         <div class="qmeta">
           <select class="select qType">
-            <option value="mcq" ${q.type==="mcq"?"selected":""}>MCQ</option>
-            <option value="tf" ${q.type==="tf"?"selected":""}>True/False</option>
-            <option value="short" ${q.type==="short"?"selected":""}>Short</option>
-            <option value="essay" ${q.type==="essay"?"selected":""}>Essay</option>
+            <option value="mcq" ${q.type === "mcq" ? "selected" : ""}>MCQ</option>
+            <option value="tf" ${q.type === "tf" ? "selected" : ""}>True/False</option>
+            <option value="short" ${q.type === "short" ? "selected" : ""}>Short</option>
+            <option value="essay" ${q.type === "essay" ? "selected" : ""}>Essay</option>
           </select>
           <input class="qPoints" type="number" min="0" value="${q.points}" style="width:120px" />
           <button class="btn danger qDel">حذف</button>
@@ -121,20 +164,22 @@ function renderQuestions() {
       optsBox.innerHTML = "";
 
       const t = typeSel.value;
+
       if (t === "mcq") {
         const opts = q.options.length ? q.options : ["", "", "", ""];
         optsBox.innerHTML = `
           <label class="small">الخيارات</label>
-          ${opts.map((o,i)=>`
+          ${opts.map((o, i) => `
             <div class="optRow">
-              <input class="opt" data-i="${i}" value="${escapeHtml(o)}" placeholder="خيار ${i+1}">
-            </div>`).join("")}
+              <input class="opt" data-i="${i}" value="${escapeHtml(o)}" placeholder="خيار ${i + 1}">
+            </div>
+          `).join("")}
           <div class="row">
             <button class="btn addOpt">+ خيار</button>
             <button class="btn delOpt">- خيار</button>
             <div class="field" style="min-width:240px">
               <label>الإجابة الصحيحة (نص الخيار)</label>
-              <input class="qCorrect" value="${escapeHtml(String(q.correctAnswer||""))}" placeholder="مثال: خيار 1">
+              <input class="qCorrect" value="${escapeHtml(String(q.correctAnswer || ""))}">
             </div>
           </div>
         `;
@@ -144,8 +189,8 @@ function renderQuestions() {
             <div class="field" style="min-width:240px">
               <label>الإجابة الصحيحة</label>
               <select class="select qCorrect">
-                <option value="true" ${String(q.correctAnswer)==="true"?"selected":""}>True</option>
-                <option value="false" ${String(q.correctAnswer)==="false"?"selected":""}>False</option>
+                <option value="true" ${String(q.correctAnswer) === "true" ? "selected" : ""}>True</option>
+                <option value="false" ${String(q.correctAnswer) === "false" ? "selected" : ""}>False</option>
               </select>
             </div>
           </div>
@@ -155,7 +200,7 @@ function renderQuestions() {
           <div class="row">
             <div class="field" style="min-width:320px">
               <label>إجابة نموذجية (اختياري)</label>
-              <input class="qCorrect" value="${escapeHtml(String(q.correctAnswer||""))}" placeholder="للمقارنة أو للمصحح">
+              <input class="qCorrect" value="${escapeHtml(String(q.correctAnswer || ""))}">
             </div>
           </div>
         `;
@@ -164,19 +209,23 @@ function renderQuestions() {
 
     renderOptions();
 
-    // listeners
     el.querySelector(".qDel").onclick = () => {
       examData.questions = examData.questions.filter(x => x.id !== q.id);
       renderQuestions();
     };
 
-    typeSel.onchange = () => { q.type = typeSel.value; q.requiresManual = (q.type==="essay"||q.type==="short"); manualSel.value = q.requiresManual ? "manual":"auto"; renderOptions(); };
+    typeSel.onchange = () => {
+      q.type = typeSel.value;
+      q.requiresManual = (q.type === "essay" || q.type === "short");
+      manualSel.value = q.requiresManual ? "manual" : "auto";
+      renderOptions();
+    };
 
-    el.querySelector(".qTitle").oninput = (e) => { q.title = e.target.value; };
-    el.querySelector(".qPoints").oninput = (e) => { q.points = Number(e.target.value||0); };
-    manualSel.onchange = () => { q.requiresManual = manualSel.value === "manual"; };
+    el.querySelector(".qTitle").oninput = e => q.title = e.target.value;
+    el.querySelector(".qPoints").oninput = e => q.points = Number(e.target.value || 0);
+    manualSel.onchange = () => q.requiresManual = manualSel.value === "manual";
 
-    optsBox.addEventListener("input", (e) => {
+    optsBox.addEventListener("input", e => {
       if (e.target.classList.contains("opt")) {
         const i = Number(e.target.dataset.i);
         q.options[i] = e.target.value;
@@ -186,7 +235,7 @@ function renderQuestions() {
       }
     });
 
-    optsBox.addEventListener("click", (e) => {
+    optsBox.addEventListener("click", e => {
       if (e.target.classList.contains("addOpt")) {
         q.options.push("");
         renderOptions();
@@ -197,19 +246,11 @@ function renderQuestions() {
       }
     });
 
-    // sync back to examData
     const idxIn = examData.questions.findIndex(x => x.id === q.id);
     examData.questions[idxIn] = q;
 
     questionsWrap.appendChild(el);
   });
-}
-
-function escapeHtml(s){
-  return String(s ?? "")
-    .replaceAll("&","&amp;").replaceAll("<","&lt;")
-    .replaceAll(">","&gt;").replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
 }
 
 /* ===============================
@@ -250,6 +291,7 @@ async function loadExam() {
   }
 
   examData = { id: examId, ...snap.data() };
+
   examTitle.value = examData.title || "";
   examDesc.value = examData.description || "";
   durationMin.value = examData.durationMin ?? 20;
@@ -270,8 +312,11 @@ async function saveExam() {
   examData.passScore = Number(passScore.value || 60);
   examData.status = examStatus.value;
 
-  // normalize
   examData.questions = (examData.questions || []).map(normalizeQuestion);
+
+  if (examData.status === "active") {
+    await deactivateOtherExams(examId);
+  }
 
   await updateDoc(doc(db, "exams", examId), {
     title: examData.title,
@@ -279,10 +324,12 @@ async function saveExam() {
     durationMin: examData.durationMin,
     passScore: examData.passScore,
     status: examData.status,
-    questions: examData.questions
+    questions: examData.questions,
+    updatedAt: serverTimestamp()
   });
 
-  alert("✅ تم الحفظ");
+  examStatus.value = examData.status;
+  alert("✅ تم حفظ الامتحان بنجاح");
 }
 
 async function deleteExam() {
@@ -291,6 +338,7 @@ async function deleteExam() {
 
   await deleteDoc(doc(db, "exams", examId));
   localStorage.removeItem("selectedExamId");
+
   examId = "";
   examData = null;
   questionsWrap.innerHTML = "";
@@ -300,6 +348,7 @@ async function deleteExam() {
 
 async function cloneExam() {
   if (!examData) return;
+
   const ref = await addDoc(collection(db, "exams"), {
     ...examData,
     status: "draft",
@@ -307,6 +356,7 @@ async function cloneExam() {
     createdAt: serverTimestamp(),
     createdBy: currentEmail
   });
+
   examId = ref.id;
   localStorage.setItem("selectedExamId", examId);
   await loadExam();
@@ -327,4 +377,6 @@ btnAddQ.onclick = () => {
 btnSave.onclick = saveExam;
 btnDelete.onclick = deleteExam;
 btnClone.onclick = cloneExam;
-examStatus.onchange = () => { if (examData) examData.status = examStatus.value; };
+examStatus.onchange = () => {
+  if (examData) examData.status = examStatus.value;
+};

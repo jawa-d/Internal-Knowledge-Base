@@ -3,7 +3,7 @@ import {
   collection,
   query,
   where,
-  getDocs,
+  getDocsFromServer,
   doc,
   getDoc,
   setDoc,
@@ -15,9 +15,7 @@ import {
    Auth Guard
 =============================== */
 const email = localStorage.getItem("kb_user_email");
-if (!email) {
-  window.location.href = "login.html";
-}
+if (!email) location.href = "login.html";
 
 /* ===============================
    Elements
@@ -36,6 +34,8 @@ const empIdEl   = document.getElementById("empId");
 const btnEnter = document.getElementById("btnEnter");
 const btnSave  = document.getElementById("btnSave");
 
+btnEnter.disabled = true;
+
 /* ===============================
    State
 =============================== */
@@ -50,45 +50,48 @@ let timerInterval = null;
    Load Active Exam
 =============================== */
 async function loadActiveExam() {
-  const q = query(
-    collection(db, "exams"),
-    where("status", "==", "active")
-  );
+  try {
+    const q = query(
+      collection(db, "exams"),
+      where("status", "==", "active")
+    );
 
-  const snap = await getDocs(q);
+    const snap = await getDocsFromServer(q);
 
-  if (snap.empty) {
-    identityBox.innerHTML = "<p>لا يوجد امتحان متاح حاليًا</p>";
-    return;
+    if (snap.empty) {
+      identityBox.innerHTML = "<p>❌ لا يوجد امتحان متاح حاليًا</p>";
+      return;
+    }
+
+    exam = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))[0];
+
+    examTitleEl.textContent = exam.title || "—";
+    examDescEl.textContent  = exam.description || "—";
+
+    btnEnter.disabled = false;
+  } catch (err) {
+    console.error(err);
+    identityBox.innerHTML = "<p>⚠️ خطأ في تحميل الامتحان</p>";
   }
-
-  exam = {
-    id: snap.docs[0].id,
-    ...snap.docs[0].data()
-  };
-
-  examTitleEl.textContent = exam.title || "—";
-  examDescEl.textContent  = exam.description || "";
 }
 
 /* ===============================
    Enter Exam
 =============================== */
 btnEnter.onclick = async () => {
+  if (!exam) return;
+
   const name = empNameEl.value.trim();
   const empId = empIdEl.value.trim();
-
-  if (!name || !empId) {
-    alert("يرجى إدخال الاسم والرقم الوظيفي");
-    return;
-  }
+  if (!name || !empId) return alert("يرجى إدخال الاسم والرقم الوظيفي");
 
   const attemptId = `${exam.id}_${empId}`;
   attemptRef = doc(db, "exam_attempts", attemptId);
 
-  const existSnap = await getDoc(attemptRef);
-  if (existSnap.exists()) {
-    alert("تم أداء الامتحان مسبقًا");
+  if ((await getDoc(attemptRef)).exists()) {
+    alert("❌ تم أداء الامتحان مسبقًا");
     return;
   }
 
@@ -111,34 +114,49 @@ btnEnter.onclick = async () => {
 };
 
 /* ===============================
-   Render Questions
+   Render Questions (FIXED)
 =============================== */
 function renderQuestions() {
   questionsEl.innerHTML = "";
+  answers = {};
 
   exam.questions.forEach((q, index) => {
     const box = document.createElement("div");
     box.className = "q";
 
-    box.innerHTML = `
-      <h4>${index + 1}. ${q.title}</h4>
-    `;
+    box.innerHTML = `<h4>${index + 1}. ${q.title}</h4>`;
 
+    // ✅ MCQ
     if (q.type === "mcq") {
       q.options.forEach(opt => {
-        const lbl = document.createElement("label");
-        lbl.innerHTML = `
-          <input type="radio" name="${q.id}" value="${opt}">
-          ${opt}
+        box.innerHTML += `
+          <label>
+            <input type="radio" name="${q.id}" value="${opt}">
+            ${opt}
+          </label>
         `;
-        box.appendChild(lbl);
       });
-    } else {
+    }
+
+    // ✅ TRUE / FALSE (FIX)
+    else if (q.type === "tf") {
+      box.innerHTML += `
+        <label>
+          <input type="radio" name="${q.id}" value="true">
+          ✔️ صح
+        </label>
+        <label>
+          <input type="radio" name="${q.id}" value="false">
+          ❌ خطأ
+        </label>
+      `;
+    }
+
+    // ✅ TEXT
+    else {
       const ta = document.createElement("textarea");
       ta.placeholder = "اكتب إجابتك هنا...";
-      ta.oninput = () => {
-        answers[q.id] = ta.value;
-      };
+      ta.oninput = () => answers[q.id] = ta.value;
       box.appendChild(ta);
     }
 
@@ -156,54 +174,38 @@ function renderQuestions() {
 =============================== */
 function startTimer() {
   endAt = Date.now() + (exam.durationMin || 10) * 60000;
-
   timerInterval = setInterval(() => {
     const diff = endAt - Date.now();
-
     if (diff <= 0) {
       clearInterval(timerInterval);
       submitExam();
       return;
     }
-
-    const m = Math.floor(diff / 60000);
-    const s = Math.floor((diff % 60000) / 1000);
-    timerEl.textContent = `${m}:${String(s).padStart(2, "0")}`;
+    timerEl.textContent =
+      Math.floor(diff / 60000) + ":" +
+      String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");
   }, 1000);
 }
 
 /* ===============================
-   Save Answers
+   Save / Submit
 =============================== */
-btnSave.onclick = async () => {
-  if (!attemptRef) return;
+btnSave.onclick = async () => submitExam();
 
-  await updateDoc(attemptRef, {
-    answers,
-    violations
-  });
-
-  showFinishPopup();
-};
-
-/* ===============================
-   Submit Exam (Auto)
-=============================== */
 async function submitExam() {
   if (!attemptRef) return;
-
   await updateDoc(attemptRef, {
     answers,
     violations,
     status: "submitted",
     submittedAt: serverTimestamp()
   });
-
-  showFinishPopup();
+  document.getElementById("finishPopup").style.display = "flex";
+  setTimeout(() => location.href = "dashboard.html", 3000);
 }
 
 /* ===============================
-   Anti-Cheat (Tab Change)
+   Anti Cheat
 =============================== */
 document.addEventListener("visibilitychange", async () => {
   if (document.hidden && attemptRef) {
@@ -213,37 +215,6 @@ document.addEventListener("visibilitychange", async () => {
 });
 
 /* ===============================
-   Auto Submit on Leave
-=============================== */
-window.addEventListener("beforeunload", () => {
-  if (attemptRef) {
-    updateDoc(attemptRef, {
-      answers,
-      violations,
-      status: "submitted",
-      submittedAt: serverTimestamp()
-    });
-  }
-});
-
-/* ===============================
-   Finish Popup
-=============================== */
-function showFinishPopup() {
-  const popup = document.getElementById("finishPopup");
-  if (!popup) {
-    window.location.href = "dashboard.html";
-    return;
-  }
-
-  popup.style.display = "flex";
-
-  setTimeout(() => {
-    window.location.href = "dashboard.html";
-  }, 3000);
-}
-
-/* ===============================
-   INIT
+   Init
 =============================== */
 await loadActiveExam();
