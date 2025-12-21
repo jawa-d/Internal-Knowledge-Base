@@ -32,3 +32,16 @@ input{ width:100%; padding:12px 14px; border:1px solid var(--border); border-rad
 .optRow{ display:flex; gap:8px; }
 .optRow input{ flex:1; }
 .badge{ padding:4px 10px; border-radius:999px; background:rgba(77,163,255,.12); border:1px solid rgba(77,163,255,.25); font-size:12px; }
+.footer {
+  text-align: center;
+  padding: 18px 0;
+  font-size: 14px;
+  color: #777;
+  margin-top: 40px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.footer strong {
+  color: #4b6fff;
+  font-weight: 700;
+}

@@ -251,3 +251,16 @@ body {
   from { transform: scale(0.7); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
 }
+.footer {
+  text-align: center;
+  padding: 18px 0;
+  font-size: 14px;
+  color: #777;
+  margin-top: 40px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.footer strong {
+  color: #4b6fff;
+  font-weight: 700;
+}

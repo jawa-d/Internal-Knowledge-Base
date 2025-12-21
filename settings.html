@@ -2,71 +2,68 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>Settings</title>
+  <title>الإعدادات</title>
 
-  <!-- Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
 
-  <!-- CSS -->
   <link rel="stylesheet" href="global.css">
-  <link rel="stylesheet" href="settings.css">
   <link rel="stylesheet" href="sidebar.css">
-
+  <link rel="stylesheet" href="settings.css">
 </head>
 
 <body>
 
-  <!-- Sidebar -->
-  <div id="sidebar"></div>
-  <script src="sidebar.js"></script>
+<!-- Sidebar -->
+<div id="sidebar"></div>
+<script src="sidebar.js"></script>
 
-  <!-- Navbar -->
-  <div class="top-nav">
-      <div></div>
+<!-- Top Nav -->
+<div class="top-nav">
+  <h1 class="page-title">الإعدادات</h1>
+</div>
 
-      <h1 class="page-title">الإعدادات</h1>
+<!-- Settings Wrapper -->
+<div class="settings-wrapper">
 
-      <div class="toggle-box">
-        <span class="user-name">Jawad</span>
-        <div class="toggle"><div class="knob"></div></div>
+  <!-- THEME CARD -->
+  <div class="settings-card">
+    <div class="card-info">
+      <h3>الثيم</h3>
+      <p>تغيير مظهر النظام بين الوضع الفاتح والداكن</p>
+    </div>
+
+    <div class="card-action" onclick="toggleTheme()">
+      <span id="themeIcon">🌙</span>
+      <div class="switch" id="themeSwitch">
+        <div class="dot"></div>
       </div>
+    </div>
   </div>
 
-  <!-- Page Content -->
-  <div class="settings-content">
-
-    <div class="setting-row">
-      <span class="label">الثـيــم</span>
-      <div class="switch"><div class="dot"></div></div>
-      <span class="sublabel">فاتح / داكن</span>
+  <!-- USER INFO CARD -->
+  <div class="settings-card">
+    <div class="card-info">
+      <h3>معلومات المستخدم</h3>
+      <p>عرض معلومات الحساب الحالية</p>
     </div>
 
-    <div class="setting-row">
-      <span class="label">اللـغــة</span>
-      <div class="switch"><div class="dot"></div></div>
-      <span class="sublabel">العربية</span>
+    <div class="user-box">
+      <div><strong>الاسم:</strong> <span id="userName">—</span></div>
+      <div><strong>الإيميل:</strong> <span id="userEmail">—</span></div>
+      <div>
+        <strong>الدور:</strong>
+        <span class="role-badge" id="userRole">—</span>
+      </div>
     </div>
-
-    <div class="setting-row">
-      <span class="label">الإشعــــــارات</span>
-      <div class="switch"><div class="dot"></div></div>
-      <span class="sublabel">تفعيل</span>
-    </div>
-
-    <div class="setting-row">
-      <span class="label">الحـســاب</span>
-      <div class="switch"><div class="dot"></div></div>
-      <span class="sublabel">تغيير كلمة المرور</span>
-    </div>
-
-    <div class="setting-row">
-      <span class="label">الصلاحـيـات</span>
-      <div class="switch"><div class="dot"></div></div>
-      <span class="sublabel">المسؤول</span>
-    </div>
-
   </div>
+
+</div>
+
+<footer class="footer">
+  Developed by <strong>Jawad Kadhim</strong>. ALL RIGHTS RESERVED © 2025
+</footer>
+
+<script src="theme.js"></script>
 <script src="settings.js"></script>
-
 </body>
 </html>

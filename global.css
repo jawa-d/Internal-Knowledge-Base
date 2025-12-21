@@ -173,3 +173,42 @@ body {
   font-size: 15px;
   outline: none;
 }
+/* ===============================
+   THEME VARIABLES
+================================ */
+:root{
+  --bg:#eef3fb;
+  --card:#ffffff;
+  --text:#111827;
+  --muted:#6b7280;
+  --border:#e5e7eb;
+  --shadow: 0 10px 30px rgba(0,0,0,.06);
+}
+
+body{
+  background: var(--bg);
+  color: var(--text);
+  transition: background .35s ease, color .35s ease;
+}
+
+/* Dark */
+body.dark{
+  --bg:#0b1220;
+  --card:#121c2f;
+  --text:#e5e7eb;
+  --muted:#94a3b8;
+  --border:#1f2a44;
+  --shadow: 0 16px 40px rgba(0,0,0,.35);
+}
+
+/* Smooth transitions for main UI blocks */
+.top-nav,
+.settings-card,
+.footer{
+  transition: background .35s ease, color .35s ease, border-color .35s ease, box-shadow .35s ease;
+}
+/* Theme flash */
+body.theme-flash{
+  outline: 2px solid rgba(79,124,255,.25);
+  outline-offset: -2px;
+}
