@@ -4,7 +4,10 @@
 <meta charset="UTF-8">
 <title>KPI Productivity Measurement</title>
 
+<!-- Font -->
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+
+<!-- CSS -->
 <link rel="stylesheet" href="kpi_productivity.css">
 
 <!-- PDF -->
@@ -13,7 +16,7 @@
 
 <body>
 
-<!-- Header -->
+<!-- ================= HEADER ================= -->
 <div class="header">
   <button class="back-btn" onclick="history.back()">←</button>
 
@@ -49,8 +52,9 @@
   </div>
 </div>
 
-<!-- Table -->
+<!-- ================= TABLE ================= -->
 <div class="table-wrapper">
+
 <table id="kpiTable">
 <thead>
 <tr>
@@ -67,59 +71,67 @@
 </thead>
 
 <tbody>
-<tr data-id="kb_modify">
-  <td>Knowledge Base Modifying</td>
-  <td>Modified articles</td>
-  <td>Count</td>
-  <td><textarea class="note"></textarea></td>
-  <td><input class="iw" value="0"></td>
-  <td><input class="uw" value="0"></td>
-  <td><input class="input" value="0"></td>
-  <td><input class="output" value="0"></td>
-  <td><input class="sla" value="0"></td>
+
+<tr data-id="row1">
+  <td><input class="kpi-name" placeholder="KPI name"></td>
+  <td><input class="kpi-desc" placeholder="Description"></td>
+  <td><input class="kpi-measure" placeholder="How it measured"></td>
+  <td><textarea class="note" placeholder="Optional note"></textarea></td>
+  <td><input class="iw" placeholder="Importance"></td>
+  <td><input class="uw" placeholder="Utilization"></td>
+  <td><input class="input" placeholder="Input"></td>
+  <td><input class="output" placeholder="Output"></td>
+  <td><input class="sla" placeholder="SLA"></td>
 </tr>
 
-<tr data-id="training">
-  <td>Training Completion</td>
-  <td>Completed sessions</td>
-  <td>Count</td>
-  <td><textarea class="note"></textarea></td>
-  <td><input class="iw" value="0"></td>
-  <td><input class="uw" value="0"></td>
-  <td><input class="input" value="0"></td>
-  <td><input class="output" value="0"></td>
-  <td><input class="sla" value="0"></td>
+<tr data-id="row2">
+  <td><input class="kpi-name" placeholder="KPI name"></td>
+  <td><input class="kpi-desc" placeholder="Description"></td>
+  <td><input class="kpi-measure" placeholder="How it measured"></td>
+  <td><textarea class="note" placeholder="Optional note"></textarea></td>
+  <td><input class="iw" placeholder="Importance"></td>
+  <td><input class="uw" placeholder="Utilization"></td>
+  <td><input class="input" placeholder="Input"></td>
+  <td><input class="output" placeholder="Output"></td>
+  <td><input class="sla" placeholder="SLA"></td>
 </tr>
 
-<tr data-id="assessment">
-  <td>Monthly Assessment</td>
-  <td>Prepared assessments</td>
-  <td>Count</td>
-  <td><textarea class="note"></textarea></td>
-  <td><input class="iw" value="0"></td>
-  <td><input class="uw" value="0"></td>
-  <td><input class="input" value="0"></td>
-  <td><input class="output" value="0"></td>
-  <td><input class="sla" value="0"></td>
+<tr data-id="row3">
+  <td><input class="kpi-name" placeholder="KPI name"></td>
+  <td><input class="kpi-desc" placeholder="Description"></td>
+  <td><input class="kpi-measure" placeholder="How it measured"></td>
+  <td><textarea class="note" placeholder="Optional note"></textarea></td>
+  <td><input class="iw" placeholder="Importance"></td>
+  <td><input class="uw" placeholder="Utilization"></td>
+  <td><input class="input" placeholder="Input"></td>
+  <td><input class="output" placeholder="Output"></td>
+  <td><input class="sla" placeholder="SLA"></td>
 </tr>
 
-<tr data-id="materials">
-  <td>New / Updated Material</td>
-  <td>Created materials</td>
-  <td>Count</td>
-  <td><textarea class="note"></textarea></td>
-  <td><input class="iw" value="0"></td>
-  <td><input class="uw" value="0"></td>
-  <td><input class="input" value="0"></td>
-  <td><input class="output" value="0"></td>
-  <td><input class="sla" value="0"></td>
+<tr data-id="row4">
+  <td><input class="kpi-name" placeholder="KPI name"></td>
+  <td><input class="kpi-desc" placeholder="Description"></td>
+  <td><input class="kpi-measure" placeholder="How it measured"></td>
+  <td><textarea class="note" placeholder="Optional note"></textarea></td>
+  <td><input class="iw" placeholder="Importance"></td>
+  <td><input class="uw" placeholder="Utilization"></td>
+  <td><input class="input" placeholder="Input"></td>
+  <td><input class="output" placeholder="Output"></td>
+  <td><input class="sla" placeholder="SLA"></td>
 </tr>
+
 </tbody>
 </table>
+
 </div>
+
+<!-- ================= FOOTER ================= -->
 <footer class="footer">
   <p>Developed by <strong>Jawad Kadhim. ALL RIGHTS RESERVED.</strong> © 2025</p>
 </footer>
+
+<!-- JS -->
 <script src="kpi_productivity.js"></script>
+
 </body>
 </html>
