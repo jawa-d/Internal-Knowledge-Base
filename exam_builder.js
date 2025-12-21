@@ -1,6 +1,6 @@
 import { db } from "./firebase.js";
 import {
-  doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc,
+  doc, getDoc, getDocs, updateDoc, deleteDoc,
   collection, addDoc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
@@ -37,9 +37,7 @@ async function deactivateOtherExams(activeId) {
   const jobs = [];
   snap.forEach(d => {
     if (d.id !== activeId && d.data().status === "active") {
-      jobs.push(
-        updateDoc(doc(db, "exams", d.id), { status: "closed" })
-      );
+      jobs.push(updateDoc(doc(db, "exams", d.id), { status: "closed" }));
     }
   });
 
@@ -53,6 +51,8 @@ const examTitle = document.getElementById("examTitle");
 const examDesc = document.getElementById("examDesc");
 const durationMin = document.getElementById("durationMin");
 const passScore = document.getElementById("passScore");
+const examStatus = document.getElementById("examStatus");
+const examSection = document.getElementById("examSection");
 
 const btnNewExam = document.getElementById("btnNewExam");
 const btnClone = document.getElementById("btnClone");
@@ -61,7 +61,6 @@ const btnSave = document.getElementById("btnSave");
 const btnDelete = document.getElementById("btnDelete");
 
 const questionsWrap = document.getElementById("questionsWrap");
-const examStatus = document.getElementById("examStatus");
 const currentExamHint = document.getElementById("currentExamHint");
 
 /* ===============================
@@ -69,6 +68,10 @@ const currentExamHint = document.getElementById("currentExamHint");
 =============================== */
 let examId = localStorage.getItem("selectedExamId") || "";
 let examData = null;
+
+const SECTION_KEY = "selectedExamSection";
+const DEFAULT_SECTION = "Inbound";
+let currentSection = localStorage.getItem(SECTION_KEY) || "";
 
 /* ===============================
   Helpers
@@ -83,11 +86,13 @@ function enableEditing(on) {
   btnDelete.disabled = !on;
   btnClone.disabled = !on;
   examStatus.disabled = !on;
+  if (examSection) examSection.disabled = !on;
 }
 
 function normalizeQuestion(q) {
   return {
     id: q.id || uid(),
+    section: q.section || DEFAULT_SECTION, // ✅ NEW
     type: q.type || "mcq",
     title: q.title || "",
     options: Array.isArray(q.options) ? q.options : [],
@@ -109,12 +114,25 @@ function escapeHtml(s) {
 }
 
 /* ===============================
-  Render Questions
+  Render Questions (FILTER BY SECTION)
 =============================== */
 function renderQuestions() {
   questionsWrap.innerHTML = "";
 
-  const qs = (examData?.questions || []).map(normalizeQuestion);
+  const allQs = (examData?.questions || []).map(normalizeQuestion);
+
+  // ✅ فلترة حسب القسم المختار
+  const sec = String(currentSection || "").trim();
+  const qs = sec ? allQs.filter(q => q.section === sec) : allQs;
+
+  if (!sec) {
+    questionsWrap.innerHTML = `
+      <div style="padding:10px;color:#64748b">
+        ⚠️ اختر القسم من الأعلى لعرض أسئلته وإضافة أسئلة له
+      </div>
+    `;
+    return;
+  }
 
   qs.forEach((q, idx) => {
     const el = document.createElement("div");
@@ -125,6 +143,7 @@ function renderQuestions() {
       <div class="qtop">
         <div class="qmeta">
           <span class="badge">#${idx + 1}</span>
+          <span class="badge">${escapeHtml(q.section)}</span>
           <span class="small">ID: ${q.id}</span>
         </div>
         <div class="qmeta">
@@ -162,7 +181,6 @@ function renderQuestions() {
 
     function renderOptions() {
       optsBox.innerHTML = "";
-
       const t = typeSel.value;
 
       if (t === "mcq") {
@@ -175,8 +193,8 @@ function renderQuestions() {
             </div>
           `).join("")}
           <div class="row">
-            <button class="btn addOpt">+ خيار</button>
-            <button class="btn delOpt">- خيار</button>
+            <button class="btn addOpt" type="button">+ خيار</button>
+            <button class="btn delOpt" type="button">- خيار</button>
             <div class="field" style="min-width:240px">
               <label>الإجابة الصحيحة (نص الخيار)</label>
               <input class="qCorrect" value="${escapeHtml(String(q.correctAnswer || ""))}">
@@ -209,11 +227,13 @@ function renderQuestions() {
 
     renderOptions();
 
+    // حذف
     el.querySelector(".qDel").onclick = () => {
-      examData.questions = examData.questions.filter(x => x.id !== q.id);
+      examData.questions = (examData.questions || []).filter(x => x.id !== q.id);
       renderQuestions();
     };
 
+    // تغيير نوع
     typeSel.onchange = () => {
       q.type = typeSel.value;
       q.requiresManual = (q.type === "essay" || q.type === "short");
@@ -221,15 +241,23 @@ function renderQuestions() {
       renderOptions();
     };
 
+    // حقول
     el.querySelector(".qTitle").oninput = e => q.title = e.target.value;
     el.querySelector(".qPoints").oninput = e => q.points = Number(e.target.value || 0);
     manualSel.onchange = () => q.requiresManual = manualSel.value === "manual";
 
+    // تحديث الخيارات/الإجابة الصحيحة
     optsBox.addEventListener("input", e => {
       if (e.target.classList.contains("opt")) {
         const i = Number(e.target.dataset.i);
         q.options[i] = e.target.value;
       }
+      if (e.target.classList.contains("qCorrect")) {
+        q.correctAnswer = e.target.value;
+      }
+    });
+
+    optsBox.addEventListener("change", e => {
       if (e.target.classList.contains("qCorrect")) {
         q.correctAnswer = e.target.value;
       }
@@ -246,8 +274,11 @@ function renderQuestions() {
       }
     });
 
-    const idxIn = examData.questions.findIndex(x => x.id === q.id);
-    examData.questions[idxIn] = q;
+    // ✅ مهم: نرجّع تحديث السؤال داخل examData.questions (بدون ما نكسر أسئلة الأقسام الأخرى)
+    const all = (examData.questions || []).map(normalizeQuestion);
+    const idxAll = all.findIndex(x => x.id === q.id);
+    if (idxAll >= 0) all[idxAll] = q;
+    examData.questions = all;
 
     questionsWrap.appendChild(el);
   });
@@ -298,7 +329,12 @@ async function loadExam() {
   passScore.value = examData.passScore ?? 60;
   examStatus.value = examData.status || "draft";
 
-  currentExamHint.textContent = `ExamID: ${examId} | Status: ${examData.status}`;
+  // ✅ تهيئة القسم
+  if (!currentSection) currentSection = DEFAULT_SECTION;
+  if (examSection) examSection.value = currentSection;
+  localStorage.setItem(SECTION_KEY, currentSection);
+
+  currentExamHint.textContent = `ExamID: ${examId} | Status: ${examData.status} | Section: ${currentSection}`;
   enableEditing(true);
   renderQuestions();
 }
@@ -312,6 +348,7 @@ async function saveExam() {
   examData.passScore = Number(passScore.value || 60);
   examData.status = examStatus.value;
 
+  // ✅ مهم: تطبيع كل الأسئلة حتى يكون section موجود دائمًا
   examData.questions = (examData.questions || []).map(normalizeQuestion);
 
   if (examData.status === "active") {
@@ -328,7 +365,7 @@ async function saveExam() {
     updatedAt: serverTimestamp()
   });
 
-  examStatus.value = examData.status;
+  currentExamHint.textContent = `ExamID: ${examId} | Status: ${examData.status} | Section: ${currentSection}`;
   alert("✅ تم حفظ الامتحان بنجاح");
 }
 
@@ -363,20 +400,36 @@ async function cloneExam() {
 }
 
 /* ===============================
+  Events
+=============================== */
+if (examSection) {
+  examSection.onchange = () => {
+    currentSection = examSection.value || "";
+    localStorage.setItem(SECTION_KEY, currentSection);
+    currentExamHint.textContent = `ExamID: ${examId || "—"} | Status: ${examData?.status || "—"} | Section: ${currentSection || "—"}`;
+    renderQuestions();
+  };
+}
+
+btnNewExam.onclick = createNewExam;
+
+btnAddQ.onclick = () => {
+  if (!examData) return;
+  if (!currentSection) return alert("اختر القسم أولاً");
+  examData.questions.push(normalizeQuestion({ section: currentSection }));
+  renderQuestions();
+};
+
+btnSave.onclick = saveExam;
+btnDelete.onclick = deleteExam;
+btnClone.onclick = cloneExam;
+
+examStatus.onchange = () => {
+  if (examData) examData.status = examStatus.value;
+};
+
+/* ===============================
   Init
 =============================== */
 await checkAdminAccess();
 await loadExam();
-
-btnNewExam.onclick = createNewExam;
-btnAddQ.onclick = () => {
-  if (!examData) return;
-  examData.questions.push(normalizeQuestion({}));
-  renderQuestions();
-};
-btnSave.onclick = saveExam;
-btnDelete.onclick = deleteExam;
-btnClone.onclick = cloneExam;
-examStatus.onchange = () => {
-  if (examData) examData.status = examStatus.value;
-};

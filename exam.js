@@ -30,12 +30,16 @@ const questionsEl = document.getElementById("questions");
 
 const empNameEl = document.getElementById("empName");
 const empIdEl   = document.getElementById("empId");
-const sectionEl = document.getElementById("examSection");
+const btnEnter  = document.getElementById("btnEnter");
+const btnSave   = document.getElementById("btnSave");
 
-const btnEnter = document.getElementById("btnEnter");
-const btnSave  = document.getElementById("btnSave");
-
-btnEnter.disabled = true;
+/* ===============================
+   Helpers
+=============================== */
+function getSelectedSection() {
+  const el = document.getElementById("examSection");
+  return el ? el.value : "";
+}
 
 /* ===============================
    State
@@ -46,6 +50,9 @@ let answers = {};
 let selectedSection = "";
 let endAt = 0;
 let timerInterval = null;
+let violations = 0;
+
+btnEnter.disabled = true;
 
 /* ===============================
    Load Active Exam
@@ -62,11 +69,8 @@ async function loadActiveExam() {
     if (snap.empty) {
       exam = null;
       btnEnter.disabled = true;
-
       identityBox.innerHTML = `
-        <div class="no-exam-box">
-          ⚠️ لا يوجد امتحان حاليًا
-        </div>
+        <div class="no-exam-box">⚠️ لا يوجد امتحان حاليًا</div>
       `;
       return;
     }
@@ -79,17 +83,13 @@ async function loadActiveExam() {
 
     examTitleEl.textContent = exam.title || "";
     examDescEl.textContent  = exam.description || "";
-
     btnEnter.disabled = false;
 
   } catch (err) {
     console.error(err);
     btnEnter.disabled = true;
-
     identityBox.innerHTML = `
-      <div class="no-exam-box">
-        ❌ خطأ في تحميل الامتحان
-      </div>
+      <div class="no-exam-box">❌ خطأ في تحميل الامتحان</div>
     `;
   }
 }
@@ -102,7 +102,7 @@ btnEnter.onclick = async () => {
 
   const name  = empNameEl.value.trim();
   const empId = empIdEl.value.trim();
-  selectedSection = sectionEl.value;
+  selectedSection = getSelectedSection(); // ✅ تخزين بالقيمة العامة
 
   if (!name || !empId) {
     alert("يرجى إدخال الاسم والرقم الوظيفي");
@@ -142,7 +142,7 @@ btnEnter.onclick = async () => {
 };
 
 /* ===============================
-   Render Questions (by Section)
+   Render Questions (By Section)
 =============================== */
 function renderQuestions() {
   questionsEl.innerHTML = "";
@@ -154,9 +154,7 @@ function renderQuestions() {
 
   if (sectionQuestions.length === 0) {
     questionsEl.innerHTML = `
-      <div class="no-questions">
-        ⚠️ لا توجد أسئلة لهذا القسم
-      </div>
+      <div class="no-questions">⚠️ لا توجد أسئلة لهذا القسم</div>
     `;
     return;
   }
@@ -175,7 +173,6 @@ function renderQuestions() {
 
     const body = card.querySelector(".q-body");
 
-    /* MCQ */
     if (q.type === "mcq") {
       q.options.forEach(opt => {
         body.innerHTML += `
@@ -186,8 +183,6 @@ function renderQuestions() {
         `;
       });
     }
-
-    /* TRUE / FALSE */
     else if (q.type === "tf") {
       body.innerHTML += `
         <label class="option">
@@ -198,14 +193,9 @@ function renderQuestions() {
         </label>
       `;
     }
-
-    /* TEXT */
     else {
       body.innerHTML += `
-        <textarea
-          class="text-answer"
-          placeholder="اكتب إجابتك هنا..."
-        ></textarea>
+        <textarea class="text-answer" placeholder="اكتب إجابتك هنا..."></textarea>
       `;
     }
 
@@ -252,6 +242,7 @@ async function submitExam() {
 
   await updateDoc(attemptRef, {
     answers,
+    violations,
     status: "submitted",
     submittedAt: serverTimestamp()
   });
@@ -289,9 +280,8 @@ function showFinishPopupAndRedirect() {
 =============================== */
 document.addEventListener("visibilitychange", async () => {
   if (document.hidden && attemptRef) {
-    await updateDoc(attemptRef, {
-      violations: (exam.violations || 0) + 1
-    });
+    violations++;
+    await updateDoc(attemptRef, { violations });
   }
 });
 

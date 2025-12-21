@@ -47,9 +47,21 @@
       </div>
     </div>
 
+    <!-- ✅ اختيار القسم -->
     <div class="row">
+      <div class="field">
+        <label>القسم</label>
+        <select id="examSection" class="select">
+          <option value="">اختر القسم</option>
+          <option value="Inbound">Inbound</option>
+          <option value="Outbound">Outbound</option>
+          <option value="NOVIP">NOVIP</option>
+        </select>
+      </div>
+
       <button class="btn primary" id="btnNewExam">إنشاء امتحان جديد</button>
       <button class="btn" id="btnClone" disabled>نسخ الامتحان</button>
+
       <select id="examStatus" class="select" disabled>
         <option value="draft">Draft</option>
         <option value="active">Active</option>
@@ -74,9 +86,11 @@
     </div>
   </div>
 </div>
+
 <footer class="footer">
   <p>Developed by <strong>Jawad Kadhim. ALL RIGHTS RESERVED.</strong> © 2025</p>
 </footer>
+
 <script type="module" src="exam_builder.js"></script>
 </body>
 </html>

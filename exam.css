@@ -190,3 +190,17 @@ body {
   from { transform: scale(.85); opacity: 0 }
   to   { transform: scale(1); opacity: 1 }
 }
+.section-select {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid #d1d9e6;
+  font-size: 15px;
+  margin-bottom: 14px;
+  outline: none;
+}
+
+.section-select:focus {
+  border-color: #4da3ff;
+  box-shadow: 0 0 0 3px rgba(77,163,255,0.15);
+}
