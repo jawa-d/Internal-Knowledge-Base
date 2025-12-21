@@ -2,64 +2,51 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>الامتحان</title>
 
+  <!-- Font -->
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- CSS -->
   <link rel="stylesheet" href="global.css">
   <link rel="stylesheet" href="exam.css">
 </head>
 
 <body>
 
-<!-- ✅ Animated Background -->
-<div class="bg-animation"></div>
+<div class="exam-wrapper">
 
-<!-- ✅ Header -->
-<header class="exam-header">
-  <div class="header-left">
-    <h1 id="examTitle">—</h1>
-    <p id="examDesc">—</p>
+  <!-- Header -->
+  <div class="exam-header">
+    <h1 id="examTitle"></h1>
+    <p id="examDesc"></p>
+    <div class="timer">⏱ <span id="timer">00:00</span></div>
   </div>
 
-  <div class="header-right">
-    <div class="timer" id="timer">--:--</div>
-  </div>
-</header>
-
-<!-- ✅ Page -->
-<main class="exam-page">
-
-  <!-- ✅ Identity -->
-  <section class="card identity-card" id="identityBox">
-    <h3>🪪 بيانات الدخول للامتحان</h3>
+  <!-- Identity -->
+  <div id="identityBox" class="card">
+    <h3>بيانات الدخول للامتحان</h3>
 
     <input id="empName" placeholder="الاسم الكامل">
-    <input id="empId" placeholder="الرقم الوظيفي / ID">
+    <input id="empId" placeholder="الرقم الوظيفي">
 
-    <button class="btn primary" id="btnEnter">
-      بدء الامتحان
-    </button>
-  </section>
+    <button id="btnEnter" class="btn-main">بدء الامتحان</button>
+  </div>
 
-  <!-- ✅ Exam -->
-  <section class="card exam-card" id="examBox" style="display:none;">
+  <!-- Exam -->
+  <div id="examBox" style="display:none">
     <div id="questions"></div>
 
-    <div class="exam-actions">
-      <button class="btn primary" id="btnSave">
-        حفظ الإجابات
-      </button>
-    </div>
-  </section>
+    <button id="btnSave" class="btn-submit">إنهاء الامتحان</button>
+  </div>
 
-</main>
+</div>
 
-<!-- ✅ Finish Popup -->
-<div class="popup-overlay" id="finishPopup">
-  <div class="popup">
+<!-- Finish Popup -->
+<div id="finishPopup" class="popup">
+  <div class="popup-box">
     <h2>✅ تم إنهاء الامتحان</h2>
-    <p>شكرًا لك، سيتم تحويلك إلى لوحة التحكم...</p>
+    <p>سيتم تحويلك إلى الصفحة الرئيسية</p>
   </div>
 </div>
 

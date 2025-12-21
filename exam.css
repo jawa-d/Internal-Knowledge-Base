@@ -1,227 +1,158 @@
-/* ===============================
-   Base
-=============================== */
 body {
   margin: 0;
+  background: #eef3f9;
   font-family: "Cairo", sans-serif;
-  color: #1f2937;
-  overflow-x: hidden;
 }
 
-/* ===============================
-   Animated Background
-=============================== */
-.bg-animation {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background:
-    radial-gradient(circle at 20% 30%, rgba(77,163,255,0.25), transparent 40%),
-    radial-gradient(circle at 80% 70%, rgba(0,255,208,0.25), transparent 40%),
-    linear-gradient(135deg, #eef3f9, #f7fbff);
-  animation: moveBg 14s ease-in-out infinite alternate;
+.exam-wrapper {
+  max-width: 900px;
+  margin: auto;
+  padding: 30px;
 }
 
-@keyframes moveBg {
-  0%   { background-position: 0% 0%, 100% 100%; }
-  100% { background-position: 100% 100%, 0% 0%; }
-}
-
-/* ===============================
-   Header
-=============================== */
+/* Header */
 .exam-header {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: rgba(255,255,255,0.92);
-  backdrop-filter: blur(10px);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 18px 26px;
-  box-shadow: 0 6px 22px rgba(0,0,0,0.08);
+  background: white;
+  border-radius: 20px;
+  padding: 25px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  margin-bottom: 25px;
 }
 
-.header-left h1 {
+.exam-header h1 {
   margin: 0;
-  font-size: 22px;
+  color: #4da3ff;
 }
 
-.header-left p {
-  margin: 6px 0 0;
-  font-size: 14px;
-  color: #6b7280;
-}
-
-/* Timer */
 .timer {
-  background: #00ffd0;
-  color: #003b33;
-  padding: 10px 20px;
-  border-radius: 30px;
+  margin-top: 10px;
   font-weight: 700;
-  font-size: 15px;
-  min-width: 90px;
-  text-align: center;
 }
 
-/* ===============================
-   Page
-=============================== */
-.exam-page {
-  max-width: 880px;
-  margin: 40px auto;
-  padding: 0 20px 70px;
-}
-
-/* ===============================
-   Card
-=============================== */
+/* Cards */
 .card {
   background: white;
-  border-radius: 22px;
-  padding: 30px;
-  margin-bottom: 30px;
-  box-shadow: 0 18px 45px rgba(0,0,0,0.10);
-}
-
-/* Identity */
-.identity-card h3 {
-  margin: 0 0 20px;
-  color: #4da3ff;
-  font-size: 18px;
-}
-
-.identity-card input {
-  width: 100%;
-  padding: 14px 16px;
-  margin-bottom: 14px;
-  border-radius: 16px;
-  border: 1px solid #d1d9e6;
-  font-size: 15px;
-  outline: none;
-  transition: 0.2s;
-}
-
-.identity-card input:focus {
-  border-color: #4da3ff;
-  box-shadow: 0 0 0 3px rgba(77,163,255,0.15);
-}
-
-/* Questions */
-.q {
-  border: 1px solid #e3e8f2;
   border-radius: 18px;
-  padding: 22px;
-  margin-bottom: 18px;
-  background: linear-gradient(135deg, #ffffff, #f9fbff);
+  padding: 25px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+  margin-bottom: 25px;
 }
 
-.q h4 {
-  margin: 0 0 14px;
-  font-size: 16px;
+.card input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+  margin-bottom: 12px;
 }
 
-.q label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
-  font-size: 14px;
+/* Buttons */
+.btn-main {
+  background: #4da3ff;
+  color: white;
+  padding: 12px;
+  border-radius: 14px;
+  border: none;
+  width: 100%;
   cursor: pointer;
 }
 
-.q input[type="radio"] {
-  accent-color: #4da3ff;
-}
-
-.q textarea {
-  width: 100%;
-  min-height: 110px;
-  padding: 14px;
-  border-radius: 14px;
-  border: 1px solid #cfd8e3;
-  font-size: 14px;
-  outline: none;
-  resize: vertical;
-}
-
-/* Actions */
-.exam-actions {
-  display: flex;
-  justify-content: flex-end;
+.btn-submit {
+  background: #00ffd0;
+  color: #003b33;
+  padding: 14px 30px;
+  border-radius: 16px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
   margin-top: 20px;
 }
 
-/* Button */
-.btn {
-  padding: 14px 30px;
-  border-radius: 18px;
-  border: none;
-  font-size: 15px;
-  cursor: pointer;
-  transition: 0.25s;
-}
-
-.btn.primary {
-  background: linear-gradient(135deg, #4da3ff, #3b82f6);
-  color: white;
-  box-shadow: 0 10px 25px rgba(77,163,255,0.35);
-}
-
-.btn.primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 14px 35px rgba(77,163,255,0.45);
-}
-
 /* ===============================
-   Finish Popup
+   Question Cards
 =============================== */
-.popup-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.45);
-  backdrop-filter: blur(4px);
-  display: none;
-  justify-content: center;
+
+.question-card {
+  background: white;
+  border-radius: 18px;
+  padding: 22px;
+  margin-bottom: 20px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+.q-header {
+  display: flex;
   align-items: center;
-  z-index: 100;
+  gap: 14px;
+  margin-bottom: 15px;
 }
 
-.popup {
-  width: 420px;
-  background: #fff;
-  border-radius: 22px;
-  padding: 35px 30px;
-  text-align: center;
-  box-shadow: 0 14px 40px rgba(0,0,0,0.25);
-  animation: popupShow 0.35s ease;
+.q-number {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4da3ff, #6ec6ff);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
 }
 
-.popup h2 {
-  margin: 0 0 8px;
-  color: #4da3ff;
-  font-size: 20px;
-}
-
-.popup p {
-  margin: 0;
-  color: #667085;
-  font-size: 14px;
-}
-
-@keyframes popupShow {
-  from { transform: scale(0.85); opacity: 0; }
-  to   { transform: scale(1); opacity: 1; }
-}
-.no-exam-box {
-  background: #fff3cd;
-  color: #856404;
-  padding: 20px;
-  border-radius: 16px;
-  text-align: center;
+.q-title {
   font-size: 16px;
   font-weight: 600;
-  box-shadow: 0 10px 25px rgba(0,0,0,.08);
+}
+
+/* Options */
+.q-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #f7f9fc;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+}
+
+.option:hover {
+  background: #eef6ff;
+}
+
+.option input {
+  accent-color: #4da3ff;
+}
+
+/* Text */
+.text-answer {
+  width: 100%;
+  min-height: 90px;
+  border-radius: 14px;
+  border: 1px solid #d1d5db;
+  padding: 12px;
+  resize: vertical;
+}
+
+/* Popup */
+.popup {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.popup-box {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  text-align: center;
 }
