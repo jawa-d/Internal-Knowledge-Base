@@ -16,15 +16,26 @@ body {
   box-shadow: 0 12px 30px rgba(0,0,0,.08);
 }
 
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
 .tbl {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 20px;
 }
 
 .tbl th {
-  background: #4da3ff;
-  color: white;
+  background: linear-gradient(135deg, #4da3ff, #3b82f6);
+  color: #fff;
   padding: 12px;
 }
 
@@ -34,24 +45,32 @@ body {
   border-bottom: 1px solid #eee;
 }
 
+.btn {
+  padding: 10px 16px;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.btn.primary {
+  background: linear-gradient(135deg,#4da3ff,#00ffd0);
+}
+
+.btn.pdf {
+  background: #6b7280;
+  color: #fff;
+}
+
+.btn.danger {
+  background: #ff4b4b;
+  color: #fff;
+}
+
 .view-btn {
   background: #00ffd0;
   border: none;
   padding: 6px 14px;
   border-radius: 10px;
   cursor: pointer;
-  font-weight: 600;
-}
-.footer {
-  text-align: center;
-  padding: 18px 0;
-  font-size: 14px;
-  color: #777;
-  margin-top: 40px;
-  border-top: 1px solid #e5e7eb;
-}
-
-.footer strong {
-  color: #4b6fff;
-  font-weight: 700;
 }

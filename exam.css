@@ -215,3 +215,13 @@ body {
   from { transform: scale(0.85); opacity: 0; }
   to   { transform: scale(1); opacity: 1; }
 }
+.no-exam-box {
+  background: #fff3cd;
+  color: #856404;
+  padding: 20px;
+  border-radius: 16px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 600;
+  box-shadow: 0 10px 25px rgba(0,0,0,.08);
+}

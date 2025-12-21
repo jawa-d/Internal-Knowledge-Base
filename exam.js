@@ -58,24 +58,50 @@ async function loadActiveExam() {
 
     const snap = await getDocsFromServer(q);
 
+    // ❌ لا يوجد امتحان
     if (snap.empty) {
-      identityBox.innerHTML = "<p>❌ لا يوجد امتحان متاح حاليًا</p>";
+      exam = null;
+
+      examTitleEl.textContent = "";
+      examDescEl.textContent  = "";
+
+      btnEnter.disabled = true;
+
+      identityBox.innerHTML = `
+        <div class="no-exam-box">
+          ⚠️ لا يوجد امتحان حاليًا
+        </div>
+      `;
+
       return;
     }
 
+    // ✅ يوجد امتحان
     exam = snap.docs
       .map(d => ({ id: d.id, ...d.data() }))
-      .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))[0];
+      .sort((a, b) =>
+        (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)
+      )[0];
 
-    examTitleEl.textContent = exam.title || "—";
-    examDescEl.textContent  = exam.description || "—";
+    examTitleEl.textContent = exam.title || "";
+    examDescEl.textContent  = exam.description || "";
 
     btnEnter.disabled = false;
+
   } catch (err) {
     console.error(err);
-    identityBox.innerHTML = "<p>⚠️ خطأ في تحميل الامتحان</p>";
+
+    exam = null;
+    btnEnter.disabled = true;
+
+    identityBox.innerHTML = `
+      <div class="no-exam-box">
+        ❌ خطأ في تحميل الامتحان
+      </div>
+    `;
   }
 }
+
 
 /* ===============================
    Enter Exam
