@@ -61,7 +61,9 @@ async function loadResults() {
     .sort((a, b) => (b.submittedAt?.seconds || 0) - (a.submittedAt?.seconds || 0))
     .forEach(r => {
 
-      const pass = (r.totalScore || 0) >= (r.passScore || 60);
+ const PASS_MARK = 50;
+const pass = (Number(r.totalScore) || 0) >= PASS_MARK;
+
 
       const reviewLabel =
         r.status === "finalized" ? "مصحح" : "بانتظار التصحيح";
