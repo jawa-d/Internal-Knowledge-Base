@@ -1,3 +1,9 @@
+/* ===============================
+   exam.js ✅ FULL (Updated)
+   - Load active exam by employee section
+   - Attempt docId remains: examId__employeeId
+=============================== */
+
 import { db } from "./firebase.js";
 import {
   collection, query, where, getDocs, doc, getDoc, setDoc, updateDoc, serverTimestamp
@@ -52,16 +58,23 @@ function formatTime(sec){
   return `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
 }
 
-async function loadActiveExam(){
-  const qy = query(collection(db,"exams"), where("status","==","active"));
+/* ✅ Load active exam by section */
+async function loadActiveExamForSection(section){
+  const qy = query(
+    collection(db,"exams"),
+    where("status","==","active"),
+    where("section","==", String(section || "").trim())
+  );
+
   const snap = await getDocs(qy);
+
   if (snap.empty){
-    examTitleEl.textContent = "لا يوجد امتحان فعال";
-    examDescEl.textContent = "اطلب من الأدمن تفعيل الامتحان.";
+    examTitleEl.textContent = "لا يوجد امتحان فعال لهذا القسم";
+    examDescEl.textContent = "اطلب من الأدمن تفعيل امتحان لقسمك.";
     btnStart.disabled = true;
-    return;
+    return null;
   }
-  // اختار الأحدث (لو صار أكثر من واحد بالغلط)
+
   const best = snap.docs
     .map(d=>({id:d.id,...d.data()}))
     .sort((a,b)=>(b.updatedAt?.seconds||b.createdAt?.seconds||0)-(a.updatedAt?.seconds||a.createdAt?.seconds||0))[0];
@@ -71,6 +84,8 @@ async function loadActiveExam(){
 
   examTitleEl.textContent = exam.title || "Exam";
   examDescEl.textContent = exam.description || "";
+
+  return best;
 }
 
 function normalizeQuestion(q){
@@ -82,7 +97,7 @@ function normalizeQuestion(q){
     type,
     title: q.title || "",
     points: num(q.points,1),
-    correctionMode, // auto/manual
+    correctionMode,
     options: Array.isArray(q.options)? q.options : [],
     correctAnswer: q.correctAnswer ?? ""
   };
@@ -92,6 +107,8 @@ function renderQuestionsForSection(section){
   questionsBox.innerHTML = "";
   answers = {};
 
+  // ✅ Here we still filter exam.questions by question.section
+  // But exam itself already targets a section
   const all = Array.isArray(exam.questions) ? exam.questions.map(normalizeQuestion) : [];
   questions = all.filter(q=> String(q.section).trim() === String(section).trim());
 
@@ -150,7 +167,6 @@ function renderQuestionsForSection(section){
         inp.addEventListener("change", ()=> onAnswer(q.id, inp.value));
       });
     } else {
-      // short/essay
       opts.innerHTML = `<textarea placeholder="اكتب إجابتك هنا..."></textarea>`;
       const ta = opts.querySelector("textarea");
       ta.addEventListener("input", ()=> onAnswer(q.id, ta.value));
@@ -184,7 +200,6 @@ function onAnswer(qid, value){
 }
 
 async function checkAlreadyAttempted(employeeId){
-  // enforce one attempt per exam per employee: docId = `${examId}__${employeeId}`
   attemptId = `${activeExamId}__${employeeId}`;
   attemptRef = doc(db,"exam_attempts",attemptId);
   const snap = await getDoc(attemptRef);
@@ -228,7 +243,6 @@ function calcAutoRaw(){
     } else if (q.type === "mcq"){
       correct = sameText(ans, q.correctAnswer);
     } else {
-      // لو صار short/essay auto بالغلط
       if (q.correctAnswer) correct = sameText(ans, q.correctAnswer);
     }
 
@@ -242,8 +256,6 @@ function calcAutoRaw(){
 // Start Exam
 // ===============================
 btnStart.onclick = async ()=>{
-  if (!exam) return;
-
   const name = empName.value.trim();
   const id = empId.value.trim();
   const section = empSection.value;
@@ -253,30 +265,41 @@ btnStart.onclick = async ()=>{
     return;
   }
 
-  startHint.textContent = "…جاري التحقق";
+  btnStart.disabled = true;
+  startHint.textContent = "…جاري تحميل امتحان القسم";
 
-  const prev = await checkAlreadyAttempted(id);
-  if (prev && (prev.status === "submitted" || prev.status === "finalized")){
-    startHint.textContent = "❌ لقد أديت هذا الامتحان مسبقًا";
-    btnStart.disabled = true;
+  const loaded = await loadActiveExamForSection(section);
+  if (!loaded){
+    btnStart.disabled = false;
+    startHint.textContent = "❌ لا يوجد امتحان فعال لقسمك";
     return;
   }
 
-  // create / overwrite started attempt
+  startHint.textContent = "…جاري التحقق";
+  const prev = await checkAlreadyAttempted(id);
+
+  if (prev && (prev.status === "submitted" || prev.status === "finalized")){
+    startHint.textContent = "❌ لقد أديت هذا الامتحان مسبقًا";
+    return;
+  }
+
   await setDoc(attemptRef, {
     examId: activeExamId,
+    examTitle: exam.title || "",
+
     employeeName: name,
     employeeId: id,
     email: empEmail.value.trim() || "",
     section,
+
     status: "started",
     answers: prev?.answers || {},
+
     createdAt: prev?.createdAt || serverTimestamp(),
     startedAt: serverTimestamp(),
     updatedAt: serverTimestamp()
   }, { merge: true });
 
-  // load saved answers if any
   const after = await getDoc(attemptRef);
   answers = after.exists() ? (after.data().answers || {}) : {};
 
@@ -286,7 +309,7 @@ btnStart.onclick = async ()=>{
 
   startTimer(exam.durationMin ?? 20);
 
-  // restore UI answers
+  // restore answers
   questions.forEach(q=>{
     const val = answers[q.id];
     if (val == null) return;
@@ -303,6 +326,8 @@ btnStart.onclick = async ()=>{
       if (ta) ta.value = String(val);
     }
   });
+
+  btnStart.disabled = false;
 };
 
 // ===============================
@@ -340,5 +365,6 @@ btnSubmit.onclick = async ()=>{
 };
 
 // init
-loadActiveExam();
 timerEl.textContent = "--:--";
+examTitleEl.textContent = "امتحان";
+examDescEl.textContent = "اختر القسم ثم ابدأ الامتحان";

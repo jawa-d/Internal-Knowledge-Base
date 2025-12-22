@@ -1,3 +1,9 @@
+/* ===============================
+   exam_result.js ✅ FULL (Updated)
+   - Search by: Name + ID + Section
+   - Popup if not found (uses your existing noResultPopup)
+=============================== */
+
 import { db } from "./firebase.js";
 import {
   collection, getDocs, doc, getDoc
@@ -8,6 +14,10 @@ import {
 ================================ */
 const empNameEl = document.getElementById("empName");
 const empIdEl = document.getElementById("empId");
+
+/* NEW ✅: Section selector */
+const empSectionEl = document.getElementById("empSection");
+
 const btnSearch = document.getElementById("btnSearch");
 const hint = document.getElementById("hint");
 
@@ -43,9 +53,10 @@ function parseTF(v) {
 btnSearch.onclick = async () => {
   const name = empNameEl.value.trim();
   const id = empIdEl.value.trim();
+  const section = (empSectionEl?.value || "").trim();
 
-  if (!name || !id) {
-    hint.textContent = "⚠️ أدخل الاسم والرقم الوظيفي";
+  if (!name || !id || !section) {
+    hint.textContent = "⚠️ أدخل الاسم والرقم الوظيفي + اختر القسم";
     resultBox.style.display = "none";
     return;
   }
@@ -54,11 +65,13 @@ btnSearch.onclick = async () => {
   resultBox.style.display = "none";
 
   const snap = await getDocs(collection(db, "exam_attempts"));
+
   const attempt = snap.docs
     .map(d => ({ id: d.id, ...d.data() }))
     .find(r =>
       sameText(r.employeeName, name) &&
-      sameText(r.employeeId, id)
+      sameText(r.employeeId, id) &&
+      sameText(r.section, section) // ✅ NEW
     );
 
   /* ❌ No Result */
@@ -71,6 +84,7 @@ btnSearch.onclick = async () => {
   /* Load Exam */
   const examSnap = await getDoc(doc(db, "exams", attempt.examId));
   if (!examSnap.exists()) {
+    hint.textContent = "";
     noResultPopup.style.display = "flex";
     return;
   }
@@ -83,17 +97,21 @@ btnSearch.onclick = async () => {
     <p><b>الاسم:</b> ${attempt.employeeName || "—"}</p>
     <p><b>الرقم الوظيفي:</b> ${attempt.employeeId || "—"}</p>
     <p><b>القسم:</b> ${attempt.section || "—"}</p>
-    <p><b>اسم الامتحان:</b> ${exam.title || "—"}</p>
+    <p><b>اسم الامتحان:</b> ${(attempt.examTitle || exam.title) || "—"}</p>
+    <p><b>حالة المحاولة:</b> ${attempt.status || "—"}</p>
   `;
 
   totalScoreEl.textContent = attempt.totalScore ?? 0;
 
   /* ===============================
-     Questions
+     Questions (filtered by section like your admin_attempt)
   ================================ */
   questionsBox.innerHTML = "";
 
-  (exam.questions || []).forEach((q, i) => {
+  const allQs = Array.isArray(exam.questions) ? exam.questions : [];
+  const qs = section ? allQs.filter(q => sameText(q.section, section)) : allQs;
+
+  qs.forEach((q, i) => {
     const ans = attempt.answers?.[q.id] ?? "—";
     let status = "—";
 
@@ -101,20 +119,14 @@ btnSearch.onclick = async () => {
       if (q.type === "tf") {
         const a = parseTF(ans);
         const c = parseTF(q.correctAnswer);
-        status =
-          (a !== null && c !== null && a === c)
-            ? "✔️ صح"
-            : "❌ خطأ";
+        status = (a !== null && c !== null && a === c) ? "✔️ صح" : "❌ خطأ";
       } else {
-        status = sameText(ans, q.correctAnswer)
-          ? "✔️ صح"
-          : "❌ خطأ";
+        status = sameText(ans, q.correctAnswer) ? "✔️ صح" : "❌ خطأ";
       }
     } else {
       status = "🟡 يدوي";
     }
 
-    /* Status Class */
     const cls =
       status.includes("✔") ? "ok" :
       status.includes("❌") ? "wrong" :
@@ -125,9 +137,7 @@ btnSearch.onclick = async () => {
     box.innerHTML = `
       <p><b>${i + 1}. ${q.title || "—"}</b></p>
       <p>جوابك: ${ans}</p>
-      <p>النتيجة:
-        <span class="${cls}">${status}</span>
-      </p>
+      <p>النتيجة: <span class="${cls}">${status}</span></p>
     `;
     questionsBox.appendChild(box);
   });
