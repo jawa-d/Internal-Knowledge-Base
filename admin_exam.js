@@ -126,31 +126,18 @@ document.addEventListener("DOMContentLoaded", async () => {
      Export Excel ✅ WORKING
   =============================== */
   btnExcel.onclick = () => {
-    if (!cache.length) {
-      alert("❌ لا توجد بيانات للتصدير");
-      return;
-    }
+  if (!cache.length) {
+    alert("❌ لا توجد بيانات للتصدير");
+    return;
+  }
 
-    if (!window.XLSX) {
-      alert("❌ مكتبة Excel لم يتم تحميلها");
-      return;
-    }
+  const ws = window.XLSX.utils.json_to_sheet(cache);
+  const wb = window.XLSX.utils.book_new();
 
-    const ws = window.XLSX.utils.json_to_sheet(cache);
+  window.XLSX.utils.book_append_sheet(wb, ws, "Exam Results");
+  window.XLSX.writeFile(wb, "Exam_Results.xlsx");
+};
 
-    ws["!cols"] = [
-      { wch: 20 }, // الاسم
-      { wch: 14 }, // الرقم
-      { wch: 14 }, // القسم
-      { wch: 10 }, // الدرجة
-      { wch: 18 }, // حالة التصحيح
-      { wch: 25 }  // ملاحظة
-    ];
-
-    const wb = window.XLSX.utils.book_new();
-    window.XLSX.utils.book_append_sheet(wb, ws, "Exam Results");
-    window.XLSX.writeFile(wb, "Exam_Results.xlsx");
-  };
 
   /* ===============================
      Export PDF
