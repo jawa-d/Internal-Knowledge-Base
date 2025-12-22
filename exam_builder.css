@@ -1,83 +1,96 @@
-:root{
-  --p:#4da3ff;
-  --a:#00ffd0;
-  --bg:#eef3f9;
-  --card:#ffffff;
-  --txt:#0f172a;
-  --muted:#64748b;
-  --border:#dbe3ef;
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:"Cairo",sans-serif;
+  background:#eef4fb;
+  color:#0f172a;
 }
-
-body{ background:var(--bg); font-family:"Cairo",sans-serif; color:var(--txt); }
-.page{ margin-left:260px; margin-top:95px; padding:26px 40px 80px; display:flex; flex-direction:column; gap:20px; }
-.card{ background:var(--card); border:1px solid var(--border); border-radius:18px; padding:18px; box-shadow:0 10px 25px rgba(0,0,0,.05); }
-.row{ display:flex; gap:14px; margin-top:12px; align-items:end; flex-wrap:wrap; }
-.row.between{ justify-content:space-between; align-items:center; margin-top:0; }
-.field{ flex:1; min-width:240px; }
-label{ display:block; font-size:13px; color:var(--muted); margin-bottom:6px; }
-
-input{
-  width:100%;
-  padding:12px 14px;
-  border:1px solid var(--border);
-  border-radius:14px;
-  outline:none;
-}
-
-/* ✅ ستايل عام للـ select */
-.select{
-  padding:12px 44px 12px 14px;
-  border:1px solid var(--border);
-  border-radius:14px;
+.top{
   background:#fff;
-  min-width:160px;
-  outline:none;
+  border-bottom:4px solid #0038a8;
+  padding:16px 18px;
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
+.top .t h1{margin:0;font-size:18px;color:#0038a8;font-weight:900}
+.top .t p{margin:4px 0 0;color:#64748b;font-size:13px}
+.btn{
+  border:none;
+  padding:10px 14px;
+  border-radius:12px;
   cursor:pointer;
+  background:#e2e8f0;
+  color:#0f172a;
+  font-weight:900;
+}
+.btn.primary{background:#0038a8;color:#fff}
+.btn.success{background:#00c2a8;color:#0038a8}
+.btn.danger{background:#ef4444;color:#fff}
+.btn.back{background:#111827;color:#fff;border-radius:999px}
 
-  -webkit-appearance:none;
-  -moz-appearance:none;
-  appearance:none;
-
-  background-image:
-    linear-gradient(45deg, transparent 50%, var(--p) 50%),
-    linear-gradient(135deg, var(--p) 50%, transparent 50%),
-    linear-gradient(to right, #e8f2ff, #e8f2ff);
-  background-position:
-    calc(16px) calc(50% - 3px),
-    calc(22px) calc(50% - 3px),
-    10px 50%;
-  background-size:
-    6px 6px,
-    6px 6px,
-    28px 28px;
-  background-repeat:no-repeat;
+.wrap{max-width:1200px;margin:18px auto;padding:0 16px}
+.card{
+  background:#fff;
+  border-radius:18px;
+  box-shadow:0 10px 30px rgba(2,6,23,.08);
+  padding:18px;
+  margin-bottom:16px;
+  border:1px solid #e2e8f0;
+}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:980px){.grid{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:6px}
+label{font-size:13px;color:#475569;font-weight:900}
+input,select{
+  height:42px;
+  border-radius:12px;
+  border:1px solid #cbd5e1;
+  padding:0 12px;
+  outline:none;
+  background:#fff;
+  font-family:"Cairo",sans-serif;
+}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.hint{
+  margin-top:12px;
+  padding:10px 12px;
+  border:1px dashed #cbd5e1;
+  border-radius:12px;
+  color:#64748b;
+  background:#f8fafc;
 }
 
-.select:focus{
-  border-color: rgba(77,163,255,.65);
-  box-shadow: 0 0 0 4px rgba(77,163,255,.12);
+/* Question Card */
+.qcard{
+  background:#fff;
+  border:1px solid #e2e8f0;
+  border-radius:18px;
+  padding:14px;
+  box-shadow:0 8px 24px rgba(2,6,23,.06);
+  margin-bottom:12px;
 }
-
-/* ✅ ستايل خاص لـ examSection (زيادة نعومة) */
-#examSection.select{
-  min-width:260px;
-  font-weight:600;
+.qtop{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
+.badges{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.badge{
+  padding:6px 10px;
+  border-radius:999px;
+  background:#eaf2ff;
+  color:#1d4ed8;
+  font-weight:900;
+  font-size:12px;
 }
+.small{font-size:12px;color:#64748b}
+.hr{height:1px;background:#e2e8f0;margin:12px 0}
 
-.btn{ padding:10px 16px; border-radius:14px; border:1px solid var(--border); cursor:pointer; background:#fff; }
-.btn.primary{ background:linear-gradient(135deg,var(--p),var(--a)); border:none; color:#00131a; font-weight:700; }
-.btn.danger{ background:#ff4b4b; color:#fff; border:none; }
-.btn:disabled,.select:disabled{ opacity:.55; cursor:not-allowed; }
-.hint{ margin-top:12px; font-size:13px; color:var(--muted); }
+.qgrid{
+  display:grid;
+  grid-template-columns:1fr 220px 220px 160px;
+  gap:10px;
+  margin-top:10px;
+}
+@media(max-width:980px){.qgrid{grid-template-columns:1fr}}
+.qgrid input,.qgrid select{width:100%;min-width:0}
 
-.qwrap{ display:flex; flex-direction:column; gap:12px; margin-top:12px; }
-.qcard{ border:1px solid var(--border); border-radius:16px; padding:14px; background:#f8fbff; }
-.qtop{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; }
-.qmeta{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-.small{ font-size:12px; color:var(--muted); }
-.qopts{ margin-top:10px; display:flex; flex-direction:column; gap:8px; }
-.optRow{ display:flex; gap:8px; }
-.optRow input{ flex:1; }
-.badge{ padding:4px 10px; border-radius:999px; background:rgba(77,163,255,.12); border:1px solid rgba(77,163,255,.25); font-size:12px; }
-.footer { text-align:center; padding:18px 0; font-size:14px; color:#777; margin-top:40px; border-top:1px solid #e5e7eb; }
-.footer strong { color:#4b6fff; font-weight:700; }
+.optRow{display:flex;gap:8px;margin-top:8px}
+.optRow input{flex:1}

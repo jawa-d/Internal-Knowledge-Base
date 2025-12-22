@@ -1,146 +1,205 @@
 import { db } from "./firebase.js";
 import {
-  collection,
-  getDocs,
-  deleteDoc,
-  doc,
-  getDoc
+  collection, getDocs, deleteDoc, doc, updateDoc, getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
 
-/* ===============================
-   Admin Guard
-=============================== */
-const email = localStorage.getItem("kb_user_email");
-const userSnap = await getDoc(doc(db, "users", email));
+document.addEventListener("DOMContentLoaded", async () => {
 
-if (!userSnap.exists() || userSnap.data().role !== "admin") {
-  alert("غير مخول");
-  location.href = "dashboard.html";
-}
+  /* ===============================
+     Admin Guard
+  =============================== */
+  const currentEmail = localStorage.getItem("kb_user_email") || "";
+  if (!currentEmail) return location.href = "login.html";
 
-/* ===============================
-   UI
-=============================== */
-const tbody = document.getElementById("tbody");
-const btnExcel = document.getElementById("btnExcel");
-const btnPDF   = document.getElementById("btnPDF");
-const btnClear = document.getElementById("btnClear");
+  const userSnap = await getDoc(doc(db, "users", currentEmail));
+  const isAdmin =
+    userSnap.exists() &&
+    String(userSnap.data().role || "").toLowerCase() === "admin";
 
-let cache = [];
-const PASS_SCORE = 50; // ✅ 50 وفوك ناجح
+  if (!isAdmin) {
+    alert("غير مخول");
+    return location.href = "dashboard.html";
+  }
 
-/* ===============================
-   Load Attempts
-=============================== */
-async function loadAttempts() {
+  /* ===============================
+     Elements
+  =============================== */
+  const tbody = document.getElementById("tbody");
+  const btnExcel = document.getElementById("btnExcel");
+  const btnPDF = document.getElementById("btnPDF");
+  const btnClear = document.getElementById("btnClear");
+  const searchInput = document.getElementById("searchInput");
+  const hint = document.getElementById("hint");
+
+  if (!btnClear) {
+    console.error("❌ btnClear not found in DOM");
+    return;
+  }
+
+  let cache = [];
+
+  /* ===============================
+     Load Results
+  =============================== */
+async function loadResults() {
   const snap = await getDocs(collection(db, "exam_attempts"));
   tbody.innerHTML = "";
   cache = [];
 
-  if (snap.empty) {
-    tbody.innerHTML = `<tr><td colspan="9">لا توجد محاولات</td></tr>`;
+  const rows = snap.docs
+    .map(d => ({ id: d.id, ...d.data() }))
+    .filter(r => ["submitted", "finalized"].includes(r.status));
+
+  hint.textContent = `عدد المحاولات: ${rows.length}`;
+
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="8">لا توجد محاولات</td></tr>`;
     return;
   }
 
-  snap.forEach(d => {
-    const a = d.data();
-    const total = Number(a.totalScore || 0);
-    const passed = total >= PASS_SCORE;
+  rows
+    .sort((a, b) => (b.submittedAt?.seconds || 0) - (a.submittedAt?.seconds || 0))
+    .forEach(r => {
 
-    cache.push({
-      الاسم: a.employeeName,
-      الرقم_الوظيفي: a.employeeId,
-      الايميل: a.email,
-      الدرجة: total,
-      النتيجة: passed ? "ناجح" : "راسب",
-      الحالة: a.status
+      const pass = (r.totalScore || 0) >= (r.passScore || 60);
+
+      const reviewLabel =
+        r.status === "finalized" ? "مصحح" : "بانتظار التصحيح";
+
+      const reviewClass =
+        r.status === "finalized" ? "status-reviewed" : "status-pending";
+
+      cache.push({
+        الاسم: r.employeeName || "—",
+        الرقم_الوظيفي: r.employeeId || "—",
+        القسم: r.section || "—",
+        الدرجة: r.totalScore || 0,
+        الحالة: pass ? "ناجح" : "راسب",
+      });
+
+      tbody.innerHTML += `
+        <tr>
+          <td>${r.employeeName || "—"}</td>
+          <td>${r.employeeId || "—"}</td>
+          <td>${r.section || "—"}</td>
+          <td>${r.totalScore || 0} / 100</td>
+
+          <td class="${pass ? "status-success" : "status-fail"}">
+            ${pass ? "ناجح" : "راسب"}
+          </td>
+
+          <td class="${reviewClass}">
+            ${reviewLabel}
+          </td>
+
+          <td>
+            <input class="note-input"
+              value="${r.adminNote || ""}"
+              placeholder="ملاحظة..."
+              onchange="saveNote('${r.id}', this.value)">
+          </td>
+
+          <td>
+            <button class="view-btn"
+              onclick="openAttempt('${r.id}')">
+              عرض التفاصيل
+            </button>
+          </td>
+        </tr>
+      `;
     });
-
-    tbody.innerHTML += `
-      <tr>
-        <td>${a.employeeName}</td>
-        <td>${a.employeeId}</td>
-        <td>${a.email}</td>
-        <td>${a.status}</td>
-        <td>${a.violations || 0}</td>
-        <td>${total} / 100</td>
-        <td>
-          ${passed
-            ? '<span style="color:green;font-weight:700">🟢 ناجح</span>'
-            : '<span style="color:red;font-weight:700">🔴 راسب</span>'
-          }
-        </td>
-        <td>
-          <button class="view-btn"
-            onclick="openAttempt('${d.id}')">
-            عرض التفاصيل
-          </button>
-        </td>
-      </tr>
-    `;
-  });
 }
 
-/* ===============================
-   Navigation
-=============================== */
-window.openAttempt = function (id) {
-  localStorage.setItem("admin_selected_attempt", id);
-  location.href = "admin_attempt.html";
-};
 
-/* ===============================
-   Export Excel
-=============================== */
-btnExcel.onclick = () => {
-  const ws = XLSX.utils.json_to_sheet(cache);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Results");
-  XLSX.writeFile(wb, "Earthlink_Exam_Results.xlsx");
-};
+  /* ===============================
+     Search
+  =============================== */
+  searchInput.oninput = () => {
+    const q = (searchInput.value || "").toLowerCase();
+    document.querySelectorAll("#tbody tr").forEach(tr => {
+      tr.style.display = tr.innerText.toLowerCase().includes(q) ? "" : "none";
+    });
+  };
 
-/* ===============================
-   Export PDF
-=============================== */
-btnPDF.onclick = () => {
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF("p", "mm", "a4");
+  /* ===============================
+     Save Note
+  =============================== */
+  window.saveNote = async (id, val) => {
+    await updateDoc(doc(db, "exam_attempts", id), { adminNote: val });
+  };
 
-  pdf.setFontSize(16);
-  pdf.text("EARTHLINK TELECOMMUNICATIONS", 105, 15, { align: "center" });
-  pdf.setFontSize(12);
-  pdf.text("Exam Results Report", 105, 23, { align: "center" });
+  /* ===============================
+     Export Excel
+  =============================== */
+  btnExcel.onclick = () => {
+    const ws = XLSX.utils.json_to_sheet(cache);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Results");
+    XLSX.writeFile(wb, "Exam_Results.xlsx");
+  };
 
-  pdf.autoTable({
-    startY: 30,
-    head: [["الاسم", "الرقم الوظيفي", "الدرجة", "النتيجة"]],
-    body: cache.map(r => [
-      r.الاسم,
-      r.الرقم_الوظيفي,
-      r.الدرجة,
-      r.النتيجة
-    ])
-  });
+  /* ===============================
+     Export PDF
+  =============================== */
+  btnPDF.onclick = () => {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF("p", "mm", "a4");
 
-  pdf.save("Earthlink_Exam_Report.pdf");
-};
+    pdf.text("تقارير النتائج", 105, 15, { align: "center" });
 
-/* ===============================
-   Delete All
-=============================== */
-btnClear.onclick = async () => {
-  if (!confirm("⚠️ حذف جميع المحاولات؟")) return;
+    pdf.autoTable({
+      startY: 25,
+      head: [["الاسم", "الرقم", "القسم", "الدرجة", "الحالة", "ملاحظة"]],
+      body: cache.map(r => [
+        r.الاسم,
+        r.الرقم_الوظيفي,
+        r.القسم,
+        String(r.الدرجة),
+        r.الحالة,
+        r.ملاحظة
+      ])
+    });
 
-  const snap = await getDocs(collection(db, "exam_attempts"));
-  for (const d of snap.docs) {
-    await deleteDoc(doc(db, "exam_attempts", d.id));
-  }
+    pdf.save("Exam_Results.pdf");
+  };
 
-  alert("تم الحذف");
-  loadAttempts();
-};
+  /* ===============================
+     Clear Finalized Results ✅ FIXED
+  =============================== */
+  btnClear.onclick = async () => {
+    const ok = confirm("⚠️ هل تريد حذف جميع النتائج المكتملة (finalized)؟");
+    if (!ok) return;
 
-/* ===============================
-   Start
-=============================== */
-loadAttempts();
+    btnClear.disabled = true;
+    btnClear.innerText = "⏳ جاري الحذف...";
+
+    const snap = await getDocs(collection(db, "exam_attempts"));
+    let count = 0;
+
+    for (const d of snap.docs) {
+      if (d.data().status === "finalized") {
+        await deleteDoc(doc(db, "exam_attempts", d.id));
+        count++;
+      }
+    }
+
+    alert(`✅ تم حذف ${count} نتيجة مكتملة`);
+    btnClear.disabled = false;
+    btnClear.innerText = "🗑️ حذف النتائج المكتملة";
+
+    loadResults();
+  };
+
+  /* ===============================
+     Navigation
+  =============================== */
+  window.openAttempt = (id) => {
+    localStorage.setItem("admin_selected_attempt", id);
+    location.href = "admin_attempt.html";
+  };
+
+  /* ===============================
+     Start
+  =============================== */
+  loadResults();
+});

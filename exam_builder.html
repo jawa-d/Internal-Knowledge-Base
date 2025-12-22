@@ -2,94 +2,74 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Exam Builder</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="global.css">
-  <link rel="stylesheet" href="sidebar.css">
+
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="exam_builder.css">
 </head>
 <body>
 
-<div id="sidebar"></div>
-<script src="sidebar.js"></script>
-
-<div class="top-nav">
-  <div class="nav-left">
+<div class="top">
+  <button class="btn back" onclick="location.href='dashboard.html'">← رجوع</button>
+  <div class="t">
     <h1>Exam Builder</h1>
-    <p class="nav-sub">إنشاء وإدارة الامتحانات</p>
-  </div>
-  <div class="nav-center">
-    <h2 class="kb-title">Customer Care Knowledge Base</h2>
+    <p>امتحان واحد Active فقط</p>
   </div>
 </div>
 
-<div class="page">
+<div class="wrap">
+
   <div class="card">
-    <div class="row">
+    <div class="grid">
       <div class="field">
         <label>عنوان الامتحان</label>
-        <input id="examTitle" placeholder="مثال: امتحان الدعم الفني - ديسمبر">
+        <input id="examTitle" placeholder="مثال: Knowledge Assessment CC December">
+      </div>
+      <div class="field">
+        <label>وصف</label>
+        <input id="examDesc" placeholder="وصف قصير...">
       </div>
       <div class="field">
         <label>المدة (دقائق)</label>
         <input id="durationMin" type="number" min="1" value="20">
       </div>
-    </div>
-
-    <div class="row">
       <div class="field">
-        <label>وصف</label>
-        <input id="examDesc" placeholder="وصف مختصر...">
+        <label>درجة النجاح</label>
+        <input id="passScore" type="number" min="0" value="60">
       </div>
       <div class="field">
-        <label>درجة النجاح (%)</label>
-        <input id="passScore" type="number" min="0" max="100" value="60">
-      </div>
-    </div>
-
-    <!-- ✅ اختيار القسم -->
-    <div class="row">
-      <div class="field">
-        <label>القسم</label>
-        <select id="examSection" class="select">
-          <option value="">اختر القسم</option>
-          <option value="Inbound">Inbound</option>
-          <option value="Outbound">Outbound</option>
-          <option value="NOVIP">NOVIP</option>
+        <label>الحالة</label>
+        <select id="examStatus">
+          <option value="draft">draft</option>
+          <option value="active">active</option>
+          <option value="closed">closed</option>
         </select>
       </div>
-
-      <button class="btn primary" id="btnNewExam">إنشاء امتحان جديد</button>
-      <button class="btn" id="btnClone" disabled>نسخ الامتحان</button>
-
-      <select id="examStatus" class="select" disabled>
-        <option value="draft">Draft</option>
-        <option value="active">Active</option>
-        <option value="closed">Closed</option>
-      </select>
+      <div class="field">
+        <label>القسم الحالي (للإضافة)</label>
+        <select id="currentSection">
+          <option>Inbound</option>
+          <option>Outbound</option>
+          <option>NOVIP</option>
+        </select>
+      </div>
     </div>
-
-    <div class="hint" id="currentExamHint">—</div>
-  </div>
-
-  <div class="card">
-    <div class="row between">
-      <h3>الأسئلة</h3>
-      <button class="btn primary" id="btnAddQ" disabled>+ إضافة سؤال</button>
-    </div>
-
-    <div id="questionsWrap" class="qwrap"></div>
 
     <div class="row">
-      <button class="btn primary" id="btnSave" disabled>حفظ</button>
-      <button class="btn danger" id="btnDelete" disabled>حذف الامتحان</button>
+      <button class="btn primary" id="btnNewExam">إنشاء Exam</button>
+      <button class="btn" id="btnLoadActive">تحميل Active</button>
+      <button class="btn success" id="btnSave">حفظ</button>
+      <button class="btn danger" id="btnDelete">حذف</button>
+      <button class="btn" id="btnAddQ">+ إضافة سؤال</button>
     </div>
-  </div>
-</div>
 
-<footer class="footer">
-  <p>Developed by <strong>Jawad Kadhim. ALL RIGHTS RESERVED.</strong> © 2025</p>
-</footer>
+    <div class="hint" id="hint">—</div>
+  </div>
+
+  <div id="questionsWrap"></div>
+
+</div>
 
 <script type="module" src="exam_builder.js"></script>
 </body>

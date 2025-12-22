@@ -1,70 +1,83 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>الامتحان</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>امتحان الموظف</title>
 
-  <!-- Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-
-  <!-- CSS -->
-  <link rel="stylesheet" href="global.css">
-  <link rel="stylesheet" href="exam.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="exam.css" />
 </head>
-
 <body>
 
-<div class="exam-wrapper">
+<div class="top-bar">
+  <div class="title">
+    <h1 id="examTitle">امتحان</h1>
+    <p id="examDesc">تحميل الامتحان...</p>
+  </div>
+  <div class="meta">
+    <div class="pill">⏱️ الوقت: <b id="timer">--:--</b></div>
+    <div class="pill">⭐ النقاط: <b id="pointsBox">0</b></div>
+  </div>
+</div>
 
-  <!-- Header -->
-  <div class="exam-header">
-    <h1 id="examTitle"></h1>
-    <p id="examDesc"></p>
-    <div class="timer">⏱ <span id="timer">00:00</span></div>
+<div class="container">
+
+  <!-- Employee Info -->
+  <div class="card">
+    <h3 class="card-title">معلومات الموظف</h3>
+
+    <div class="grid">
+      <div class="field">
+        <label>الاسم</label>
+        <input id="empName" placeholder="اكتب اسمك..." />
+      </div>
+      <div class="field">
+        <label>الرقم الوظيفي</label>
+        <input id="empId" placeholder="ID Number..." />
+      </div>
+      <div class="field">
+        <label>القسم</label>
+        <select id="empSection">
+          <option value="Inbound">Inbound</option>
+          <option value="Outbound">Outbound</option>
+          <option value="NOVIP">NOVIP</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>الإيميل (اختياري)</label>
+        <input id="empEmail" placeholder="name@earthlink.iq" />
+      </div>
+    </div>
+
+    <div class="row">
+      <button class="btn primary" id="btnStart">بدء الامتحان</button>
+      <span class="hint" id="startHint"></span>
+    </div>
   </div>
 
-  <!-- Identity -->
-  <div id="identityBox" class="card">
-    <h3>بيانات الدخول للامتحان</h3>
+  <!-- Questions -->
+  <div class="card" id="examCard" style="display:none;">
+    <h3 class="card-title">الأسئلة</h3>
+    <div id="questionsBox"></div>
 
-    <input id="empName" placeholder="الاسم الكامل">
-    <input id="empId" placeholder="الرقم الوظيفي">
-<select id="examSection" class="section-select">
-  <option value="">اختر القسم</option>
-  <option value="Inbound">Inbound</option>
-  <option value="Outbound">Outbound</option>
-  <option value="NOVIP">NOVIP</option>
-</select>
-
-    <button id="btnEnter" class="btn-main">بدء الامتحان</button>
-  </div>
-
-  <!-- Exam -->
-  <div id="examBox" style="display:none">
-    <div id="questions"></div>
-
-    <button id="btnSave" class="btn-submit">إنهاء الامتحان</button>
+    <div class="row end-row">
+      <button class="btn success" id="btnSubmit">إرسال الامتحان</button>
+      <span class="hint" id="saveHint"></span>
+    </div>
   </div>
 
 </div>
 
-<!-- Finish Popup -->
-<div id="finishPopup" class="popup">
-  <div class="popup-box">
-    <h2>✅ تم إنهاء الامتحان</h2>
-    <p>سيتم تحويلك إلى الصفحة الرئيسية خلال <span id="countdown">3</span> ثوانٍ</p>
+<!-- Finish Overlay -->
+<div id="finishOverlay" class="finish-overlay">
+  <div class="finish-card">
+    <div class="checkmark">✔</div>
+    <h3>تم إرسال الامتحان</h3>
+    <p>شكرًا لك. سيتم تحويلك خلال لحظات…</p>
   </div>
 </div>
-
 
 <script type="module" src="exam.js"></script>
-<!-- ⚠️ No Questions Popup -->
-<div id="noQuestionsPopup" class="popup">
-  <div class="popup-box warning">
-    <h2>⚠️ تنبيه</h2>
-    <p>لا توجد أسئلة لهذا القسم حاليًا</p>
-    <button onclick="closeNoQuestions()">حسناً</button>
-  </div>
-</div>
 </body>
 </html>
