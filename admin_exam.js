@@ -210,28 +210,46 @@ btnSheet.onclick = async () => {
   /* ===============================
      Clear Finalized Results
   =============================== */
-  btnClear.onclick = async () => {
-    const ok = confirm("⚠️ هل تريد حذف جميع النتائج المكتملة؟");
-    if (!ok) return;
+btnClear.onclick = async () => {
+  const ok = confirm(
+    "⚠️ سيتم حذف جميع نتائج الامتحانات (المكتملة وغير المكتملة) حتى لو كان الامتحان محذوف.\nهل أنت متأكد؟"
+  );
+  if (!ok) return;
 
-    btnClear.disabled = true;
-    btnClear.innerText = "⏳ جاري الحذف...";
+  btnClear.disabled = true;
+  btnClear.innerText = "⏳ جاري الحذف...";
 
+  try {
     const snap = await getDocs(collection(db, "exam_attempts"));
+
+    if (snap.empty) {
+      alert("ℹ️ لا توجد نتائج للحذف");
+      btnClear.disabled = false;
+      btnClear.innerText = "🗑️ حذف النتائج";
+      return;
+    }
+
     let count = 0;
 
     for (const d of snap.docs) {
-      if (d.data().status === "finalized") {
-        await deleteDoc(doc(db, "exam_attempts", d.id));
-        count++;
-      }
+      await deleteDoc(doc(db, "exam_attempts", d.id));
+      count++;
     }
 
-    alert(`✅ تم حذف ${count} نتيجة`);
-    btnClear.disabled = false;
-    btnClear.innerText = "🗑️ حذف النتائج المكتملة";
+    alert(`✅ تم حذف ${count} نتيجة بنجاح`);
+
+    // تحديث الجدول
     loadResults();
-  };
+
+  } catch (err) {
+    console.error(err);
+    alert("❌ حدث خطأ أثناء حذف النتائج");
+  }
+
+  btnClear.disabled = false;
+  btnClear.innerText = "🗑️ حذف النتائج";
+};
+
 
   /* ===============================
      Navigation
