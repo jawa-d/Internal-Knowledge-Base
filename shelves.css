@@ -1,3 +1,6 @@
+
+
+
 body {
   background: #eef3f9;
   font-family: "Cairo", sans-serif;
@@ -27,7 +30,7 @@ body {
 }
 
 .add-btn {
-  background: #4b6fff;
+  background: #0038a8;
   color: white;
   padding: 10px 20px;
   border-radius: 14px;
@@ -38,7 +41,7 @@ body {
 }
 
 .add-btn:hover {
-  background: #274bff;
+  background: #0038a8;
 }
 
 /* Shelves Content */
@@ -127,9 +130,9 @@ body {
   color: white;
 }
 
-.view-btn { background: #4b6fff; }
-.edit-btn { background: #ffb300; }
-.delete-btn { background: #ff4b4b; }
+.view-btn { background: #0038a8; }
+.edit-btn { background: #00c2a8; }
+.delete-btn { background: #00c2a8; }
 
 .delete-btn:hover {
   background: #e43d3d;

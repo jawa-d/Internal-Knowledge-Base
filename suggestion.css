@@ -42,13 +42,13 @@ body {
 }
 
 .form-input:focus {
-  border-color: #4b6fff;
+  border-color: #0038a8;
   background: #ffffff;
 }
 
 /* ===== زر الإرسال ===== */
 .send-btn {
-  background: #4b6fff;
+  background: #0038a8;
   color: white;
   border: none;
   padding: 13px 30px;

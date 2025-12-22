@@ -19,7 +19,7 @@ body {
 }
 
 .add-card-btn {
-  background: #4b6fff;
+  background: #0038a8;
   color: white;
   padding: 10px 20px;
   border-radius: 12px;
@@ -85,20 +85,20 @@ body {
 }
 
 .view-article-btn {
-  background: #e5e7eb;
+  background: #00c2a8;
   color: #111827;
 }
 
 .add-article-btn {
-  background: #10b981;
+  background: #0038a8;
 }
 
 .edit-card {
-  background: #ffb300;
+  background: #00c2a8;
 }
 
 .delete-card {
-  background: #ff4b4b;
+  background: #0038a8;
 }
 
 /* Popup (نفس ستايل البوب أب العام) */
@@ -143,7 +143,7 @@ body {
   margin-bottom: 12px;
   padding: 12px 14px;
   border-radius: 14px;
-  border: 1px solid #cdd5e2;
+  border: 1px solid #00c2a8;
   font-size: 15px;
 }
 

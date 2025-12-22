@@ -12,7 +12,7 @@ body {
 
 /* زر إضافة موظف رئيسي */
 .add-btn-main {
-  background: #4b6fff;
+  background: #0038a8;
   color: white;
   padding: 14px 24px;
   border-radius: 16px;
@@ -23,7 +23,7 @@ body {
 }
 
 .add-btn-main:hover {
-  background: #3253e8;
+  background: #0038a8;
 }
 
 /* ====== Center Cards ====== */
@@ -113,7 +113,7 @@ body {
   border-radius: 12px;
   font-weight: 700;
   color: white;
-  background: #4b6fff;
+  background: #0038a8;
   margin-bottom: 16px;
   font-size: 15px;
 }
@@ -202,7 +202,7 @@ body {
 }
 
 .confirm {
-  background: #4b6fff;
+  background: #0038a8;
   color: white;
 }
 
@@ -240,7 +240,7 @@ body {
 .popup-box button {
   margin-top: 20px;
   padding: 10px 20px;
-  background: #4b6fff;
+  background: #00c2a8;
   color: white;
   border: none;
   border-radius: 10px;

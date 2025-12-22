@@ -18,7 +18,7 @@ body {
 }
 
 .users-table th {
-  background: #3b82f6;
+  background: #00c2a8;
   color: white;
   padding: 12px;
   text-align: center;
@@ -31,7 +31,7 @@ body {
 }
 
 .btn-edit {
-  background: #2563eb;
+  background: #0038a8;
   color: white;
   border: none;
   padding: 6px 12px;
@@ -39,7 +39,7 @@ body {
 }
 
 .btn-delete {
-  background: #ef4444;
+  background: #00c2a8;
   color: white;
   border: none;
   padding: 6px 12px;
@@ -47,7 +47,7 @@ body {
 }
 
 .status-active {
-  color: #10b981;
+  color: #00c2a8;
   font-weight: bold;
 }
 .status-pending {
@@ -134,7 +134,7 @@ body {
 
 /* زر الحفظ */
 .btn-save {
-  background: #22c55e;
+  background: #00c2a8;
   color: #fff;
   padding: 12px 26px;
   border: none;
@@ -144,13 +144,13 @@ body {
   transition: 0.25s;
 }
 .btn-save:hover {
-  background: #16a34a;
+  background: #00c2a8;
   transform: translateY(-2px);
 }
 
 /* زر الإلغاء */
 .btn-cancel {
-  background: #ef4444;
+  background: #00c2a8;
   color: #fff;
   padding: 12px 26px;
   border: none;

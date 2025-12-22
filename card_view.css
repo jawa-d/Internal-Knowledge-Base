@@ -62,7 +62,7 @@ body {
   font-size: 15px;
 }
 
-.view-btn   { background: #4b6fff; }
-.add-btn    { background: #10b981; }
-.edit-btn   { background: #ffb300; }
-.delete-btn { background: #ff4b4b; }
+.view-btn   { background: #0038a8; }
+.add-btn    { background: #00c2a8; }
+.edit-btn   { background: #0038a8; }
+.delete-btn { background: #00c2a8; }

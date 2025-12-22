@@ -27,7 +27,7 @@ body {
 }
 
 .add-btn {
-  background: #4b6fff;
+  background: #0038a8;
   color: white;
   padding: 10px 20px;
   border-radius: 14px;
@@ -125,9 +125,9 @@ body {
   color: white;
 }
 
-.view-btn { background: #4b6fff; }
-.edit-btn { background: #ffb300; }
-.delete-btn { background: #ff4b4b; }
+.view-btn { background: #0038a8; }
+.edit-btn { background: #00c2a8; }
+.delete-btn { background: #00c2a8; }
 /* Popup Overlay */
 .popup-overlay {
   position: fixed;
@@ -218,7 +218,7 @@ body {
 }
 
 .confirm {
-  background: #4b6fff;
+  background: #00c2a8;
   color: white;
 }
 

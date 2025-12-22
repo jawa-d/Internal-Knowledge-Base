@@ -36,7 +36,7 @@ body{
   padding: 0 20px;
   border-radius: 14px;
   border: none;
-  background: #4b6fff;
+  background: #0038a8;
   color: #fff;
   font-weight: 700;
   font-size: 14px;
@@ -103,7 +103,7 @@ body{
   margin-top:auto;
   height:44px;
   border-radius:12px;
-  background:#4b6fff;
+  background:#00c2a8;
   color:#fff;
   text-decoration:none;
   display:flex;
@@ -128,8 +128,8 @@ body{
 }
 
 .delete-btn{
-  background: #fee2e2;
-  color: #dc2626;
+  background: #0038a8;
+  color: #00c2a8;
   border: none;
   border-radius: 999px;
   padding: 6px 14px;

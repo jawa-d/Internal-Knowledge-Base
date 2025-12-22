@@ -10,7 +10,7 @@ body {
 
 /* Header */
 .header {
-  background: linear-gradient(135deg, #0f6dbd, #0b4f8a);
+  background: linear-gradient(135deg, #0038a8, #0038a8);
   color: white;
   padding: 14px 20px;
   display: flex;
@@ -74,17 +74,17 @@ body {
 }
 
 .btn.save {
-  background: #ffe082;
+  background: #00c2a8;
   color: #5d4037;
 }
 
 .btn.pdf {
-  background: #ffffff;
-  color: #0f6dbd;
+  background: #00c2a8;
+  color: #0038a8;
 }
 
 .btn.excel {
-  background: #e8f5e9;
+  background: #00c2a8;
   color: #2e7d32;
 }
 
@@ -136,6 +136,6 @@ textarea {
 }
 
 .footer strong {
-  color: #4b6fff;
+  color: #0038a8;
   font-weight: 700;
 }
