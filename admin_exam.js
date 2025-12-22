@@ -1,6 +1,11 @@
 import { db } from "./firebase.js";
 import {
-  collection, getDocs, deleteDoc, doc, updateDoc, getDoc
+  collection,
+  getDocs,
+  deleteDoc,
+  doc,
+  updateDoc,
+  getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -9,7 +14,10 @@ document.addEventListener("DOMContentLoaded", async () => {
      Admin Guard
   =============================== */
   const currentEmail = localStorage.getItem("kb_user_email") || "";
-  if (!currentEmail) return location.href = "login.html";
+  if (!currentEmail) {
+    location.href = "login.html";
+    return;
+  }
 
   const userSnap = await getDoc(doc(db, "users", currentEmail));
   const isAdmin =
@@ -18,7 +26,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (!isAdmin) {
     alert("غير مخول");
-    return location.href = "dashboard.html";
+    location.href = "dashboard.html";
+    return;
   }
 
   /* ===============================
@@ -26,92 +35,75 @@ document.addEventListener("DOMContentLoaded", async () => {
   =============================== */
   const tbody = document.getElementById("tbody");
   const btnExcel = document.getElementById("btnExcel");
-  const btnPDF = document.getElementById("btnPDF");
+  const btnPDF   = document.getElementById("btnPDF");
   const btnClear = document.getElementById("btnClear");
   const searchInput = document.getElementById("searchInput");
   const hint = document.getElementById("hint");
-
-  if (!btnClear) {
-    console.error("❌ btnClear not found in DOM");
-    return;
-  }
 
   let cache = [];
 
   /* ===============================
      Load Results
   =============================== */
-async function loadResults() {
-  const snap = await getDocs(collection(db, "exam_attempts"));
-  tbody.innerHTML = "";
-  cache = [];
+  async function loadResults() {
+    const snap = await getDocs(collection(db, "exam_attempts"));
+    tbody.innerHTML = "";
+    cache = [];
 
-  const rows = snap.docs
-    .map(d => ({ id: d.id, ...d.data() }))
-    .filter(r => ["submitted", "finalized"].includes(r.status));
+    const rows = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter(r => ["submitted", "finalized"].includes(r.status));
 
-  hint.textContent = `عدد المحاولات: ${rows.length}`;
+    hint.textContent = `عدد المحاولات: ${rows.length}`;
 
-  if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="8">لا توجد محاولات</td></tr>`;
-    return;
-  }
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="7">لا توجد محاولات</td></tr>`;
+      return;
+    }
 
-  rows
-    .sort((a, b) => (b.submittedAt?.seconds || 0) - (a.submittedAt?.seconds || 0))
-    .forEach(r => {
+    rows
+      .sort((a, b) => (b.submittedAt?.seconds || 0) - (a.submittedAt?.seconds || 0))
+      .forEach(r => {
 
- const PASS_MARK = 50;
-const pass = (Number(r.totalScore) || 0) >= PASS_MARK;
+        const total = Number(r.totalScore || 0);
+        const reviewLabel =
+          r.status === "finalized" ? "مصحح" : "بانتظار التصحيح";
 
+        /* ⭐ البيانات المستخدمة فقط في Excel / PDF */
+        cache.push({
+          الاسم: r.employeeName || "",
+          الرقم: r.employeeId || "",
+          القسم: r.section || "",
+          الدرجة: total,
+          "حالة التصحيح": reviewLabel,
+          ملاحظة: r.adminNote || ""
+        });
 
-      const reviewLabel =
-        r.status === "finalized" ? "مصحح" : "بانتظار التصحيح";
-
-      const reviewClass =
-        r.status === "finalized" ? "status-reviewed" : "status-pending";
-
-      cache.push({
-        الاسم: r.employeeName || "—",
-        الرقم_الوظيفي: r.employeeId || "—",
-        القسم: r.section || "—",
-        الدرجة: r.totalScore || 0,
-        الحالة: pass ? "ناجح" : "راسب",
+        tbody.innerHTML += `
+          <tr>
+            <td>${r.employeeName || "—"}</td>
+            <td>${r.employeeId || "—"}</td>
+            <td>${r.section || "—"}</td>
+            <td>${total} / 100</td>
+            <td class="${r.status === "finalized" ? "status-reviewed" : "status-pending"}">
+              ${reviewLabel}
+            </td>
+            <td>
+              <input class="note-input"
+                value="${r.adminNote || ""}"
+                placeholder="ملاحظة..."
+                onchange="saveNote('${r.id}', this.value)">
+            </td>
+            <td>
+              <button class="view-btn"
+                onclick="openAttempt('${r.id}')">
+                عرض التفاصيل
+              </button>
+            </td>
+          </tr>
+        `;
       });
-
-      tbody.innerHTML += `
-        <tr>
-          <td>${r.employeeName || "—"}</td>
-          <td>${r.employeeId || "—"}</td>
-          <td>${r.section || "—"}</td>
-          <td>${r.totalScore || 0} / 100</td>
-
-          <td class="${pass ? "status-success" : "status-fail"}">
-            ${pass ? "ناجح" : "راسب"}
-          </td>
-
-          <td class="${reviewClass}">
-            ${reviewLabel}
-          </td>
-
-          <td>
-            <input class="note-input"
-              value="${r.adminNote || ""}"
-              placeholder="ملاحظة..."
-              onchange="saveNote('${r.id}', this.value)">
-          </td>
-
-          <td>
-            <button class="view-btn"
-              onclick="openAttempt('${r.id}')">
-              عرض التفاصيل
-            </button>
-          </td>
-        </tr>
-      `;
-    });
-}
-
+  }
 
   /* ===============================
      Search
@@ -131,45 +123,58 @@ const pass = (Number(r.totalScore) || 0) >= PASS_MARK;
   };
 
   /* ===============================
-     Export Excel
+     Export Excel ✅ WORKING
   =============================== */
   btnExcel.onclick = () => {
-    const ws = XLSX.utils.json_to_sheet(cache);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Results");
-    XLSX.writeFile(wb, "Exam_Results.xlsx");
+    if (!cache.length) {
+      alert("❌ لا توجد بيانات للتصدير");
+      return;
+    }
+
+    if (!window.XLSX) {
+      alert("❌ مكتبة Excel لم يتم تحميلها");
+      return;
+    }
+
+    const ws = window.XLSX.utils.json_to_sheet(cache);
+
+    ws["!cols"] = [
+      { wch: 20 }, // الاسم
+      { wch: 14 }, // الرقم
+      { wch: 14 }, // القسم
+      { wch: 10 }, // الدرجة
+      { wch: 18 }, // حالة التصحيح
+      { wch: 25 }  // ملاحظة
+    ];
+
+    const wb = window.XLSX.utils.book_new();
+    window.XLSX.utils.book_append_sheet(wb, ws, "Exam Results");
+    window.XLSX.writeFile(wb, "Exam_Results.xlsx");
   };
 
   /* ===============================
      Export PDF
   =============================== */
   btnPDF.onclick = () => {
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF("p", "mm", "a4");
+    const tableWrap = document.querySelector(".table-wrap");
+    if (!tableWrap) {
+      alert("لا توجد بيانات للتصدير");
+      return;
+    }
 
-    pdf.text("تقارير النتائج", 105, 15, { align: "center" });
-
-    pdf.autoTable({
-      startY: 25,
-      head: [["الاسم", "الرقم", "القسم", "الدرجة", "الحالة", "ملاحظة"]],
-      body: cache.map(r => [
-        r.الاسم,
-        r.الرقم_الوظيفي,
-        r.القسم,
-        String(r.الدرجة),
-        r.الحالة,
-        r.ملاحظة
-      ])
-    });
-
-    pdf.save("Exam_Results.pdf");
+    html2pdf().set({
+      margin: 8,
+      filename: "Exam_Results.pdf",
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: "mm", format: "a4", orientation: "landscape" }
+    }).from(tableWrap).save();
   };
 
   /* ===============================
-     Clear Finalized Results ✅ FIXED
+     Clear Finalized Results
   =============================== */
   btnClear.onclick = async () => {
-    const ok = confirm("⚠️ هل تريد حذف جميع النتائج المكتملة (finalized)؟");
+    const ok = confirm("⚠️ هل تريد حذف جميع النتائج المكتملة؟");
     if (!ok) return;
 
     btnClear.disabled = true;
@@ -185,10 +190,9 @@ const pass = (Number(r.totalScore) || 0) >= PASS_MARK;
       }
     }
 
-    alert(`✅ تم حذف ${count} نتيجة مكتملة`);
+    alert(`✅ تم حذف ${count} نتيجة`);
     btnClear.disabled = false;
     btnClear.innerText = "🗑️ حذف النتائج المكتملة";
-
     loadResults();
   };
 

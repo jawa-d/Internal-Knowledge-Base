@@ -8,13 +8,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="admin_exam.css">
 
-  <!-- Excel -->
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.19.3/dist/xlsx.full.min.js"></script>
-
   <!-- PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.5.29/dist/jspdf.plugin.autotable.min.js"></script>
 </head>
+
 <body>
 
 <div class="top">
@@ -40,19 +39,17 @@
   <div class="card">
     <div class="table-wrap">
       <table>
-    <thead>
-  <tr>
-    <th>الاسم</th>
-    <th>الرقم</th>
-    <th>القسم</th>
-    <th>الدرجة</th>
-    <th>الحالة</th>
-    <th>حالة التصحيح</th>
-    <th>ملاحظة</th>
-    <th>تفاصيل</th>
-  </tr>
-</thead>
-
+        <thead>
+          <tr>
+            <th>الاسم</th>
+            <th>الرقم</th>
+            <th>القسم</th>
+            <th>الدرجة</th>
+            <th>حالة التصحيح</th>
+            <th>ملاحظة</th>
+            <th>تفاصيل</th>
+          </tr>
+        </thead>
         <tbody id="tbody"></tbody>
       </table>
     </div>
@@ -60,6 +57,10 @@
 
 </div>
 
+<!-- ✅ Excel Library (FIXED) -->
 <script type="module" src="admin_exam.js"></script>
+
+<!-- Your JS -->
+
 </body>
 </html>
