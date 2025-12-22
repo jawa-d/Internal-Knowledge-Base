@@ -30,6 +30,56 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
+
+
+  /* ===============================
+// 🔗 ضع رابط Google Apps Script هنا
+  =============================== */
+
+
+const btnSheet = document.getElementById("btnSheet");
+
+// 🔗 ضع رابط Google Apps Script هنا
+const SHEET_URL = "https://script.google.com/macros/s/AKfycby56wMOMBEBl5vp0T1rFeh657mdJxkw1RT6dkjbmJuZV7xk8GtPxNQtlFTFVfiUhTQxrA/exec";
+
+btnSheet.onclick = async () => {
+  if (!cache.length) {
+    alert("❌ لا توجد بيانات للإرسال");
+    return;
+  }
+
+  btnSheet.disabled = true;
+  btnSheet.innerText = "⏳ جاري الإرسال...";
+
+  try {
+    const res = await fetch(SHEET_URL, {
+      method: "POST",
+      body: JSON.stringify(cache)
+    });
+
+    const text = await res.text();
+    console.log("Google Sheet Response:", text);
+
+    if (text.includes("success")) {
+      alert("✅ تم إرسال البيانات إلى Google Sheet بنجاح");
+    } else {
+      alert("❌ رد غير متوقع من Google Sheet");
+    }
+
+  } catch (err) {
+    console.error("Fetch Error:", err);
+    alert("❌ فشل الاتصال مع Google Sheet");
+  }
+
+  btnSheet.disabled = false;
+  btnSheet.innerText = "📤 Google Sheet";
+};
+
+
+
+
+
+
   /* ===============================
      Elements
   =============================== */
