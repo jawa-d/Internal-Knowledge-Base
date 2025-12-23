@@ -212,3 +212,41 @@ body.theme-flash{
   outline: 2px solid rgba(79,124,255,.25);
   outline-offset: -2px;
 }
+<!--:root{
+  --primary:#0038a8;
+  --accent:#00c2a8;
+  --bg:#f4f7fb;
+  --sidebar-w:260px;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Cairo, Arial;
+  background:var(--bg);
+  overflow-x:hidden;
+}
+
+/* محتوى الصفحة مع sidebar يسار */
+.main{
+  margin-left:var(--sidebar-w);
+  padding:30px;
+  min-height:100vh;
+  transition:.3s;
+}
+
+/* RTL (لو مشروعك عربي) */
+html[dir="rtl"] .main{
+  margin-left:0;
+  margin-right:var(--sidebar-w);
+}
+
+/* موبايل */
+@media(max-width:900px){
+  .main{
+    margin:0 !important;
+    padding:16px;
+  }
+}
+-->
