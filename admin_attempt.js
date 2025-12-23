@@ -28,8 +28,6 @@ document.addEventListener("DOMContentLoaded", async () => {
      State
   =============================== */
   const attemptId = localStorage.getItem("admin_selected_attempt");
-
-  // ❌ لا Redirect قاتل
   if (!attemptId) {
     alert("لا توجد محاولة محددة");
     return;
@@ -45,8 +43,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const totalScoreEl = document.getElementById("totalScore");
 
   const btnFinalize = document.getElementById("btnFinalize");
-  const btnPDF = document.getElementById("btnPDF");
-  const btnExcel = document.getElementById("btnExcel");
 
   let attempt = null;
   let exam = null;
@@ -60,27 +56,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   =============================== */
   function uid() {
     return "q_" + Math.random().toString(16).slice(2) + Date.now();
-  }
-
-  function cleanTF(v) {
-    return String(v ?? "")
-      .replace(/[✔️✅❌✖️]/g, "")
-      .trim()
-      .toLowerCase();
-  }
-
-  function parseTF(v) {
-    const s = cleanTF(v);
-    if (["true", "1", "yes", "y", "صح", "صحيح"].includes(s)) return true;
-    if (["false", "0", "no", "n", "خطأ", "خاطئ", "خطاء"].includes(s)) return false;
-    return null;
-  }
-
-  function formatTF(v) {
-    const b = parseTF(v);
-    if (b === true) return "✔️ صح";
-    if (b === false) return "❌ خطأ";
-    return String(v ?? "—");
   }
 
   function sameText(a, b) {
@@ -100,7 +75,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       title: q.title || "",
       points: Number(q.points ?? 1),
       correctionMode: q.correctionMode || defaultMode,
-      options: Array.isArray(q.options) ? q.options : [],
       correctAnswer: q.correctAnswer ?? ""
     };
   }
@@ -108,6 +82,40 @@ document.addEventListener("DOMContentLoaded", async () => {
   function num(v, d = 0) {
     const n = Number(v);
     return Number.isFinite(n) ? n : d;
+  }
+
+  /* ===============================
+     🔥 Universal Answer Resolver
+  =============================== */
+  function getAnswer(attempt, qid) {
+    if (!attempt) return "";
+
+    // answers as object
+    if (attempt.answers && typeof attempt.answers === "object") {
+      if (attempt.answers[qid] !== undefined) return attempt.answers[qid];
+      if (attempt.answers.questions?.[qid] !== undefined)
+        return attempt.answers.questions[qid];
+    }
+
+    // responses
+    if (attempt.responses?.[qid] !== undefined) {
+      return attempt.responses[qid];
+    }
+
+    // userAnswers
+    if (attempt.userAnswers?.[qid] !== undefined) {
+      return attempt.userAnswers[qid];
+    }
+
+    // answers as array
+    if (Array.isArray(attempt.answers)) {
+      const found = attempt.answers.find(a =>
+        a.qid === qid || a.id === qid || a.questionId === qid
+      );
+      if (found) return found.answer ?? found.value ?? "";
+    }
+
+    return "";
   }
 
   /* ===============================
@@ -163,7 +171,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const savedManual = attempt.manualGrades || {};
 
     qs.forEach((q, i) => {
-      const ans = attempt.answers?.[q.id] ?? "";
+      const ans = getAnswer(attempt, q.id);
       const max = Math.max(1, num(q.points, 1));
       maxRaw += max;
 
@@ -242,11 +250,30 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   /* ===============================
-     Finalize
+     Finalize (SAVE FINAL SCORE)
   =============================== */
   btnFinalize.onclick = async () => {
+
+    const manualGrades = {};
+    document.querySelectorAll(".manual-input").forEach(inp => {
+      const qid = inp.closest(".question")?.dataset.qid;
+      if (qid) manualGrades[qid] = Number(inp.value || 0);
+    });
+
+    const earnedRaw = autoRaw + manualRaw;
+    const finalPercent = maxRaw
+      ? Math.round((earnedRaw / maxRaw) * 100)
+      : 0;
+
     await updateDoc(doc(db, "exam_attempts", attemptId), {
       adminNote: adminNoteEl.value || "",
+      manualGrades,
+
+      autoScore: autoRaw,
+      manualScore: manualRaw,
+      totalScore: finalPercent,
+      maxScore: maxRaw,
+
       status: "finalized",
       reviewedBy: currentEmail,
       finalizedAt: serverTimestamp()
