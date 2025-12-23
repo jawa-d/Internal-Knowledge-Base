@@ -338,36 +338,68 @@ btnNewExam.onclick = async () => {
   render();
 };
 
+
+
+
+
+
 btnLoadActive.onclick = async () => {
-  // ✅ load by selected section (examSection)
   const sec = examSection?.value || "Inbound";
 
+  // ⬅️ تحميل كل الحالات (draft / active / closed)
   const qy = query(
     collection(db, "exams"),
-    where("status", "==", "active"),
     where("section", "==", sec)
   );
 
   const snap = await getDocs(qy);
-  if (snap.empty) return alert(`لا يوجد امتحان Active لقسم: ${sec}`);
+  if (snap.empty) {
+    alert(`لا يوجد امتحانات لهذا القسم: ${sec}`);
+    return;
+  }
 
+  // ⬅️ اختيار أحدث امتحان
   const best = snap.docs
     .map(d => ({ id: d.id, ...d.data() }))
-    .sort((a, b) => (b.updatedAt?.seconds || b.createdAt?.seconds || 0) - (a.updatedAt?.seconds || a.createdAt?.seconds || 0))[0];
+    .sort((a, b) =>
+      (b.updatedAt?.seconds || b.createdAt?.seconds || 0) -
+      (a.updatedAt?.seconds || a.createdAt?.seconds || 0)
+    )[0];
 
   examId = best.id;
   examData = best;
 
-  examTitle.value = examData.title || "";
-  examDesc.value = examData.description || "";
+  // تعبئة الفورم
+  examTitle.value   = examData.title || "";
+  examDesc.value    = examData.description || "";
   durationMin.value = examData.durationMin ?? 20;
-  passScore.value = examData.passScore ?? 60;
-  examStatus.value = examData.status || "draft";
+  passScore.value   = examData.passScore ?? 60;
+  examStatus.value  = examData.status || "draft";
 
-  if (examSection) examSection.value = examData.section || sec;
+  if (examSection) {
+    examSection.value = examData.section || sec;
+  }
 
   render();
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 btnAddQ.onclick = () => {
   if (!examData) return alert("أنشئ أو حمّل امتحان أولاً");
