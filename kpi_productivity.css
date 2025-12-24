@@ -33,13 +33,6 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-}
-
-.title-group h1 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 700;
 }
 
 .kpi-title-input {
@@ -47,22 +40,11 @@ body {
   padding: 6px 10px;
   border-radius: 8px;
   border: none;
-  outline: none;
-  font-size: 13px;
 }
 
-/* Actions */
 .header-actions {
   display: flex;
-  align-items: center;
   gap: 10px;
-}
-
-.month-select {
-  padding: 8px 12px;
-  border-radius: 10px;
-  border: none;
-  font-weight: 600;
 }
 
 .btn {
@@ -73,22 +55,10 @@ body {
   cursor: pointer;
 }
 
-.btn.save {
-  background: #00c2a8;
-  color: #5d4037;
-}
+.btn.save { background: #00c2a8; }
+.btn.pdf  { background: #ffc107; }
+.btn.excel{ background: #4caf50; }
 
-.btn.pdf {
-  background: #00c2a8;
-  color: #0038a8;
-}
-
-.btn.excel {
-  background: #00c2a8;
-  color: #2e7d32;
-}
-
-/* Table */
 .table-wrapper {
   padding: 16px;
 }
@@ -100,10 +70,8 @@ table {
 }
 
 thead th {
-  padding: 12px;
   font-size: 13px;
   color: #555;
-  text-align: left;
 }
 
 tbody tr {
@@ -112,7 +80,6 @@ tbody tr {
 
 tbody td {
   padding: 10px;
-  font-size: 13px;
 }
 
 input, textarea {
@@ -126,16 +93,9 @@ input, textarea {
 textarea {
   min-height: 50px;
 }
+
 .footer {
   text-align: center;
-  padding: 18px 0;
-  font-size: 14px;
+  padding: 18px;
   color: #777;
-  margin-top: 40px;
-  border-top: 1px solid #e5e7eb;
-}
-
-.footer strong {
-  color: #0038a8;
-  font-weight: 700;
 }

@@ -1,26 +1,27 @@
-// ================== Load Sidebar ==================
 fetch("sidebar.html")
   .then(res => res.text())
   .then(html => {
     document.getElementById("sidebar").innerHTML = html;
 
-    // Get all menu items
-    const items = document.querySelectorAll(".menu li");
-
-    // Add click event
-    items.forEach(li => {
-      li.addEventListener("click", () => {
-        window.location.href = li.dataset.page;
-      });
-    });
-
-    // ==== Active Detection ====
+    const sections = document.querySelectorAll(".section");
+    const items = document.querySelectorAll(".item");
     const current = window.location.pathname.split("/").pop();
 
-    items.forEach(li => {
-      if (li.dataset.page === current) {
-        li.classList.add("active");
+    sections.forEach(sec => {
+      sec.querySelector(".section-header")
+        .addEventListener("click", () => {
+          sec.classList.toggle("open");
+        });
+    });
+
+    items.forEach(item => {
+      item.addEventListener("click", () => {
+        window.location.href = item.dataset.page;
+      });
+
+      if (item.dataset.page === current) {
+        item.classList.add("active");
+        item.closest(".section").classList.add("open");
       }
     });
-  })
-  .catch(err => console.error("Sidebar Load Error:", err));
+  });
