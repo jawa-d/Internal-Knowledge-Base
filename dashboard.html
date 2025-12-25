@@ -231,6 +231,82 @@
   </div>
 
 </div>
+<script>
+/* ===============================
+   Animated Interactive Charts
+   (ADDED ONLY – no old code touched)
+================================ */
+
+function createGradient(ctx, color) {
+  const g = ctx.createLinearGradient(0, 0, 0, 200);
+  g.addColorStop(0, color + '55');
+  g.addColorStop(1, color + '00');
+  return g;
+}
+
+const baseOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  tension: 0.45,
+  animation: {
+    duration: 1400,
+    easing: 'easeOutQuart'
+  },
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      backgroundColor: '#0f172a',
+      titleColor: '#fff',
+      bodyColor: '#e5e7eb',
+      padding: 10,
+      cornerRadius: 10
+    }
+  },
+  scales: {
+    x: { grid: { display: false } },
+    y: { beginAtZero: true }
+  }
+};
+
+function renderLineChart(canvasId, data, color) {
+  const el = document.getElementById(canvasId);
+  if (!el) return;
+
+  const ctx = el.getContext("2d");
+
+  new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: ["Jan","Feb","Mar","Apr","May","Jun"],
+      datasets: [{
+        data,
+        borderColor: color,
+        backgroundColor: createGradient(ctx, color),
+        fill: true,
+        pointRadius: 4,
+        pointHoverRadius: 7,
+        pointBackgroundColor: color
+      }]
+    },
+    options: {
+      ...baseOptions,
+      onClick: (_, elements) => {
+        if (elements.length) {
+          const index = elements[0].index;
+          alert("القيمة: " + data[index]);
+        }
+      }
+    }
+  });
+}
+
+/* === INIT CHARTS === */
+renderLineChart("usersChart",       [7,10,12,14,16,18], "#2563eb");
+renderLineChart("shelvesChart",     [1,1,1,1,1,1],     "#22c55e");
+renderLineChart("booksChart",       [1,1,1,1,2,3],     "#6366f1");
+renderLineChart("kpiChart",         [1,1,1,2,4,5],     "#f59e0b");
+renderLineChart("examUsersChart",   [6,10,12,14,16,18],"#0ea5e9");
+</script>
 
 <script type="module" src="dashboard.js"></script>
 </body>

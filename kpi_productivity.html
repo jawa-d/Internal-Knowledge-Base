@@ -4,126 +4,172 @@
 <meta charset="UTF-8">
 <title>KPI Productivity</title>
 
+<!-- Cairo Font -->
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="kpi_productivity.css">
+
+<!-- Tailwind CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          cairo: ['Cairo', 'sans-serif']
+        }
+      }
+    }
+  }
+</script>
 
 <!-- PDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 
-<body>
+<body class="font-cairo bg-slate-100 text-slate-800">
 
 <!-- ================= HEADER ================= -->
-<div class="header">
-  <button class="back-btn" onclick="history.back()">←</button>
+<header class="bg-white border-b sticky top-0 z-40">
+  <div class="max-w-[1600px] mx-auto px-6 py-4 flex flex-wrap gap-4 items-center justify-between">
 
-  <div class="title-group">
-    <h1>KPI Productivity</h1>
-    <input
-      type="text"
-      id="kpiTitle"
-      class="kpi-title-input"
-      placeholder="Enter KPI report name (e.g. September – Team A)"
-    >
+    <!-- Left -->
+    <div class="flex items-center gap-4">
+      <button
+        onclick="history.back()"
+        class="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center">
+        ←
+      </button>
+
+      <div>
+        <h1 class="text-xl font-bold">KPI Productivity</h1>
+        <input
+          type="text"
+          id="kpiTitle"
+          class="mt-1 w-[360px] max-w-full px-3 py-2 rounded-lg border outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Enter KPI report name (e.g. September – Team A)"
+        >
+      </div>
+    </div>
+
+    <!-- Right -->
+    <div class="flex flex-wrap items-center gap-3">
+
+      <select id="monthSelect"
+        class="px-3 py-2 rounded-lg border bg-white outline-none">
+        <option value="01">January</option>
+        <option value="02">February</option>
+        <option value="03">March</option>
+        <option value="04">April</option>
+        <option value="05">May</option>
+        <option value="06">June</option>
+        <option value="07">July</option>
+        <option value="08">August</option>
+        <option value="09" selected>September</option>
+        <option value="10">October</option>
+        <option value="11">November</option>
+        <option value="12">December</option>
+      </select>
+
+      <button onclick="saveReport()"
+        class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+        💾 Save
+      </button>
+
+      <button onclick="exportPDF()"
+        class="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600">
+        PDF
+      </button>
+
+      <button onclick="exportExcel()"
+        class="px-4 py-2 rounded-lg bg-emerald-500 text-white hover:bg-emerald-600">
+        Excel
+      </button>
+    </div>
   </div>
-
-  <div class="header-actions">
-    <select id="monthSelect" class="month-select">
-      <option value="01">January</option>
-      <option value="02">February</option>
-      <option value="03">March</option>
-      <option value="04">April</option>
-      <option value="05">May</option>
-      <option value="06">June</option>
-      <option value="07">July</option>
-      <option value="08">August</option>
-      <option value="09" selected>September</option>
-      <option value="10">October</option>
-      <option value="11">November</option>
-      <option value="12">December</option>
-    </select>
-
-    <button class="btn save" onclick="saveReport()">💾 Save</button>
-    <button class="btn pdf" onclick="exportPDF()">PDF</button>
-    <button class="btn excel" onclick="exportExcel()">Excel</button>
-  </div>
-</div>
+</header>
 
 <!-- ================= TABLE ================= -->
-<div class="table-wrapper">
+<main class="max-w-[1600px] mx-auto px-6 py-6">
 
-<table id="kpiTable">
-<thead>
-<tr>
-  <th>KPI</th>
-  <th>Description</th>
-  <th>How it Measured</th>
-  <th>Note</th>
-  <th>Importance</th>
-  <th>Utilization</th>
-  <th>Input</th>
-  <th>Output</th>
-  <th>SLA</th>
-</tr>
-</thead>
+  <div class="bg-white rounded-xl shadow overflow-x-auto">
+    <table id="kpiTable" class="w-full text-sm border-collapse">
 
-<tbody>
+      <thead class="bg-slate-200">
+        <tr>
+          <th class="p-3">KPI</th>
+          <th class="p-3">Description</th>
+          <th class="p-3">How it Measured</th>
+          <th class="p-3">Note</th>
+          <th class="p-3">Importance</th>
+          <th class="p-3">Utilization</th>
+          <th class="p-3">Input</th>
+          <th class="p-3">Output</th>
+          <th class="p-3">SLA</th>
+        </tr>
+      </thead>
 
-<!-- 4 Rows -->
-<tr data-id="row1">
-  <td><input class="kpi-name"></td>
-  <td><input class="kpi-desc"></td>
-  <td><input class="kpi-measure"></td>
-  <td><textarea class="note"></textarea></td>
-  <td><input class="iw"></td>
-  <td><input class="uw"></td>
-  <td><input class="input"></td>
-  <td><input class="output"></td>
-  <td><input class="sla"></td>
-</tr>
+      <tbody class="divide-y">
 
-<tr data-id="row2">
-  <td><input class="kpi-name"></td>
-  <td><input class="kpi-desc"></td>
-  <td><input class="kpi-measure"></td>
-  <td><textarea class="note"></textarea></td>
-  <td><input class="iw"></td>
-  <td><input class="uw"></td>
-  <td><input class="input"></td>
-  <td><input class="output"></td>
-  <td><input class="sla"></td>
-</tr>
+        <!-- ===== Row 1 ===== -->
+        <tr data-id="row1">
+          <td class="p-2"><input class="kpi-name w-full border rounded-md px-2 py-1"></td>
+          <td class="p-2"><input class="kpi-desc w-full border rounded-md px-2 py-1"></td>
+          <td class="p-2"><input class="kpi-measure w-full border rounded-md px-2 py-1"></td>
+          <td class="p-2"><textarea class="note w-full border rounded-md px-2 py-1"></textarea></td>
+          <td class="p-2"><input class="iw w-full border rounded-md px-2 py-1"></td>
+          <td class="p-2"><input class="uw w-full border rounded-md px-2 py-1"></td>
+          <td class="p-2"><input class="input w-full border rounded-md px-2 py-1"></td>
+          <td class="p-2"><input class="output w-full border rounded-md px-2 py-1"></td>
+          <td class="p-2"><input class="sla w-full border rounded-md px-2 py-1"></td>
+        </tr>
 
-<tr data-id="row3">
-  <td><input class="kpi-name"></td>
-  <td><input class="kpi-desc"></td>
-  <td><input class="kpi-measure"></td>
-  <td><textarea class="note"></textarea></td>
-  <td><input class="iw"></td>
-  <td><input class="uw"></td>
-  <td><input class="input"></td>
-  <td><input class="output"></td>
-  <td><input class="sla"></td>
-</tr>
+        <!-- ===== Row 2 ===== -->
+        <tr data-id="row2">
+          <td class="p-2"><input class="kpi-name w-full border rounded-md px-2 py-1"></td>
+          <td class="p-2"><input class="kpi-desc w-full border rounded-md px-2 py-1"></td>
+          <td class="p-2"><input class="kpi-measure w-full border rounded-md px-2 py-1"></td>
+          <td class="p-2"><textarea class="note w-full border rounded-md px-2 py-1"></textarea></td>
+          <td class="p-2"><input class="iw w-full border rounded-md px-2 py-1"></td>
+          <td class="p-2"><input class="uw w-full border rounded-md px-2 py-1"></td>
+          <td class="p-2"><input class="input w-full border rounded-md px-2 py-1"></td>
+          <td class="p-2"><input class="output w-full border rounded-md px-2 py-1"></td>
+          <td class="p-2"><input class="sla w-full border rounded-md px-2 py-1"></td>
+        </tr>
 
-<tr data-id="row4">
-  <td><input class="kpi-name"></td>
-  <td><input class="kpi-desc"></td>
-  <td><input class="kpi-measure"></td>
-  <td><textarea class="note"></textarea></td>
-  <td><input class="iw"></td>
-  <td><input class="uw"></td>
-  <td><input class="input"></td>
-  <td><input class="output"></td>
-  <td><input class="sla"></td>
-</tr>
+        <!-- ===== Row 3 ===== -->
+        <tr data-id="row3">
+          <td class="p-2"><input class="kpi-name w-full border rounded-md px-2 py-1"></td>
+          <td class="p-2"><input class="kpi-desc w-full border rounded-md px-2 py-1"></td>
+          <td class="p-2"><input class="kpi-measure w-full border rounded-md px-2 py-1"></td>
+          <td class="p-2"><textarea class="note w-full border rounded-md px-2 py-1"></textarea></td>
+          <td class="p-2"><input class="iw w-full border rounded-md px-2 py-1"></td>
+          <td class="p-2"><input class="uw w-full border rounded-md px-2 py-1"></td>
+          <td class="p-2"><input class="input w-full border rounded-md px-2 py-1"></td>
+          <td class="p-2"><input class="output w-full border rounded-md px-2 py-1"></td>
+          <td class="p-2"><input class="sla w-full border rounded-md px-2 py-1"></td>
+        </tr>
 
-</tbody>
-</table>
-</div>
+        <!-- ===== Row 4 ===== -->
+        <tr data-id="row4">
+          <td class="p-2"><input class="kpi-name w-full border rounded-md px-2 py-1"></td>
+          <td class="p-2"><input class="kpi-desc w-full border rounded-md px-2 py-1"></td>
+          <td class="p-2"><input class="kpi-measure w-full border rounded-md px-2 py-1"></td>
+          <td class="p-2"><textarea class="note w-full border rounded-md px-2 py-1"></textarea></td>
+          <td class="p-2"><input class="iw w-full border rounded-md px-2 py-1"></td>
+          <td class="p-2"><input class="uw w-full border rounded-md px-2 py-1"></td>
+          <td class="p-2"><input class="input w-full border rounded-md px-2 py-1"></td>
+          <td class="p-2"><input class="output w-full border rounded-md px-2 py-1"></td>
+          <td class="p-2"><input class="sla w-full border rounded-md px-2 py-1"></td>
+        </tr>
 
-<footer class="footer">
-  <p>Developed by <strong>Jawad Kadhim</strong> © 2025</p>
+      </tbody>
+    </table>
+  </div>
+
+</main>
+
+<!-- ================= FOOTER ================= -->
+<footer class="bg-white border-t text-center py-4 text-sm text-slate-500">
+  Developed by <strong class="text-blue-600">Jawad Kadhim</strong> © 2025
 </footer>
 
 <script type="module" src="kpi_productivity.js"></script>
