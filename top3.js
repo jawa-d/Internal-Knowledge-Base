@@ -64,7 +64,7 @@ function renderTop3() {
     ` : "";
 
     grid.innerHTML += `
-      <div class="top-card">
+<div class="top-card rank-${emp.rank}">
 
         <div class="top-img"
           style="background-image:url('${emp.image}');
@@ -75,7 +75,12 @@ function renderTop3() {
         <h3 class="emp-name">${emp.name}</h3>
         <p class="emp-id">ID: ${emp.empId}</p>
 
-        <div class="rank-badge">المركز ${emp.rank}</div>
+<div class="rank-badge ${
+  emp.rank == 1 ? "gold" :
+  emp.rank == 2 ? "silver" : "bronze"
+}">
+  المركز ${emp.rank}
+</div>
 
         <div class="btn-row">
           ${adminBtns}

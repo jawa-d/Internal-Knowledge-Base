@@ -9,7 +9,6 @@
   <link rel="stylesheet" href="global.css">
   <link rel="stylesheet" href="top3.css">
   <link rel="stylesheet" href="sidebar.css">
-
 </head>
 
 <body>
@@ -26,19 +25,27 @@
     </div>
   </div>
 
+  <!-- ===== MAIN ===== -->
   <main class="top3-container">
 
     <!-- Admin only -->
-    <button id="addTopBtn" class="add-btn-main" onclick="openAddPopup()">
+    <button
+      id="addTopBtn"
+      class="add-btn-main"
+      onclick="openAddPopup()">
       + إضافة موظف
     </button>
 
-    <div class="cards-grid" id="top3Grid"></div>
+    <!-- 🔧 FIX: container واضح للكروت -->
+    <div class="cards-grid" id="top3Grid">
+      <!-- الكروت تنضاف هنا -->
+    </div>
 
   </main>
 
-  <!-- Popup -->
-  <div class="popup-overlay" id="popupTop3">
+  <!-- ===== Popup ===== -->
+  <!-- 🔧 FIX: display flex مضبوط -->
+  <div class="popup-overlay" id="popupTop3" style="display:none;">
     <div class="popup-box">
 
       <h2 class="popup-title">إضافة موظف</h2>
@@ -61,11 +68,16 @@
         <button class="btn confirm" onclick="saveEmployee()">حفظ</button>
         <button class="btn cancel" onclick="closePopup()">إلغاء</button>
       </div>
+
     </div>
   </div>
-<footer class="footer">
-  <p>Developed by <strong>Jawad Kadhim. ALL RIGHTS RESERVED.</strong> © 2025</p>
-</footer>
+
+  <!-- ===== Footer ===== -->
+  <!-- 🔧 FIX: حتى لا يدخل تحت السايدبار -->
+  <footer class="footer" style="margin-left:260px;">
+    <p>Developed by <strong>Jawad Kadhim. ALL RIGHTS RESERVED.</strong> © 2025</p>
+  </footer>
+
   <script type="module" src="top3.js"></script>
 </body>
 </html>

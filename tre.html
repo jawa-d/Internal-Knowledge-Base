@@ -3,58 +3,132 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>TRE</title>
+<title>TRE – Employee Tasks</title>
 
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config={
+  darkMode:'class',
+  theme:{
+    extend:{
+      fontFamily:{ cairo:['Cairo','sans-serif'] },
+      boxShadow:{
+        glow:'0 0 0 1px rgba(255,255,255,.08),0 20px 40px rgba(0,0,0,.15)'
+      }
+    }
+  }
+}
+</script>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="sidebar.css">
 <link rel="stylesheet" href="tre.css">
 </head>
-<body>
 
+<body class="font-cairo bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-900 dark:to-slate-800 transition-colors">
+
+<!-- Sidebar -->
 <div id="sidebar"></div>
 <script src="sidebar.js"></script>
 
-<div class="page">
-  <div class="header">
-    <h1>TRE – Employee Tasks</h1>
+<!-- Page -->
+<div class="ml-[260px] px-10 py-10 min-h-screen">
+
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-black text-slate-800 dark:text-white">
+      TRE – Employee Tasks
+    </h1>
+    <p class="text-slate-500 dark:text-slate-400 mt-1">
+      إدارة التاسكات الخاصة بالموظفين
+    </p>
   </div>
 
-  <div class="table">
-    <div class="thead">
+  <!-- Table Card -->
+  <div class="backdrop-blur-xl bg-white/85 dark:bg-slate-800/70
+              border border-white/30 dark:border-white/10
+              rounded-3xl shadow overflow-hidden">
+
+    <!-- Table Head -->
+    <div class="grid grid-cols-[2fr_1fr_1fr]
+                bg-gradient-to-r from-blue-600 to-indigo-600
+                text-white font-bold px-6 py-4">
       <div>الاسم</div>
       <div>ID</div>
       <div>الإجراء</div>
     </div>
 
-    <div id="empRows"></div>
+    <!-- Rows -->
+    <div id="empRows" class="divide-y divide-slate-200 dark:divide-slate-700"></div>
   </div>
+
 </div>
 
-<!-- Modal -->
-<div id="taskModal" class="modal hidden" aria-hidden="true">
-  <div class="modal-card">
-    <button class="close-x" id="closeModalX">✖</button>
+<!-- ================= Modal ================= -->
+<div id="taskModal"
+     class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden
+            flex items-center justify-center z-50">
 
-    <h2 id="modalTitle"></h2>
+  <div class="relative w-[min(760px,95vw)]
+              backdrop-blur-xl bg-white/90 dark:bg-slate-900/85
+              border border-white/30 dark:border-white/10
+              rounded-3xl shadow p-6">
 
-    <table class="task-table">
-      <thead>
-        <tr>
-          <th>Task Name</th>
-          <th>Status</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody id="taskBody"></tbody>
-    </table>
+    <!-- Close -->
+    <button id="closeModalX"
+            class="absolute top-4 left-4 w-10 h-10 rounded-full
+                   bg-slate-100 dark:bg-slate-800
+                   hover:bg-slate-200 dark:hover:bg-slate-700
+                   font-black">
+      ✖
+    </button>
 
-    <div class="modal-footer">
-      <button id="addTask" class="btn btn-secondary">➕ إضافة Task</button>
+    <h2 id="modalTitle"
+        class="text-2xl font-black text-blue-700 dark:text-blue-400 mb-4">
+    </h2>
 
-      <div class="modal-actions">
-        <button id="saveTasks" class="btn btn-primary">💾 حفظ</button>
-        <button id="closeModal" class="btn btn-ghost">إغلاق</button>
+    <!-- Tasks Table -->
+    <div class="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700">
+      <table class="w-full border-collapse">
+        <thead>
+          <tr class="bg-slate-50 dark:bg-slate-800 text-right">
+            <th class="p-3 font-bold">Task Name</th>
+            <th class="p-3 font-bold w-40">Status</th>
+            <th class="p-3 w-16"></th>
+          </tr>
+        </thead>
+        <tbody id="taskBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Footer -->
+    <div class="flex flex-wrap items-center justify-between gap-3 mt-5">
+      <button id="addTask"
+              class="px-5 py-2.5 rounded-xl
+                     bg-emerald-100 text-emerald-700 font-bold
+                     hover:bg-emerald-200 transition">
+        ➕ إضافة Task
+      </button>
+
+      <div class="flex gap-3">
+        <button id="saveTasks"
+                class="px-6 py-2.5 rounded-xl
+                       bg-gradient-to-r from-blue-500 to-indigo-600
+                       text-white font-bold shadow
+                       hover:shadow-lg hover:-translate-y-0.5 transition">
+          💾 حفظ
+        </button>
+
+        <button id="closeModal"
+                class="px-5 py-2.5 rounded-xl
+                       bg-slate-200 dark:bg-slate-700
+                       hover:bg-slate-300 dark:hover:bg-slate-600 transition">
+          إغلاق
+        </button>
       </div>
     </div>
+
   </div>
 </div>
 

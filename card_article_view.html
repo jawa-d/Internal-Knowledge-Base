@@ -1,60 +1,101 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>عرض المقال</title>
+  <meta charset="UTF-8">
+  <title>عرض المقال</title>
 
-<link rel="stylesheet" href="global.css">
-<link rel="stylesheet" href="sidebar.css">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { cairo: ['Cairo','sans-serif'] },
+          boxShadow: {
+            glow: '0 0 0 1px rgba(255,255,255,.08), 0 20px 40px rgba(0,0,0,.15)'
+          }
+        }
+      }
+    }
+  </script>
 
-<style>
-body{background:#eef3f9;font-family:"Cairo"}
-.view-container{
-  margin-left:260px;margin-top:100px;
-  background:white;padding:30px;
-  border-radius:20px;width:75%;
-}
-.back-btn{
-  margin-top:20px;
-  background:#4b6fff;color:white;
-  padding:10px 22px;border-radius:12px;border:none
-}
-</style>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="global.css">
+  <link rel="stylesheet" href="sidebar.css">
 </head>
 
-<body>
+<body class="font-cairo bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-900 dark:to-slate-800 transition-colors">
 
+<!-- Sidebar -->
 <div id="sidebar"></div>
 <script src="sidebar.js"></script>
 
-<div class="top-nav">
-  <div class="nav-left"><h1>عرض المقال</h1></div>
+<!-- Header -->
+<div class="ml-[260px] px-10 pt-10">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-3xl font-bold text-slate-800 dark:text-white">
+        عرض المقال
+      </h1>
+      <p class="text-slate-500 dark:text-slate-400 mt-1">
+        محتوى المقال المرتبط بالبطاقة
+      </p>
+    </div>
+  </div>
 </div>
 
-<div class="view-container">
-  <div id="articleContent">جاري التحميل...</div>
-  <button class="back-btn" onclick="history.back()">رجوع</button>
+<!-- Article Container -->
+<div class="ml-[260px] px-10 pb-24">
+  <div class="backdrop-blur-xl bg-white/85 dark:bg-slate-800/70
+              border border-white/30 dark:border-white/10
+              rounded-3xl p-10 shadow">
+
+    <!-- Article Content -->
+    <div id="articleContent"
+         class="prose max-w-none
+                prose-slate dark:prose-invert
+                prose-h1:text-2xl
+                prose-h2:text-xl
+                prose-p:leading-8
+                prose-img:rounded-xl">
+      جاري التحميل...
+    </div>
+
+    <!-- Back Button -->
+    <div class="mt-10">
+      <button
+        onclick="history.back()"
+        class="px-6 py-3 rounded-2xl
+               bg-gradient-to-r from-blue-500 to-indigo-600
+               text-white font-semibold
+               shadow hover:shadow-lg hover:-translate-y-0.5 transition">
+        ← رجوع
+      </button>
+    </div>
+
+  </div>
 </div>
 
+<!-- Firebase Logic (بدون تغيير) -->
 <script type="module">
 import { db } from "./firebase.js";
-import { doc, getDoc } 
+import { doc, getDoc }
 from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
 
-const shelfId=localStorage.getItem("selectedShelfId");
-const cardId =localStorage.getItem("selectedCardId");
+const shelfId = localStorage.getItem("selectedShelfId");
+const cardId  = localStorage.getItem("selectedCardId");
 
-if(!shelfId||!cardId){
+if (!shelfId || !cardId) {
   alert("لم يتم تحديد البطاقة");
-  location.href="shelves.html";
+  location.href = "shelves.html";
 }
 
-const snap=await getDoc(doc(db,"shelves",shelfId,"cards",cardId));
+const snap = await getDoc(doc(db, "shelves", shelfId, "cards", cardId));
 document.getElementById("articleContent").innerHTML =
   snap.exists() && snap.data().articleHtml
-  ? snap.data().articleHtml
-  : "<p>لا يوجد مقال بعد.</p>";
+    ? snap.data().articleHtml
+    : "<p>لا يوجد مقال بعد.</p>";
 </script>
 
 </body>

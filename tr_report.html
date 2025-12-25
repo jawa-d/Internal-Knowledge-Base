@@ -2,62 +2,139 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>TR REPORT</title>
 
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      fontFamily: { cairo: ['Cairo','sans-serif'] },
+      boxShadow: {
+        glow: '0 0 0 1px rgba(255,255,255,.08), 0 20px 40px rgba(0,0,0,.15)'
+      }
+    }
+  }
+}
+</script>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="sidebar.css">
 <link rel="stylesheet" href="tr_report.css">
 </head>
-<body>
 
+<body class="font-cairo bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-900 dark:to-slate-800 transition-colors">
+
+<!-- Sidebar -->
 <div id="sidebar"></div>
 <script src="sidebar.js"></script>
 
-<div class="page">
+<!-- Page -->
+<div class="ml-[260px] px-10 py-10 min-h-screen">
 
   <!-- Header -->
-  <div class="header">
+  <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+    <div class="flex items-center gap-4">
+      <button
+        onclick="history.back()"
+        class="px-4 py-2 rounded-xl
+               bg-slate-200 dark:bg-slate-700
+               hover:bg-slate-300 dark:hover:bg-slate-600
+               font-bold transition">
+        ⬅ رجوع
+      </button>
 
-    <!-- زر رجوع -->
-    <button class="back-btn" onclick="history.back()">⬅ رجوع</button>
-
-    <h1>TR REPORT</h1>
-
-    <div class="actions">
-      <button id="openReport">📊 تقرير</button>
+      <h1 class="text-3xl font-black text-slate-800 dark:text-white">
+        TR REPORT
+      </h1>
     </div>
 
+    <button
+      id="openReport"
+      class="px-6 py-3 rounded-2xl
+             bg-gradient-to-r from-blue-500 to-indigo-600
+             text-white font-bold shadow
+             hover:shadow-lg hover:-translate-y-0.5 transition">
+      📊 تقرير
+    </button>
   </div>
 
-  <!-- عرض الموظفين -->
-  <div id="list" class="grid"></div>
+  <!-- Employees Grid -->
+  <div id="list"
+       class="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-6">
+    <!-- يتم التعبئة من tr_report.js -->
+  </div>
 
 </div>
 
-<!-- نافذة التقرير -->
-<div id="reportModal" class="modal hidden">
-  <div class="modal-card">
+<!-- ================= Report Modal ================= -->
+<div id="reportModal"
+     class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden
+            flex items-center justify-center z-50">
 
-    <!-- زر إغلاق -->
-    <button class="close-x" id="closeReportX">✖</button>
+  <div class="relative w-[min(620px,95vw)]
+              backdrop-blur-xl bg-white/90 dark:bg-slate-900/85
+              border border-white/30 dark:border-white/10
+              rounded-3xl shadow p-6">
 
-    <h2>تقرير الموظفين</h2>
+    <!-- Close -->
+    <button id="closeReportX"
+            class="absolute top-4 left-4 w-10 h-10 rounded-full
+                   bg-slate-100 dark:bg-slate-800
+                   hover:bg-slate-200 dark:hover:bg-slate-700
+                   font-black">
+      ✖
+    </button>
 
-    <select id="rDep">
-      <option value="">اختر القسم</option>
-      <option value="INBOUND">INBOUND</option>
-      <option value="NONIP">NONIP</option>
-      <option value="OUTBOUND">OUTBOUND</option>
-      <option value="SALES">SALES</option>
-    </select>
+    <h2 class="text-2xl font-black text-blue-700 dark:text-blue-400 mb-6">
+      تقرير الموظفين
+    </h2>
 
-    <input type="month" id="rMonth">
+    <!-- Filters -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <select id="rDep"
+              class="px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700
+                     bg-white dark:bg-slate-900 outline-none">
+        <option value="">اختر القسم</option>
+        <option value="INBOUND">INBOUND</option>
+        <option value="NONIP">NONIP</option>
+        <option value="OUTBOUND">OUTBOUND</option>
+        <option value="SALES">SALES</option>
+      </select>
 
-    <div class="modal-actions">
-      <button id="runReport">تشغيل التقرير</button>
-      <button id="closeReport" class="secondary">إغلاق</button>
+      <input type="month" id="rMonth"
+             class="px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700
+                    bg-white dark:bg-slate-900 outline-none"/>
     </div>
 
-    <div id="reportResult" class="result"></div>
+    <!-- Actions -->
+    <div class="flex flex-wrap justify-between items-center gap-3 mb-6">
+      <button id="runReport"
+              class="px-6 py-3 rounded-xl
+                     bg-gradient-to-r from-emerald-500 to-teal-600
+                     text-white font-bold shadow
+                     hover:shadow-lg hover:-translate-y-0.5 transition">
+        تشغيل التقرير
+      </button>
+
+      <button id="closeReport"
+              class="px-5 py-3 rounded-xl
+                     bg-slate-200 dark:bg-slate-700
+                     hover:bg-slate-300 dark:hover:bg-slate-600 transition">
+        إغلاق
+      </button>
+    </div>
+
+    <!-- Result -->
+    <div id="reportResult"
+         class="mt-4 max-h-[40vh] overflow-auto
+                rounded-2xl border border-slate-200 dark:border-slate-700
+                p-4 bg-slate-50 dark:bg-slate-800">
+      <!-- نتيجة التقرير -->
+    </div>
 
   </div>
 </div>

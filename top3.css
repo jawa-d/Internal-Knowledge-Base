@@ -264,3 +264,48 @@ body {
   color: #4b6fff;
   font-weight: 700;
 }
+/* =========================
+   Top 3 Highlight
+========================= */
+
+/* 🥇 المركز الأول */
+.top-card.rank-1 {
+  transform: scale(1.06);
+  border: 2px solid #d4af37;
+  box-shadow: 0 25px 50px rgba(212, 175, 55, 0.35);
+  position: relative;
+}
+
+/* 👑 تاج */
+.top-card.rank-1::before {
+  content: "👑";
+  position: absolute;
+  top: -14px;
+  left: 14px;
+  font-size: 28px;
+}
+
+/* 🥈 المركز الثاني */
+.top-card.rank-2 {
+  border: 2px solid #c0c0c0;
+  box-shadow: 0 18px 35px rgba(192, 192, 192, 0.3);
+}
+
+/* 🥉 المركز الثالث */
+.top-card.rank-3 {
+  border: 2px solid #cd7f32;
+  box-shadow: 0 18px 35px rgba(205, 127, 50, 0.3);
+}
+
+/* Badge لون حسب الترتيب */
+.rank-badge.gold {
+  background: linear-gradient(135deg, #f7d046, #d4af37);
+}
+
+.rank-badge.silver {
+  background: linear-gradient(135deg, #e5e7eb, #9ca3af);
+}
+
+.rank-badge.bronze {
+  background: linear-gradient(135deg, #e0a15c, #b87333);
+}

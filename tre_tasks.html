@@ -2,28 +2,80 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>TRE Tasks</title>
 
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      fontFamily: { cairo: ['Cairo','sans-serif'] },
+      boxShadow: {
+        glow: '0 0 0 1px rgba(255,255,255,.08), 0 20px 40px rgba(0,0,0,.15)'
+      }
+    }
+  }
+}
+</script>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="sidebar.css">
 <link rel="stylesheet" href="tre_tasks.css">
 </head>
-<body>
 
+<body class="font-cairo bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-900 dark:to-slate-800 transition-colors">
+
+<!-- Sidebar -->
 <div id="sidebar"></div>
 <script src="sidebar.js"></script>
 
-<div class="page">
+<!-- Page -->
+<div class="ml-[260px] px-10 py-10 min-h-screen">
 
-  <div class="header">
-    <h1>Employee Tasks</h1>
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-black text-slate-800 dark:text-white">
+      Employee Tasks
+    </h1>
+    <p class="text-slate-500 dark:text-slate-400 mt-1">
+      البحث عن التاسكات حسب رقم الموظف
+    </p>
   </div>
 
-  <div class="search-box">
-    <input id="searchId" placeholder="Employee ID">
-    <button id="searchBtn">🔍 بحث</button>
+  <!-- Search Card -->
+  <div class="backdrop-blur-xl bg-white/85 dark:bg-slate-800/70
+              border border-white/30 dark:border-white/10
+              rounded-3xl shadow p-6 mb-8">
+
+    <div class="flex flex-wrap items-center gap-4">
+      <input
+        id="searchId"
+        placeholder="Employee ID"
+        class="flex-1 min-w-[220px]
+               px-5 py-3 rounded-xl
+               border border-slate-200 dark:border-slate-700
+               bg-white dark:bg-slate-900
+               outline-none"/>
+
+      <button
+        id="searchBtn"
+        class="px-8 py-3 rounded-2xl
+               bg-gradient-to-r from-blue-500 to-indigo-600
+               text-white font-bold shadow
+               hover:shadow-lg hover:-translate-y-0.5 transition">
+        🔍 بحث
+      </button>
+    </div>
   </div>
 
-  <div id="tasksContainer" class="tasks-grid"></div>
+  <!-- Tasks Grid -->
+  <div id="tasksContainer"
+       class="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-6">
+    <!-- يتم تعبئتها من tre_tasks.js -->
+  </div>
 
 </div>
 

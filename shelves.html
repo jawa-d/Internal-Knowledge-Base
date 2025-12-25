@@ -4,90 +4,120 @@
   <meta charset="UTF-8">
   <title>الرفوف</title>
 
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { cairo: ['Cairo','sans-serif'] },
+          boxShadow: {
+            glow: '0 0 0 1px rgba(255,255,255,.08), 0 20px 40px rgba(0,0,0,.15)'
+          }
+        }
+      }
+    }
+  </script>
+
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="global.css">
   <link rel="stylesheet" href="shelves.css">
   <link rel="stylesheet" href="sidebar.css">
-
 </head>
 
-<body>
+<body class="font-cairo bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-900 dark:to-slate-800 transition-colors">
 
-  <!-- Sidebar -->
-  <div id="sidebar"></div>
-  <script src="sidebar.js"></script>
+<!-- Sidebar -->
+<div id="sidebar"></div>
+<script src="sidebar.js"></script>
 
-  <!-- Navbar -->
-  <div class="top-nav">
-    <div class="nav-left">
-      <h1>الرفوف</h1>
-      <p class="nav-sub">إدارة الرفوف والمحتوى</p>
+<!-- Top Header -->
+<div class="ml-[260px] px-10 pt-8">
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-3xl font-bold text-slate-800 dark:text-white">الرفوف</h1>
+      <p class="text-slate-500 dark:text-slate-400 mt-1">إدارة الرفوف والمحتوى</p>
     </div>
 
-    <div class="nav-center">
-      <h2 class="kb-title">Customer Care Knowledge Base</h2>
-    </div>
+    <h2 class="text-lg font-semibold text-slate-600 dark:text-slate-300">
+      Customer Care Knowledge Base
+    </h2>
   </div>
 
   <!-- Search -->
-  <div class="shelves-search-area">
-    <input type="text" class="shelves-search" placeholder="ابحث عن رف..." />
+  <div class="flex items-center gap-4 mb-6">
+    <input
+      type="text"
+      class="shelves-search w-[420px] px-6 py-3 rounded-full
+             bg-white/80 dark:bg-slate-800/70
+             border border-white/30 dark:border-white/10
+             shadow focus:outline-none"
+      placeholder="ابحث عن رف..." />
+
+    <button
+      id="addShelfBtn"
+      onclick="openAddShelf()"
+      class="px-6 py-3 rounded-2xl
+             bg-gradient-to-r from-blue-500 to-indigo-600
+             text-white font-semibold
+             shadow hover:shadow-lg hover:-translate-y-0.5 transition">
+      + إضافة رف
+    </button>
   </div>
+</div>
 
-  <!-- Add shelf button -->
-  <div class="add-shelf-area">
-    <button id="addShelfBtn" class="add-btn" onclick="openAddShelf()">+ إضافة رف</button>
+<!-- Shelves Grid -->
+<main class="ml-[260px] px-10 pb-24">
+  <div id="shelvesGrid"
+       class="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-8">
   </div>
+</main>
 
-  <!-- Shelves Grid -->
-  <main class="shelves-content">
-    <div class="shelves-grid" id="shelvesGrid"></div>
-  </main>
+<!-- ================= Add Popup ================= -->
+<div id="popupAdd" class="popup-overlay">
+  <div class="popup-box backdrop-blur-xl bg-white/90 dark:bg-slate-900/80">
+    <h2 class="popup-title">إضافة رف جديد</h2>
 
-  <!-- Popup Add Shelf -->
-  <div class="popup-overlay" id="popupAdd">
-    <div class="popup-box">
-      <h2 class="popup-title">إضافة رف جديد</h2>
+    <input id="popupTitle" class="popup-input" placeholder="اسم الرف...">
+    <textarea id="popupDesc" class="popup-textarea" placeholder="وصف مختصر..."></textarea>
 
-      <input type="text" id="popupTitle" placeholder="اسم الرف..." class="popup-input">
-      <textarea id="popupDesc" class="popup-textarea" placeholder="وصف مختصر..."></textarea>
+    <label class="upload-box">
+      <input type="file" id="popupImage" accept="image/*">
+      اختر صورة أو اسحبها هنا
+    </label>
 
-      <label class="upload-box">
-        <input type="file" id="popupImage" accept="image/*">
-        اختر صورة أو اسحبها هنا
-      </label>
-
-      <div class="popup-btns">
-        <button class="btn confirm" onclick="confirmAdd()">إضافة</button>
-        <button class="btn cancel" onclick="closePopup()">إلغاء</button>
-      </div>
+    <div class="popup-btns">
+      <button class="btn confirm" onclick="confirmAdd()">إضافة</button>
+      <button class="btn cancel" onclick="closePopup()">إلغاء</button>
     </div>
   </div>
+</div>
 
-  <!-- Popup Edit Shelf -->
-  <div class="popup-overlay" id="popupEdit">
-    <div class="popup-box">
-      <h2 class="popup-title">تعديل الرف</h2>
+<!-- ================= Edit Popup ================= -->
+<div id="popupEdit" class="popup-overlay">
+  <div class="popup-box backdrop-blur-xl bg-white/90 dark:bg-slate-900/80">
+    <h2 class="popup-title">تعديل الرف</h2>
 
-      <input type="text" id="editTitle" class="popup-input" placeholder="اسم الرف...">
-      <textarea id="editDesc" class="popup-textarea" placeholder="وصف مختصر..."></textarea>
+    <input id="editTitle" class="popup-input">
+    <textarea id="editDesc" class="popup-textarea"></textarea>
 
-      <label class="upload-box">
-        <input type="file" id="editImage" accept="image/*">
-        تعديل الصورة (اختياري)
-      </label>
+    <label class="upload-box">
+      <input type="file" id="editImage" accept="image/*">
+      تعديل الصورة (اختياري)
+    </label>
 
-      <div class="popup-btns">
-        <button class="btn confirm" onclick="saveEdit()">حفظ التعديل</button>
-        <button class="btn cancel" onclick="closeEditPopup()">إلغاء</button>
-      </div>
+    <div class="popup-btns">
+      <button class="btn confirm" onclick="saveEdit()">حفظ</button>
+      <button class="btn cancel" onclick="closeEditPopup()">إلغاء</button>
     </div>
   </div>
+</div>
 
-  <!-- ✅ مهم جداً: لازم Module -->
-  <script type="module" src="shelves.js"></script>
-  <footer class="footer">
-  <p>Developed by <strong>Jawad Kadhim. ALL RIGHTS RESERVED.</strong> © 2025</p>
+<footer class="footer">
+  <p>Developed by <strong>Jawad Kadhim</strong> © 2025</p>
 </footer>
+
+<script type="module" src="shelves.js"></script>
 </body>
 </html>

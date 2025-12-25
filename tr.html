@@ -2,44 +2,107 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>TR</title>
+<title>TR – الموظفين</title>
 
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        fontFamily: { cairo: ['Cairo','sans-serif'] },
+        boxShadow: {
+          glow: '0 0 0 1px rgba(255,255,255,.08), 0 20px 40px rgba(0,0,0,.15)'
+        }
+      }
+    }
+  }
+</script>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="sidebar.css">
 <link rel="stylesheet" href="tr.css">
 </head>
-<body>
 
+<body class="font-cairo bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-900 dark:to-slate-800 transition-colors">
+
+<!-- Sidebar -->
 <div id="sidebar"></div>
 <script src="sidebar.js"></script>
 
-<div class="page">
-  <div class="header">
-    <h1>TR – الموظفين</h1>
-    <button id="openForm">➕ إضافة موظف</button>
+<!-- Content -->
+<div class="ml-[260px] px-10 py-10">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-8">
+    <h1 class="text-3xl font-bold text-slate-800 dark:text-white">
+      TR – الموظفين
+    </h1>
+
+    <button
+      id="openForm"
+      class="px-6 py-3 rounded-2xl
+             bg-gradient-to-r from-blue-500 to-indigo-600
+             text-white font-semibold shadow
+             hover:shadow-lg hover:-translate-y-0.5 transition">
+      ➕ إضافة موظف
+    </button>
   </div>
 
-  <div id="formCard" class="card hidden">
-    <div class="grid">
-      <input id="empId" placeholder="ID">
-      <input id="name" placeholder="Name">
-      <input id="ph" placeholder="Phone">
-      <input type="date" id="date">
-      <select id="status">
+  <!-- Form Card -->
+  <div id="formCard"
+       class="hidden backdrop-blur-xl bg-white/85 dark:bg-slate-800/70
+              border border-white/30 dark:border-white/10
+              rounded-3xl p-8 shadow animate-fadeIn">
+
+    <div class="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4 mb-6">
+
+      <input id="empId" placeholder="ID"
+             class="px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700
+                    bg-white dark:bg-slate-900 outline-none"/>
+
+      <input id="name" placeholder="Name"
+             class="px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700
+                    bg-white dark:bg-slate-900 outline-none"/>
+
+      <input id="ph" placeholder="Phone"
+             class="px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700
+                    bg-white dark:bg-slate-900 outline-none"/>
+
+      <input type="date" id="date"
+             class="px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700
+                    bg-white dark:bg-slate-900 outline-none"/>
+
+      <select id="status"
+              class="px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700
+                     bg-white dark:bg-slate-900 outline-none">
         <option value="">الحالة</option>
         <option value="Active">Active</option>
         <option value="Inactive">Inactive</option>
       </select>
-<select id="dep">
-  <option value="">القسم (اختياري)</option>
-  <option value="INBOUND">INBOUND</option>
-  <option value="NONIP">NONIP</option>
-  <option value="OUTBOUND">OUTBOUND</option>
-  <option value="SALES">SALES</option>
-</select>
+
+      <select id="dep"
+              class="px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700
+                     bg-white dark:bg-slate-900 outline-none">
+        <option value="">القسم (اختياري)</option>
+        <option value="INBOUND">INBOUND</option>
+        <option value="NONIP">NONIP</option>
+        <option value="OUTBOUND">OUTBOUND</option>
+        <option value="SALES">SALES</option>
+      </select>
     </div>
 
-    <button id="saveBtn">💾 حفظ</button>
+    <button
+      id="saveBtn"
+      class="px-8 py-3 rounded-2xl
+             bg-gradient-to-r from-emerald-500 to-teal-600
+             text-white font-semibold shadow
+             hover:shadow-lg hover:-translate-y-0.5 transition">
+      💾 حفظ
+    </button>
   </div>
+
 </div>
 
 <script type="module" src="tr.js"></script>

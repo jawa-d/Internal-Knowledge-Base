@@ -1,6 +1,30 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            cairo: ['Cairo', 'sans-serif'],
+          },
+          colors: {
+            primary: '#2563eb',
+            accent: '#22c55e',
+            danger: '#ef4444',
+          },
+          boxShadow: {
+            glow: '0 0 0 1px rgba(255,255,255,0.08), 0 20px 40px rgba(0,0,0,0.15)'
+          }
+        }
+      }
+    }
+  </script>
+
   <meta charset="UTF-8">
   <title>Dashboard</title>
 
@@ -11,94 +35,196 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
-<body>
+<body class="font-cairo bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-900 dark:to-slate-800 min-h-screen transition-colors">
 
 <!-- Sidebar -->
 <div id="sidebar"></div>
 <script src="sidebar.js"></script>
 
 <!-- Content -->
-<div class="page dashboard-page">
+<div class="page dashboard-page relative">
 
   <!-- Header -->
-  <div class="dash-header">
-    <h1>Dashboard</h1>
-    <p>نظرة عامة على النظام</p>
+  <div class="dash-header flex items-center justify-between mb-10">
+    <div>
+      <h1 class="text-3xl font-bold text-slate-800 dark:text-white">
+        Dashboard
+      </h1>
+      <p class="text-slate-500 dark:text-slate-400 mt-1">
+        نظرة عامة على أداء النظام
+      </p>
+    </div>
 
-    <!-- ✅ ADD ONLY: Logout Button -->
-    <button id="logoutBtn" class="logout-btn">🚪 تسجيل الخروج</button>
+    <!-- Logout -->
+    <button
+      id="logoutBtn"
+      class="group flex items-center gap-2 px-5 py-2.5 rounded-2xl
+             bg-gradient-to-r from-red-500 to-rose-600
+             text-white shadow-lg
+             hover:shadow-xl hover:-translate-y-0.5
+             transition-all duration-300"
+    >
+      <span class="text-lg">🚪</span>
+      تسجيل الخروج
+    </button>
   </div>
 
-  <!-- ================= Cards ================= -->
-  <div class="cards">
+  <!-- ================= KPI CARDS ================= -->
+  <div class="cards grid gap-5 mb-10">
 
-    <div class="card" onclick="location.href='users.html'">
-      <div class="icon">👤</div>
+    <!-- Card -->
+    <div onclick="location.href='users.html'"
+         class="card group backdrop-blur-xl bg-white/70 dark:bg-slate-800/60
+                border border-white/30 dark:border-white/10
+                rounded-2xl p-5 flex items-center gap-4
+                cursor-pointer shadow
+                hover:shadow-glow hover:-translate-y-1
+                transition-all duration-300">
+
+      <div class="icon w-14 h-14 flex items-center justify-center rounded-xl
+                  bg-gradient-to-br from-blue-500 to-indigo-600 text-white text-xl">
+        👤
+      </div>
+
       <div>
-        <div class="label">عدد المستخدمين</div>
-        <div class="number" id="usersCount">0</div>
+        <div class="text-xs text-slate-500 dark:text-slate-400">
+          عدد المستخدمين
+        </div>
+        <div class="number text-3xl font-bold text-slate-800 dark:text-white"
+             id="usersCount">0</div>
       </div>
     </div>
 
-    <div class="card" onclick="location.href='shelves.html'">
-      <div class="icon">🗂</div>
+    <!-- Copy نفس الهيكل -->
+    <div onclick="location.href='shelves.html'"
+         class="card group backdrop-blur-xl bg-white/70 dark:bg-slate-800/60
+                border border-white/30 dark:border-white/10
+                rounded-2xl p-5 flex items-center gap-4
+                cursor-pointer shadow
+                hover:shadow-glow hover:-translate-y-1
+                transition-all duration-300">
+
+      <div class="icon w-14 h-14 flex items-center justify-center rounded-xl
+                  bg-gradient-to-br from-emerald-500 to-teal-600 text-white text-xl">
+        🗂
+      </div>
+
       <div>
-        <div class="label">عدد الرفوف</div>
-        <div class="number" id="shelvesCount">0</div>
+        <div class="text-xs text-slate-500 dark:text-slate-400">عدد الرفوف</div>
+        <div class="number text-3xl font-bold text-slate-800 dark:text-white"
+             id="shelvesCount">0</div>
       </div>
     </div>
 
-    <div class="card" onclick="location.href='news.html'">
-      <div class="icon">📰</div>
+    <div onclick="location.href='news.html'"
+         class="card group backdrop-blur-xl bg-white/70 dark:bg-slate-800/60
+                border border-white/30 dark:border-white/10
+                rounded-2xl p-5 flex items-center gap-4
+                cursor-pointer shadow
+                hover:shadow-glow hover:-translate-y-1
+                transition-all duration-300">
+
+      <div class="icon w-14 h-14 flex items-center justify-center rounded-xl
+                  bg-gradient-to-br from-orange-500 to-amber-600 text-white text-xl">
+        📰
+      </div>
+
       <div>
-        <div class="label">عدد الأخبار</div>
-        <div class="number" id="newsCount">0</div>
+        <div class="text-xs text-slate-500 dark:text-slate-400">عدد الأخبار</div>
+        <div class="number text-3xl font-bold text-slate-800 dark:text-white"
+             id="newsCount">0</div>
       </div>
     </div>
 
-    <div class="card" onclick="location.href='kpi_productivity.html'">
-      <div class="icon">📊</div>
+    <div onclick="location.href='kpi_productivity.html'"
+         class="card group backdrop-blur-xl bg-white/70 dark:bg-slate-800/60
+                border border-white/30 dark:border-white/10
+                rounded-2xl p-5 flex items-center gap-4
+                cursor-pointer shadow
+                hover:shadow-glow hover:-translate-y-1
+                transition-all duration-300">
+
+      <div class="icon w-14 h-14 flex items-center justify-center rounded-xl
+                  bg-gradient-to-br from-purple-500 to-fuchsia-600 text-white text-xl">
+        📊
+      </div>
+
       <div>
-        <div class="label">مؤشرات الأداء KPI</div>
-        <div class="number" id="kpiCount">0</div>
+        <div class="text-xs text-slate-500 dark:text-slate-400">مؤشرات KPI</div>
+        <div class="number text-3xl font-bold text-slate-800 dark:text-white"
+             id="kpiCount">0</div>
       </div>
     </div>
 
-    <div class="card" onclick="location.href='exam.html'">
-      <div class="icon">📝</div>
+    <div onclick="location.href='exam.html'"
+         class="card group backdrop-blur-xl bg-white/70 dark:bg-slate-800/60
+                border border-white/30 dark:border-white/10
+                rounded-2xl p-5 flex items-center gap-4
+                cursor-pointer shadow
+                hover:shadow-glow hover:-translate-y-1
+                transition-all duration-300">
+
+      <div class="icon w-14 h-14 flex items-center justify-center rounded-xl
+                  bg-gradient-to-br from-pink-500 to-rose-600 text-white text-xl">
+        📝
+      </div>
+
       <div>
-        <div class="label">الموظفون الذين أدّوا الامتحان</div>
-        <div class="number" id="examUsersCount">0</div>
+        <div class="text-xs text-slate-500 dark:text-slate-400">
+          موظفو الامتحان
+        </div>
+        <div class="number text-3xl font-bold text-slate-800 dark:text-white"
+             id="examUsersCount">0</div>
       </div>
     </div>
 
   </div>
 
   <!-- ================= Charts ================= -->
-  <div class="charts-grid">
+  <div class="charts-grid grid gap-6">
 
-    <div class="chart-card">
-      <h3>عدد المستخدمين</h3>
+    <div class="chart-card backdrop-blur-xl bg-white/80 dark:bg-slate-800/70
+                border border-white/30 dark:border-white/10
+                rounded-2xl p-4 shadow">
+      <h3 class="text-sm text-center text-slate-600 dark:text-slate-300 mb-2">
+        عدد المستخدمين
+      </h3>
       <canvas id="usersChart"></canvas>
     </div>
 
-    <div class="chart-card">
-      <h3>عدد الرفوف</h3>
+    <div class="chart-card backdrop-blur-xl bg-white/80 dark:bg-slate-800/70
+                border border-white/30 dark:border-white/10
+                rounded-2xl p-4 shadow">
+      <h3 class="text-sm text-center text-slate-600 dark:text-slate-300 mb-2">
+        عدد الرفوف
+      </h3>
       <canvas id="shelvesChart"></canvas>
     </div>
 
-    <div class="chart-card">
-      <h3>عدد الكتب</h3>
+    <div class="chart-card backdrop-blur-xl bg-white/80 dark:bg-slate-800/70
+                border border-white/30 dark:border-white/10
+                rounded-2xl p-4 shadow">
+      <h3 class="text-sm text-center text-slate-600 dark:text-slate-300 mb-2">
+        عدد الكتب
+      </h3>
       <canvas id="booksChart"></canvas>
     </div>
 
-    <div class="chart-card">
-      <h3>تطور مؤشرات الأداء KPI</h3>
+    <div class="chart-card backdrop-blur-xl bg-white/80 dark:bg-slate-800/70
+                border border-white/30 dark:border-white/10
+                rounded-2xl p-4 shadow">
+      <h3 class="text-sm text-center text-slate-600 dark:text-slate-300 mb-2">
+        تطور مؤشرات KPI
+      </h3>
       <canvas id="kpiChart"></canvas>
     </div>
 
-    <div class="chart-card">
-      <h3>الموظفون الذين أدّوا الامتحان (شهري)</h3>
+    <div class="chart-card backdrop-blur-xl bg-white/80 dark:bg-slate-800/70
+                border border-white/30 dark:border-white/10
+                rounded-2xl p-4 shadow">
+      <h3 class="text-sm text-center text-slate-600 dark:text-slate-300 mb-2">
+        موظفو الامتحان (شهري)
+      </h3>
       <canvas id="examUsersChart"></canvas>
     </div>
 
@@ -106,7 +232,6 @@
 
 </div>
 
-<!-- JS -->
 <script type="module" src="dashboard.js"></script>
 </body>
 </html>

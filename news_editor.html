@@ -4,103 +4,104 @@
   <meta charset="UTF-8">
   <title>تحرير الخبر</title>
 
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { cairo: ['Cairo','sans-serif'] },
+          boxShadow: {
+            glow: '0 0 0 1px rgba(255,255,255,.08), 0 20px 40px rgba(0,0,0,.15)'
+          }
+        }
+      }
+    }
+  </script>
+
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
 
-  <!-- Global Style -->
+  <!-- Global -->
   <link rel="stylesheet" href="global.css">
-<link rel="stylesheet" href="sidebar.css">
+  <link rel="stylesheet" href="sidebar.css">
 
   <!-- CKEditor -->
   <script src="https://cdn.ckeditor.com/ckeditor5/40.2.0/classic/ckeditor.js"></script>
-
-  <style>
-    body {
-      background:#eef3f9;
-      font-family:"Cairo",sans-serif;
-    }
-
-    .editor-container {
-      margin-left:260px;
-      margin-top:100px;
-      background:#fff;
-      padding:30px;
-      border-radius:20px;
-      width:75%;
-    }
-
-    .editor-container h2 {
-      margin-bottom:6px;
-    }
-
-    .editor-container .desc {
-      color:#666;
-      margin-bottom:20px;
-    }
-
-    .actions {
-      margin-top:20px;
-      display:flex;
-      gap:10px;
-    }
-
-    .save-btn {
-      background:#4b6fff;
-      color:white;
-      padding:10px 22px;
-      border-radius:12px;
-      border:none;
-      cursor:pointer;
-    }
-
-    .delete-btn {
-      background:#ff4b4b;
-      color:white;
-      padding:10px 22px;
-      border-radius:12px;
-      border:none;
-      cursor:pointer;
-    }
-  </style>
 </head>
 
-<body>
+<body class="font-cairo bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-900 dark:to-slate-800 transition-colors">
 
 <!-- Sidebar -->
 <div id="sidebar"></div>
 <script src="sidebar.js"></script>
 
-<!-- Navbar -->
-<div class="top-nav">
-  <div class="nav-left">
-    <h1>تحرير الخبر</h1>
+<!-- Header -->
+<div class="ml-[260px] px-10 pt-10">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-3xl font-bold text-slate-800 dark:text-white">
+        تحرير الخبر
+      </h1>
+      <p class="text-slate-500 dark:text-slate-400 mt-1">
+        تعديل محتوى الخبر ونشره
+      </p>
+    </div>
   </div>
 </div>
 
-<!-- Editor -->
-<div class="editor-container">
-  <h2 id="newsTitle">—</h2>
-  <p id="newsDesc" class="desc">—</p>
+<!-- Editor Container -->
+<div class="ml-[260px] px-10 pb-24">
+  <div class="backdrop-blur-xl bg-white/85 dark:bg-slate-800/70
+              border border-white/30 dark:border-white/10
+              rounded-3xl p-8 shadow">
 
-  <div id="editor"></div>
+    <!-- News Info -->
+    <div class="mb-6">
+      <h2 id="newsTitle"
+          class="text-2xl font-bold text-slate-800 dark:text-white mb-1">—</h2>
+      <p id="newsDesc"
+         class="text-slate-600 dark:text-slate-400">—</p>
+    </div>
 
-  <div class="actions">
-    <button class="save-btn" onclick="saveArticle()">حفظ</button>
-    <button class="delete-btn" onclick="deleteArticle()">حذف</button>
+    <!-- Editor -->
+    <div class="bg-white dark:bg-slate-900 rounded-2xl
+                border border-slate-200 dark:border-slate-700
+                overflow-hidden mb-6">
+      <div id="editor" class="min-h-[300px]"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex gap-3">
+      <button
+        onclick="saveArticle()"
+        class="px-6 py-3 rounded-2xl
+               bg-gradient-to-r from-blue-500 to-indigo-600
+               text-white font-semibold shadow
+               hover:shadow-lg hover:-translate-y-0.5 transition">
+        💾 حفظ
+      </button>
+
+      <button
+        onclick="deleteArticle()"
+        class="px-6 py-3 rounded-2xl
+               bg-gradient-to-r from-rose-500 to-red-600
+               text-white font-semibold shadow
+               hover:shadow-lg hover:-translate-y-0.5 transition">
+        🗑 حذف
+      </button>
+    </div>
+
   </div>
 </div>
 
+<!-- ================= Firebase + CKEditor Logic (بدون تغيير) ================= -->
 <script type="module">
 import { db } from "./firebase.js";
-import {
-  doc,
-  getDoc,
-  updateDoc
-} from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
+import { doc, getDoc, updateDoc }
+from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
 
-// ===============================
-// Get selected news
-// ===============================
 const newsId = localStorage.getItem("selectedNewsId");
 
 if (!newsId) {
@@ -109,10 +110,6 @@ if (!newsId) {
 }
 
 const ref = doc(db, "news", newsId);
-
-// ===============================
-// CKEditor Init
-// ===============================
 let editorInstance;
 
 ClassicEditor.create(document.querySelector("#editor"))
@@ -128,26 +125,14 @@ ClassicEditor.create(document.querySelector("#editor"))
     }
   });
 
-// ===============================
-// Save
-// ===============================
 window.saveArticle = async () => {
-  await updateDoc(ref, {
-    content: editorInstance.getData()
-  });
+  await updateDoc(ref, { content: editorInstance.getData() });
   alert("✅ تم حفظ الخبر");
 };
 
-// ===============================
-// Delete
-// ===============================
 window.deleteArticle = async () => {
   if (!confirm("حذف محتوى الخبر؟")) return;
-
-  await updateDoc(ref, {
-    content: ""
-  });
-
+  await updateDoc(ref, { content: "" });
   editorInstance.setData("");
 };
 </script>
