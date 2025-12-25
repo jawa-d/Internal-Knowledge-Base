@@ -3,6 +3,14 @@
    - Active per section
    - Exam has its own section field
 =============================== */
+import { checkAccess } from "./security.js";
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const allowed = await checkAccess(["admin"]);
+  if (!allowed) return;
+
+  // 👇 كود الصفحة الطبيعي هنا
+});
 
 import { db } from "./firebase.js";
 import {
@@ -10,21 +18,7 @@ import {
   serverTimestamp, query, where
 } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
 
-/* ===============================
-   Admin Guard
-=============================== */
-const currentEmail = localStorage.getItem("kb_user_email") || "";
-if (!currentEmail) location.href = "login.html";
 
-const userSnap = await getDoc(doc(db, "users", currentEmail));
-const isAdmin =
-  userSnap.exists() &&
-  String(userSnap.data().role || "").toLowerCase() === "admin";
-
-if (!isAdmin) {
-  alert("غير مخول");
-  location.href = "dashboard.html";
-}
 
 /* ===============================
    UI

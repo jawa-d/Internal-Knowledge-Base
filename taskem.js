@@ -3,6 +3,14 @@
 // ⚠️ IMPORTANT:
 // - Base: Code #1 (UNCHANGED)
 // - Additions: Code #2 (ONLY ADDITIONS, clearly marked)
+import { checkAccess } from "./security.js";
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const allowed = await checkAccess(["admin"]);
+  if (!allowed) return;
+
+  // 👇 كود الصفحة الطبيعي هنا
+});
 
 import { db } from "./firebase.js";
 import {

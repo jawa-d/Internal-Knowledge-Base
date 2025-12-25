@@ -1,4 +1,13 @@
 import { db } from "./firebase.js";
+import { checkAccess } from "./security.js";
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const allowed = await checkAccess(["admin"]);
+  if (!allowed) return;
+
+  // 👇 كود الصفحة الطبيعي هنا
+});
+
 import { doc, getDoc, updateDoc, serverTimestamp } from
   "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
 
