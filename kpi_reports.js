@@ -1,44 +1,61 @@
+import { db } from "./firebase.js";
+import {
+  collection,
+  getDocs,
+  deleteDoc,
+  doc
+} from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
+
 const body = document.getElementById("reportsBody");
 const empty = document.getElementById("emptyState");
 
-function loadReports() {
-  const reports = JSON.parse(localStorage.getItem("kpi_reports") || "[]");
+/* ===============================
+   Load Reports (Firestore)
+================================ */
+async function loadReports() {
   body.innerHTML = "";
+  empty.style.display = "none";
 
-  if (reports.length === 0) {
+  const snap = await getDocs(collection(db, "kpi_reports"));
+
+  if (snap.empty) {
     empty.style.display = "block";
     return;
   }
 
-  empty.style.display = "none";
+  snap.forEach(d => {
+    const r = d.data();
 
-  reports.forEach(r => {
     body.innerHTML += `
       <tr>
-        <td class="kpi-name">${r.title || "Untitled KPI"}</td>
+        <td>${r.title || "Untitled KPI"}</td>
         <td>${r.month}</td>
-        <td>${r.createdBy}</td>
-        <td>${new Date(r.createdAt).toLocaleString()}</td>
-        <td class="actions">
-          <button class="btn-edit" onclick="editReport('${r.id}')">Edit</button>
-          <button class="btn-delete" onclick="deleteReport('${r.id}')">Delete</button>
+        <td>-</td>
+        <td>${r.createdAt?.toDate().toLocaleString() || "-"}</td>
+        <td>
+          <button onclick="editReport('${d.id}')">Edit</button>
+          <button onclick="deleteReport('${d.id}')">Delete</button>
         </td>
       </tr>
     `;
   });
 }
 
+/* ===============================
+   Edit
+================================ */
 window.editReport = function (id) {
-  localStorage.setItem("edit_kpi_report", id);
-  window.location.href = "kpi_productivity.html";
+  localStorage.setItem("edit_kpi_id", id);
+  location.href = "kpi_productivity.html";
 };
 
-window.deleteReport = function (id) {
+/* ===============================
+   Delete
+================================ */
+window.deleteReport = async function (id) {
   if (!confirm("Delete this KPI report?")) return;
 
-  let reports = JSON.parse(localStorage.getItem("kpi_reports") || "[]");
-  reports = reports.filter(r => r.id !== id);
-  localStorage.setItem("kpi_reports", JSON.stringify(reports));
+  await deleteDoc(doc(db, "kpi_reports", id));
   loadReports();
 };
 

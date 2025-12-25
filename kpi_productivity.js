@@ -2,12 +2,52 @@ import { db } from "./firebase.js";
 import {
   collection,
   addDoc,
-  serverTimestamp
+  serverTimestamp,
+  doc,
+  getDoc,
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
 
 const monthSelect = document.getElementById("monthSelect");
 const kpiTitleInput = document.getElementById("kpiTitle");
 
+const editId = localStorage.getItem("edit_kpi_id");
+
+/* ===============================
+   Load For Edit (Firestore)
+================================ */
+if (editId) {
+  loadForEdit(editId);
+}
+
+async function loadForEdit(id) {
+  const snap = await getDoc(doc(db, "kpi_reports", id));
+  if (!snap.exists()) return;
+
+  const data = snap.data();
+
+  kpiTitleInput.value = data.title || "";
+  monthSelect.value = data.month;
+
+  data.rows.forEach((r, i) => {
+    const row = document.querySelectorAll("#kpiTable tbody tr")[i];
+    if (!row) return;
+
+    row.querySelector(".kpi-name").value = r.kpi;
+    row.querySelector(".kpi-desc").value = r.desc;
+    row.querySelector(".kpi-measure").value = r.measure;
+    row.querySelector(".note").value = r.note;
+    row.querySelector(".iw").value = r.iw;
+    row.querySelector(".uw").value = r.uw;
+    row.querySelector(".input").value = r.input;
+    row.querySelector(".output").value = r.output;
+    row.querySelector(".sla").value = r.sla;
+  });
+}
+
+/* ===============================
+   Save / Update KPI (Firestore)
+================================ */
 window.saveReport = async function () {
 
   const rows = [];
@@ -34,24 +74,39 @@ window.saveReport = async function () {
     return;
   }
 
-  await addDoc(collection(db, "kpi_reports"), {
-    title: kpiTitleInput.value || "",
-    month: monthSelect.value,
-    createdAt: serverTimestamp(),
-    totalKpis: rows.length,
-    rows
-  });
+  if (editId) {
+    await updateDoc(doc(db, "kpi_reports", editId), {
+      title: kpiTitleInput.value || "",
+      month: monthSelect.value,
+      rows
+    });
 
-  alert("✔ KPI saved to Firestore");
+    localStorage.removeItem("edit_kpi_id");
+    alert("✔ KPI updated");
+  } else {
+    await addDoc(collection(db, "kpi_reports"), {
+      title: kpiTitleInput.value || "",
+      month: monthSelect.value,
+      createdAt: serverTimestamp(),
+      rows
+    });
+
+    alert("✔ KPI saved");
+  }
+
   location.href = "kpi_reports.html";
 };
 
-/* PDF */
+/* ===============================
+   PDF
+================================ */
 window.exportPDF = function () {
   html2pdf().from(document.getElementById("kpiTable")).save("KPI_Report.pdf");
 };
 
-/* Excel */
+/* ===============================
+   Excel
+================================ */
 window.exportExcel = function () {
   const tableHTML = document.getElementById("kpiTable").outerHTML;
   const blob = new Blob([tableHTML], { type: "application/vnd.ms-excel" });
