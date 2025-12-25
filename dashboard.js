@@ -151,4 +151,17 @@ async function loadDashboard() {
 /* ===============================
    Init
 ================================ */
+/* ===============================
+   ADD ONLY: Logout
+================================ */
+const logoutBtn = document.getElementById("logoutBtn");
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", () => {
+    if (!confirm("هل أنت متأكد من تسجيل الخروج؟")) return;
+
+    localStorage.clear();
+    location.href = "login.html";
+  });
+}
+
 loadDashboard();

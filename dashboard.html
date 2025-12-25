@@ -24,6 +24,9 @@
   <div class="dash-header">
     <h1>Dashboard</h1>
     <p>نظرة عامة على النظام</p>
+
+    <!-- ✅ ADD ONLY: Logout Button -->
+    <button id="logoutBtn" class="logout-btn">🚪 تسجيل الخروج</button>
   </div>
 
   <!-- ================= Cards ================= -->
@@ -61,7 +64,6 @@
       </div>
     </div>
 
-    <!-- ✅ Exam Attempts Card -->
     <div class="card" onclick="location.href='exam.html'">
       <div class="icon">📝</div>
       <div>
@@ -95,7 +97,6 @@
       <canvas id="kpiChart"></canvas>
     </div>
 
-    <!-- ✅ Exam Attempts Monthly Chart -->
     <div class="chart-card">
       <h3>الموظفون الذين أدّوا الامتحان (شهري)</h3>
       <canvas id="examUsersChart"></canvas>
