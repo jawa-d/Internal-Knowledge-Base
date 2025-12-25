@@ -94,3 +94,38 @@
   border-radius: 50%;
   transform: translateY(-50%);
 }
+.section-body {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.section.open .section-body {
+  max-height: 500px;
+  opacity: 1;
+}
+
+.section.open .arrow {
+  transform: rotate(90deg);
+}
+
+.item {
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #cbd5f5;
+}
+
+.item:hover {
+  background: rgba(255,255,255,0.12);
+  transform: translateX(6px);
+}
+
+.item.active {
+  background: linear-gradient(90deg,#2563eb,#4f46e5);
+  color: #fff;
+  font-weight: 600;
+}
