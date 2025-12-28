@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>قريباً</title>
+
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg1:#070A12;
+      --bg2:#0B1226;
+      --card: rgba(255,255,255,.08);
+      --card2: rgba(255,255,255,.05);
+      --stroke: rgba(255,255,255,.12);
+      --txt:#EAF0FF;
+      --muted: rgba(234,240,255,.75);
+      --accent:#7C3AED;   /* purple */
+      --accent2:#22D3EE;  /* cyan */
+      --accent3:#F472B6;  /* pink */
+      --shadow: 0 30px 90px rgba(0,0,0,.55);
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family:"Cairo", system-ui, sans-serif;
+      color:var(--txt);
+      overflow:hidden;
+      background: radial-gradient(1200px 700px at 20% 10%, rgba(124,58,237,.25), transparent 55%),
+                  radial-gradient(900px 600px at 85% 30%, rgba(34,211,238,.22), transparent 50%),
+                  radial-gradient(900px 700px at 40% 95%, rgba(244,114,182,.18), transparent 55%),
+                  linear-gradient(180deg, var(--bg1), var(--bg2));
+    }
+
+    /* ===== Animated Grid / Noise Overlay ===== */
+    .overlay{
+      position:fixed; inset:0;
+      pointer-events:none;
+      background:
+        linear-gradient(to right, rgba(255,255,255,.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,.04) 1px, transparent 1px);
+      background-size: 70px 70px;
+      mask-image: radial-gradient(500px 500px at 50% 40%, #000 35%, transparent 75%);
+      opacity:.35;
+      animation:gridMove 8s linear infinite;
+    }
+    @keyframes gridMove{
+      from{ transform: translate3d(0,0,0); }
+      to{ transform: translate3d(70px,70px,0); }
+    }
+
+    /* ===== Floating Glow Blobs ===== */
+    .blob{
+      position:fixed;
+      width:520px; height:520px;
+      border-radius: 999px;
+      filter: blur(40px);
+      opacity:.45;
+      mix-blend-mode: screen;
+      animation: floaty 10s ease-in-out infinite;
+      pointer-events:none;
+    }
+    .blob.b1{
+      left:-160px; top:-160px;
+      background: radial-gradient(circle at 30% 30%, rgba(124,58,237,.9), transparent 55%);
+      animation-duration: 11s;
+    }
+    .blob.b2{
+      right:-190px; top:70px;
+      background: radial-gradient(circle at 40% 40%, rgba(34,211,238,.9), transparent 55%);
+      animation-duration: 13s;
+      animation-delay: -2s;
+    }
+    .blob.b3{
+      left:20%; bottom:-220px;
+      background: radial-gradient(circle at 40% 40%, rgba(244,114,182,.9), transparent 55%);
+      animation-duration: 12s;
+      animation-delay: -4s;
+    }
+    @keyframes floaty{
+      0%,100%{ transform: translate3d(0,0,0) scale(1); }
+      50%{ transform: translate3d(40px,-30px,0) scale(1.08); }
+    }
+
+    /* ===== Particles Canvas ===== */
+    canvas#particles{
+      position:fixed; inset:0;
+      width:100%; height:100%;
+      pointer-events:none;
+      opacity:.9;
+    }
+
+    /* ===== Main Wrapper ===== */
+    .wrap{
+      position:relative;
+      height:100%;
+      display:grid;
+      place-items:center;
+      padding:24px;
+    }
+
+    /* ===== Card ===== */
+    .card{
+      width:min(860px, 92vw);
+      background: linear-gradient(180deg, var(--card), var(--card2));
+      border:1px solid var(--stroke);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      overflow:hidden;
+      position:relative;
+      transform: translateZ(0);
+      animation: cardPop 900ms cubic-bezier(.16,1,.3,1) both;
+    }
+
+    @keyframes cardPop{
+      from{ transform: translateY(18px) scale(.98); opacity:0; }
+      to{ transform: translateY(0) scale(1); opacity:1; }
+    }
+
+    /* neon border sweep */
+    .card::before{
+      content:"";
+      position:absolute; inset:-2px;
+      background: conic-gradient(from 180deg,
+        rgba(124,58,237,.0),
+        rgba(124,58,237,.8),
+        rgba(34,211,238,.8),
+        rgba(244,114,182,.8),
+        rgba(124,58,237,.0)
+      );
+      filter: blur(14px);
+      opacity:.55;
+      animation: spin 5.5s linear infinite;
+      z-index:0;
+    }
+    @keyframes spin{ to{ transform: rotate(360deg); } }
+
+    .inner{
+      position:relative;
+      z-index:1;
+      padding: 46px 42px 34px;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 14px;
+      border:1px solid rgba(255,255,255,.14);
+      border-radius: 999px;
+      background: rgba(0,0,0,.18);
+      color: rgba(234,240,255,.85);
+      font-weight:700;
+      letter-spacing:.2px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    }
+    .dot{
+      width:10px; height:10px;
+      border-radius:50%;
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+      box-shadow: 0 0 16px rgba(34,211,238,.6), 0 0 26px rgba(124,58,237,.45);
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+    @keyframes pulse{
+      0%,100%{ transform: scale(1); opacity:.85;}
+      50%{ transform: scale(1.35); opacity:1;}
+    }
+
+    h1{
+      margin:18px 0 8px;
+      font-size: clamp(28px, 3.4vw, 44px);
+      line-height:1.15;
+      font-weight:900;
+      letter-spacing:.2px;
+      position:relative;
+    }
+
+    /* shimmer text */
+    .shimmer{
+      background: linear-gradient(90deg,
+        rgba(234,240,255,.55),
+        rgba(234,240,255,1),
+        rgba(34,211,238,1),
+        rgba(124,58,237,1),
+        rgba(244,114,182,1),
+        rgba(234,240,255,1),
+        rgba(234,240,255,.55)
+      );
+      background-size: 240% 100%;
+      -webkit-background-clip:text;
+      background-clip:text;
+      color: transparent;
+      animation: shimmer 3.8s ease-in-out infinite;
+      text-shadow: 0 18px 40px rgba(0,0,0,.35);
+    }
+    @keyframes shimmer{
+      0%{ background-position: 0% 50%; }
+      50%{ background-position: 100% 50%; }
+      100%{ background-position: 0% 50%; }
+    }
+
+    p{
+      margin: 0;
+      font-size: clamp(15px, 1.8vw, 20px);
+      color: var(--muted);
+      line-height: 1.9;
+    }
+
+    .msg{
+      margin-top: 14px;
+      padding: 18px 18px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.14);
+      position:relative;
+      overflow:hidden;
+    }
+
+    .msg::after{
+      content:"";
+      position:absolute; inset:0;
+      background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,.08) 45%, transparent 70%);
+      transform: translateX(130%);
+      animation: gloss 2.6s ease-in-out infinite;
+    }
+    @keyframes gloss{
+      0%{ transform: translateX(130%); }
+      55%{ transform: translateX(-130%); }
+      100%{ transform: translateX(-130%); }
+    }
+
+    .actions{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:18px;
+    }
+    .btn{
+      border:0;
+      cursor:pointer;
+      font-family:inherit;
+      font-weight:800;
+      border-radius: 16px;
+      padding: 12px 16px;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+      user-select:none;
+    }
+    .btn:active{ transform: translateY(1px) scale(.99); }
+
+    .btn.primary{
+      color:#07101A;
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+      box-shadow: 0 18px 46px rgba(34,211,238,.18), 0 18px 46px rgba(124,58,237,.18);
+    }
+    .btn.primary:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 22px 70px rgba(34,211,238,.22), 0 22px 70px rgba(124,58,237,.22);
+    }
+
+    .btn.ghost{
+      color: rgba(234,240,255,.92);
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.14);
+    }
+    .btn.ghost:hover{
+      transform: translateY(-2px);
+      background: rgba(255,255,255,.08);
+      box-shadow: 0 18px 46px rgba(0,0,0,.25);
+    }
+
+    .footer{
+      margin-top: 18px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+      color: rgba(234,240,255,.6);
+      font-size: 13px;
+      border-top: 1px solid rgba(255,255,255,.10);
+      padding-top: 14px;
+    }
+
+    .status{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+    }
+    .bar{
+      width:140px; height:10px;
+      border-radius:999px;
+      background: rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.10);
+      overflow:hidden;
+      position:relative;
+    }
+    .bar > span{
+      position:absolute; inset:0;
+      width:45%;
+      border-radius:999px;
+      background: linear-gradient(90deg, var(--accent3), var(--accent2), var(--accent));
+      animation: load 2.4s ease-in-out infinite;
+      filter: saturate(1.2);
+    }
+    @keyframes load{
+      0%{ transform: translateX(-60%); }
+      50%{ transform: translateX(140%); }
+      100%{ transform: translateX(140%); }
+    }
+
+    /* subtle floating */
+    .float{
+      animation: gentle 4.2s ease-in-out infinite;
+    }
+    @keyframes gentle{
+      0%,100%{ transform: translateY(0); }
+      50%{ transform: translateY(-6px); }
+    }
+
+    /* Responsive */
+    @media (max-width:520px){
+      .inner{ padding: 34px 20px 22px; }
+      .bar{ width:110px; }
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="particles"></canvas>
+  <div class="overlay"></div>
+
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+
+  <div class="wrap">
+    <div class="card float">
+      <div class="inner">
+        <div class="badge">
+          <span class="dot"></span>
+          <span>قريباً</span>
+        </div>
+
+        <h1 class="shimmer">سيتم فتح هذه الصفحة بعد الانتهاء من الامتحان</h1>
+
+        <div class="msg">
+          <p>
+            شكراً لكم 🤍<br/>
+            سيتم تفعيل هذه الصفحة تلقائياً بعد إكمال الامتحان وإرسال النتائج.
+          </p>
+        </div>
+
+        <div class="actions">
+          <button class="btn primary" onclick="location.href='dashboard.html'">← الرجوع للداشبورد</button>
+          <button class="btn ghost" onclick="location.reload()">↻ تحديث</button>
+        </div>
+
+        <div class="footer">
+          <div class="status">
+            <span>جارٍ التجهيز</span>
+            <div class="bar"><span></span></div>
+          </div>
+          <div>© Customer Care Knowledge Base</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================
+    // Strong Particles Animation (Canvas)
+    // =========================
+    const canvas = document.getElementById("particles");
+    const ctx = canvas.getContext("2d");
+
+    let w, h, dpr;
+    function resize(){
+      dpr = Math.min(2, window.devicePixelRatio || 1);
+      w = canvas.width  = Math.floor(innerWidth  * dpr);
+      h = canvas.height = Math.floor(innerHeight * dpr);
+      canvas.style.width = innerWidth + "px";
+      canvas.style.height = innerHeight + "px";
+      ctx.setTransform(1,0,0,1,0,0);
+    }
+    window.addEventListener("resize", resize);
+    resize();
+
+    const rand = (a,b)=> Math.random()*(b-a)+a;
+
+    const particles = [];
+    const COUNT = Math.floor(Math.min(180, Math.max(90, innerWidth/8)));
+
+    function makeParticle(){
+      const p = {
+        x: rand(0, w),
+        y: rand(0, h),
+        r: rand(0.8, 2.6) * dpr,
+        vx: rand(-0.45, 0.45) * dpr,
+        vy: rand(-0.30, 0.55) * dpr,
+        a: rand(0.25, 0.9),
+        tw: rand(0.002, 0.007),
+        phase: rand(0, Math.PI*2)
+      };
+      return p;
+    }
+
+    for(let i=0;i<COUNT;i++) particles.push(makeParticle());
+
+    function draw(){
+      ctx.clearRect(0,0,w,h);
+
+      // soft vignette
+      const g = ctx.createRadialGradient(w*0.5, h*0.4, 0, w*0.5, h*0.4, Math.max(w,h)*0.7);
+      g.addColorStop(0, "rgba(0,0,0,0)");
+      g.addColorStop(1, "rgba(0,0,0,0.55)");
+      ctx.fillStyle = g;
+      ctx.fillRect(0,0,w,h);
+
+      // particles
+      for(const p of particles){
+        p.x += p.vx;
+        p.y += p.vy;
+
+        // wrap
+        if(p.x < -20*dpr) p.x = w + 20*dpr;
+        if(p.x > w + 20*dpr) p.x = -20*dpr;
+        if(p.y < -20*dpr) p.y = h + 20*dpr;
+        if(p.y > h + 20*dpr) p.y = -20*dpr;
+
+        // twinkle
+        p.phase += p.tw;
+        const alpha = p.a * (0.55 + 0.45 * Math.sin(p.phase));
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+        ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+        ctx.fill();
+      }
+
+      // connect near particles (strong effect)
+      for(let i=0;i<particles.length;i++){
+        for(let j=i+1;j<particles.length;j++){
+          const a = particles[i], b = particles[j];
+          const dx = a.x - b.x, dy = a.y - b.y;
+          const dist = Math.sqrt(dx*dx + dy*dy);
+          const max = 150 * dpr;
+
+          if(dist < max){
+            const t = 1 - (dist / max);
+            ctx.strokeStyle = `rgba(34,211,238,${0.10 * t})`;
+            ctx.lineWidth = 1 * dpr;
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      requestAnimationFrame(draw);
+    }
+    draw();
+  </script>
+</body>
+</html>
