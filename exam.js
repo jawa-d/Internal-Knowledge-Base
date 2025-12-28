@@ -126,6 +126,7 @@ function renderQuestionsForSection(section){
     const card = document.createElement("div");
     card.className = "qcard";
     card.dataset.qid = q.id;
+    card.dataset.index = idx + 1; // ⭐ خاص بالدزاين (رقم السؤال)
 
     card.innerHTML = `
       <div class="qhead">
@@ -152,9 +153,18 @@ function renderQuestionsForSection(section){
           <span>False</span>
         </label>
       `;
+
       opts.querySelectorAll("input").forEach(inp=>{
-        inp.addEventListener("change", ()=> onAnswer(q.id, inp.value));
+        inp.addEventListener("change", ()=>{
+          // 🟢 Design: تمييز الجواب المختار
+          opts.querySelectorAll(".opt").forEach(o=>o.classList.remove("selected"));
+          inp.closest(".opt")?.classList.add("selected");
+
+          // ✅ المنطق الأصلي بدون تغيير
+          onAnswer(q.id, inp.value);
+        });
       });
+
     } else if (q.type === "mcq"){
       const ops = (q.options && q.options.length) ? q.options : ["", "", "", ""];
       opts.innerHTML = ops.map((o,i)=>`
@@ -163,9 +173,18 @@ function renderQuestionsForSection(section){
           <span>${o || `خيار ${i+1}`}</span>
         </label>
       `).join("");
+
       opts.querySelectorAll("input").forEach(inp=>{
-        inp.addEventListener("change", ()=> onAnswer(q.id, inp.value));
+        inp.addEventListener("change", ()=>{
+          // 🟢 Design: تمييز الجواب المختار
+          opts.querySelectorAll(".opt").forEach(o=>o.classList.remove("selected"));
+          inp.closest(".opt")?.classList.add("selected");
+
+          // ✅ المنطق الأصلي بدون تغيير
+          onAnswer(q.id, inp.value);
+        });
       });
+
     } else {
       opts.innerHTML = `<textarea placeholder="اكتب إجابتك هنا..."></textarea>`;
       const ta = opts.querySelector("textarea");
@@ -177,6 +196,7 @@ function renderQuestionsForSection(section){
 
   btnSubmit.disabled = false;
 }
+
 
 let saveTimer = null;
 function onAnswer(qid, value){
