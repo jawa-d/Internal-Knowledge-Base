@@ -4,13 +4,24 @@
    - Exam has its own section field
 =============================== */
 import { checkAccess } from "./security.js";
+let currentEmail = "";
 
 document.addEventListener("DOMContentLoaded", async () => {
   const allowed = await checkAccess(["admin"]);
   if (!allowed) return;
 
+  // ✅ تحديث مهم
+  currentEmail = localStorage.getItem("kb_user_email");
+
+  if (!currentEmail) {
+    alert("انتهت الجلسة، يرجى تسجيل الدخول مرة أخرى");
+    location.href = "login.html";
+    return;
+  }
+
   // 👇 كود الصفحة الطبيعي هنا
 });
+
 
 import { db } from "./firebase.js";
 import {
