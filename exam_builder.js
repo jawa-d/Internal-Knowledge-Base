@@ -66,18 +66,22 @@ function uid() {
 function normalizeQuestion(q) {
   const type = q.type || "tf";
   const defaultMode = (type === "essay" || type === "short") ? "manual" : "auto";
+
   return {
     id: q.id || uid(),
     section: q.section || "Inbound",
     type,
+    subType: q.subType || "single", // ✅ NEW (single | multi)
     title: q.title || "",
     points: Number(q.points ?? 10),
     correctionMode: q.correctionMode || defaultMode,
     options: Array.isArray(q.options) ? q.options : [],
     correctAnswer: q.correctAnswer ?? "",
-    image: q.image || ""   // ✅ NEW
+    correctAnswers: Array.isArray(q.correctAnswers) ? q.correctAnswers : [], // ✅ NEW
+    image: q.image || ""
   };
 }
+
 
 
 function escapeHtml(s) {
@@ -220,38 +224,53 @@ if (removeBtn) {
       const m = examData.questions[idx].correctionMode;
 
       optsBox.innerHTML = "";
+if (t === "mcq") {
+  if (!examData.questions[idx].options.length) {
+    examData.questions[idx].options = ["", "", "", ""];
+  }
 
-      if (t === "mcq") {
-        if (!examData.questions[idx].options || !examData.questions[idx].options.length) {
-          examData.questions[idx].options = ["", "", "", ""];
-        }
+  const isMulti = examData.questions[idx].subType === "multi";
 
-        optsBox.innerHTML = `
-          <div class="field">
-            <label>خيارات MCQ</label>
-            ${examData.questions[idx].options.map((o, i) => `
-              <div class="optRow">
-                <input class="opt" data-i="${i}" value="${escapeHtml(o)}" placeholder="خيار ${i + 1}">
-              </div>
-            `).join("")}
-          </div>
+  optsBox.innerHTML = `
+    <div class="field">
+      <label>نوع MCQ</label>
+      <select class="qSubType">
+        <option value="single" ${!isMulti ? "selected" : ""}>إجابة واحدة</option>
+        <option value="multi" ${isMulti ? "selected" : ""}>أكثر من إجابة (Checkbox)</option>
+      </select>
+    </div>
 
-          <div class="row">
-            <button class="btn addOpt" type="button">+ خيار</button>
-            <button class="btn delOpt" type="button" style="background:#fecaca">- خيار</button>
+    <div class="field">
+      <label>الخيارات</label>
+      ${examData.questions[idx].options.map((o, i) => `
+        <div class="optRow">
+          <input class="opt" data-i="${i}" value="${escapeHtml(o)}" placeholder="خيار ${i + 1}">
+          ${
+            isMulti
+              ? `<input type="checkbox" class="qCorrectMulti" data-i="${i}"
+                   ${examData.questions[idx].correctAnswers.includes(i) ? "checked" : ""}>`
+              : ""
+          }
+        </div>
+      `).join("")}
+    </div>
 
-            <div class="field" style="min-width:260px">
-              <label>الإجابة الصحيحة (إذا تلقائي)</label>
-              <input class="qCorrect" value="${escapeHtml(examData.questions[idx].correctAnswer)}" placeholder="اكتب نص الخيار الصحيح">
-            </div>
+    <div class="row">
+      <button class="btn addOpt" type="button">+ خيار</button>
+      <button class="btn delOpt" type="button" style="background:#fecaca">- خيار</button>
 
-            <div class="field" style="min-width:220px">
-              <label>ملاحظة</label>
-              <input value="${m === "manual" ? "يدوي" : "تلقائي"}" disabled>
-            </div>
-          </div>
-        `;
-      } else if (t === "tf") {
+      ${
+        !isMulti ? `
+        <div class="field" style="min-width:260px">
+          <label>الإجابة الصحيحة</label>
+          <input class="qCorrect" value="${escapeHtml(examData.questions[idx].correctAnswer)}">
+        </div>` : ""
+      }
+    </div>
+  `;
+}
+
+       else if (t === "tf") {
         optsBox.innerHTML = `
           <div class="row">
             <div class="field" style="min-width:260px">
@@ -314,10 +333,21 @@ if (removeBtn) {
 
     // Options input
     optsBox.addEventListener("input", (e) => {
-      if (e.target.classList.contains("opt")) {
-        const i = Number(e.target.dataset.i);
-        examData.questions[idx].options[i] = e.target.value;
-      }
+   if (e.target.classList.contains("qSubType")) {
+  examData.questions[idx].subType = e.target.value;
+  examData.questions[idx].correctAnswers = [];
+  render();
+}
+
+if (e.target.classList.contains("qCorrectMulti")) {
+  const i = Number(e.target.dataset.i);
+  const arr = examData.questions[idx].correctAnswers;
+
+  if (e.target.checked && !arr.includes(i)) arr.push(i);
+  if (!e.target.checked)
+    examData.questions[idx].correctAnswers = arr.filter(x => x !== i);
+}
+
       if (e.target.classList.contains("qCorrect")) {
         examData.questions[idx].correctAnswer = e.target.value;
       }
