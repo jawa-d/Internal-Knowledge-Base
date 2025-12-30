@@ -46,6 +46,15 @@
         إدارة المستخدمين والصلاحيات
       </p>
     </div>
+
+    <!-- ➕ Add User Button -->
+    <button
+      onclick="openAddUser()"
+      class="bg-emerald-500 hover:bg-emerald-600
+             text-white px-6 py-3 rounded-xl
+             font-bold shadow transition">
+      ➕ إضافة مستخدم
+    </button>
   </div>
 </div>
 
@@ -114,6 +123,45 @@
       <button onclick="saveUser()" class="btn-save">حفظ</button>
       <button onclick="closePopup()" class="btn-cancel">إلغاء</button>
     </div>
+  </div>
+</div>
+
+<!-- ================= Popup Add User ================= -->
+<div id="addUserOverlay" class="popup-overlay">
+  <div class="popup backdrop-blur-xl bg-white/90 dark:bg-slate-900/80">
+
+    <h3 class="text-xl font-bold mb-6 text-white">
+      إضافة مستخدم جديد
+    </h3>
+
+    <label>الإيميل</label>
+    <input
+      id="addEmail"
+      type="email"
+      placeholder="name@earthlink.iq"
+      class="w-full p-3 mb-4 rounded-xl outline-none"
+    />
+
+    <label>الصلاحية</label>
+    <select id="addRole">
+      <option value="none">بدون</option>
+      <option value="viewer">Viewer</option>
+      <option value="editor">Editor</option>
+      <option value="admin">Admin</option>
+    </select>
+
+    <label>الحالة</label>
+    <select id="addStatus">
+      <option value="pending">Pending</option>
+      <option value="active">Active</option>
+      <option value="disabled">Disabled</option>
+    </select>
+
+    <div class="popup-actions">
+      <button onclick="createUser()" class="btn-save">إضافة</button>
+      <button onclick="closeAddUser()" class="btn-cancel">إلغاء</button>
+    </div>
+
   </div>
 </div>
 

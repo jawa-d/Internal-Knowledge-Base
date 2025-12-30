@@ -4,15 +4,17 @@ import {
   getDocs,
   doc,
   updateDoc,
-  getDoc
+  getDoc,
+  setDoc
 } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
 import { checkAccess } from "./security.js";
 
+/* =====================
+   SECURITY GUARD
+===================== */
 document.addEventListener("DOMContentLoaded", async () => {
   const allowed = await checkAccess(["admin"]);
   if (!allowed) return;
-
-  // 👇 كود الصفحة الطبيعي هنا
 });
 
 /* =====================
@@ -85,24 +87,19 @@ function renderUsers() {
     `;
   });
 
-  // 🔐 Show mask if not admin
+  // 🔐 Mask
   const mask = document.getElementById("usersMask");
-  if (!isAdmin) {
-    mask.style.display = "flex";
-  } else {
-    mask.style.display = "none";
-  }
+  mask.style.display = isAdmin ? "none" : "flex";
 }
 
 /* =====================
-   EDIT USER (ADMIN ONLY)
+   EDIT USER (ADMIN)
 ===================== */
 window.editUser = function (email) {
   if (!isAdmin) return;
 
   editingEmail = email;
   const user = USERS.find(u => u.email === email);
-
   if (!user) return;
 
   document.getElementById("editRole").value = user.role || "none";
@@ -112,7 +109,7 @@ window.editUser = function (email) {
 };
 
 /* =====================
-   CLOSE POPUP
+   CLOSE EDIT POPUP
 ===================== */
 window.closePopup = function () {
   document.getElementById("popupOverlay").style.display = "none";
@@ -120,7 +117,7 @@ window.closePopup = function () {
 };
 
 /* =====================
-   SAVE USER (ADMIN ONLY)
+   SAVE EDIT USER
 ===================== */
 window.saveUser = async function () {
   if (!isAdmin || !editingEmail) return;
@@ -128,9 +125,7 @@ window.saveUser = async function () {
   const newRole = document.getElementById("editRole").value;
   const newStatus = document.getElementById("editStatus").value;
 
-  const userRef = doc(db, "users", editingEmail);
-
-  await updateDoc(userRef, {
+  await updateDoc(doc(db, "users", editingEmail), {
     role: newRole,
     status: newStatus
   });
@@ -138,6 +133,55 @@ window.saveUser = async function () {
   alert("✔ تم تحديث بيانات المستخدم");
 
   closePopup();
+  loadUsers();
+};
+
+/* =====================
+   ➕ ADD USER POPUP
+===================== */
+window.openAddUser = function () {
+  if (!isAdmin) return;
+  document.getElementById("addUserOverlay").style.display = "flex";
+};
+
+window.closeAddUser = function () {
+  document.getElementById("addUserOverlay").style.display = "none";
+};
+
+/* =====================
+   CREATE USER (Firestore)
+===================== */
+window.createUser = async function () {
+  if (!isAdmin) return;
+
+  const email = document.getElementById("addEmail").value.trim();
+  const role = document.getElementById("addRole").value;
+  const status = document.getElementById("addStatus").value;
+
+  if (!email) {
+    alert("⚠️ أدخل الإيميل");
+    return;
+  }
+
+  const userRef = doc(db, "users", email);
+  const snap = await getDoc(userRef);
+
+  if (snap.exists()) {
+    alert("⚠️ المستخدم موجود مسبقًا");
+    return;
+  }
+
+  await setDoc(userRef, {
+    email,
+    role,
+    status,
+    name: "",
+    createdAt: new Date()
+  });
+
+  alert("✅ تم إضافة المستخدم");
+
+  closeAddUser();
   loadUsers();
 };
 

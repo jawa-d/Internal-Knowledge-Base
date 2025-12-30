@@ -8,6 +8,10 @@ body {
   padding: 30px;
 }
 
+/* =====================
+   Users Table
+===================== */
+
 .users-table {
   width: 100%;
   border-collapse: collapse;
@@ -22,6 +26,7 @@ body {
   color: white;
   padding: 12px;
   text-align: center;
+  font-weight: 700;
 }
 
 .users-table td {
@@ -30,21 +35,37 @@ body {
   text-align: center;
 }
 
+/* =====================
+   Buttons
+===================== */
+
 .btn-edit {
   background: #0038a8;
   color: white;
   border: none;
-  padding: 6px 12px;
-  border-radius: 6px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.25s;
+}
+.btn-edit:hover {
+  background: #002f8f;
 }
 
 .btn-delete {
   background: #00c2a8;
   color: white;
   border: none;
-  padding: 6px 12px;
-  border-radius: 6px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
 }
+
+/* =====================
+   Status
+===================== */
 
 .status-active {
   color: #00c2a8;
@@ -59,16 +80,15 @@ body {
   font-weight: bold;
 }
 
-/* Popup */
 /* =====================
-   Popup Modern Glass 
-=====================*/
+   Popup Modern Glass
+===================== */
 
 .popup-overlay {
   position: fixed;
-  top: 0; 
+  top: 0;
   left: 0;
-  width: 100%; 
+  width: 100%;
   height: 100%;
   background: rgba(0,0,0,0.55);
   backdrop-filter: blur(4px);
@@ -85,11 +105,11 @@ body {
 }
 
 .popup {
-  width: 400px;
+  width: 420px;
   background: rgba(255,255,255,0.2);
   backdrop-filter: blur(18px);
   padding: 30px;
-  border-radius: 18px;
+  border-radius: 20px;
   border: 1px solid rgba(255,255,255,0.25);
   box-shadow: 0 10px 35px rgba(0,0,0,0.15);
   animation: popUp 0.3s ease;
@@ -97,65 +117,84 @@ body {
 }
 
 @keyframes popUp {
-  from { opacity: 0; transform: scale(0.8); }
+  from { opacity: 0; transform: scale(0.85); }
   to   { opacity: 1; transform: scale(1); }
 }
 
 .popup h3 {
   font-size: 22px;
-  margin-bottom: 20px;
+  margin-bottom: 22px;
   color: #fff;
 }
+
+/* =====================
+   Popup Form Elements
+===================== */
 
 .popup label {
   display: block;
-  font-size: 15px;
+  font-size: 14px;
   color: #fff;
   margin-bottom: 6px;
   text-align: right;
+  font-weight: 600;
 }
 
-.popup select {
+.popup select,
+.popup input {
   width: 100%;
   padding: 12px;
   margin-bottom: 18px;
-  border-radius: 10px;
+  border-radius: 12px;
   border: none;
-  background: rgba(255,255,255,0.85);
+  background: rgba(255,255,255,0.9);
   font-size: 15px;
   outline: none;
+  transition: 0.25s;
 }
+
+.popup select:focus,
+.popup input:focus {
+  box-shadow: 0 0 0 3px rgba(0,194,168,0.35);
+}
+
+/* =====================
+   Popup Actions
+===================== */
 
 .popup-actions {
   display: flex;
   justify-content: space-between;
+  gap: 10px;
   margin-top: 10px;
 }
 
-/* زر الحفظ */
+/* Save Button */
 .btn-save {
   background: #00c2a8;
   color: #fff;
   padding: 12px 26px;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 15px;
+  font-weight: 700;
   cursor: pointer;
   transition: 0.25s;
 }
 .btn-save:hover {
-  background: #00c2a8;
+  background: #00a896;
   transform: translateY(-2px);
 }
 
-/* زر الإلغاء */
+/* Cancel Button */
 .btn-cancel {
-  background: #00c2a8;
+  background: #9ca3af;
   color: #fff;
   padding: 12px 26px;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 15px;
+  font-weight: 700;
   cursor: pointer;
   transition: 0.25s;
 }
@@ -163,6 +202,7 @@ body {
   background: #dc2626;
   transform: translateY(-2px);
 }
+
 /* =====================
    Unauthorized Mask
 ===================== */
@@ -197,6 +237,11 @@ body {
   filter: blur(5px);
   user-select: none;
 }
+
+/* =====================
+   Footer
+===================== */
+
 .footer {
   text-align: center;
   padding: 18px 0;
