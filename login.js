@@ -50,7 +50,6 @@ sendCodeBtn.onclick = async () => {
   }
 
   generatedCode = String(Math.floor(100000 + Math.random() * 900000));
-  console.log("Verification Code:", generatedCode);
 
   codeBox.classList.remove("hidden");
   showMessage("✔ تم إرسال رمز التحقق", "success");
