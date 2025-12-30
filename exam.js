@@ -99,9 +99,11 @@ function normalizeQuestion(q){
     points: num(q.points,1),
     correctionMode,
     options: Array.isArray(q.options)? q.options : [],
-    correctAnswer: q.correctAnswer ?? ""
+    correctAnswer: q.correctAnswer ?? "",
+    image: q.image || "" // ✅ NEW
   };
 }
+
 
 function renderQuestionsForSection(section){
   questionsBox.innerHTML = "";
@@ -128,17 +130,27 @@ function renderQuestionsForSection(section){
     card.dataset.qid = q.id;
     card.dataset.index = idx + 1; // ⭐ خاص بالدزاين (رقم السؤال)
 
-    card.innerHTML = `
-      <div class="qhead">
-        <div class="qtitle">${idx+1}. ${q.title || "—"}</div>
-        <div class="qmeta">
-          <span class="badge">${q.type}</span>
-          <span class="badge">${q.correctionMode === "manual" ? "🟡 يدوي" : "⚡ تلقائي"}</span>
-          <span class="badge">الدرجة: ${Math.max(1,num(q.points,1))}</span>
-        </div>
-      </div>
-      <div class="opts"></div>
-    `;
+   card.innerHTML = `
+  <div class="qhead">
+    <div class="qtitle">${idx+1}. ${q.title || "—"}</div>
+    <div class="qmeta">
+      <span class="badge">${q.type}</span>
+      <span class="badge">${q.correctionMode === "manual" ? "🟡 يدوي" : "⚡ تلقائي"}</span>
+      <span class="badge">الدرجة: ${Math.max(1,num(q.points,1))}</span>
+    </div>
+  </div>
+
+  ${
+    q.image
+    ? `<div class="q-image-wrap">
+         <img src="${q.image}" alt="question image">
+       </div>`
+    : ``
+  }
+
+  <div class="opts"></div>
+`;
+
 
     const opts = card.querySelector(".opts");
 

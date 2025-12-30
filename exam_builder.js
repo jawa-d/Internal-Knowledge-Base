@@ -2,10 +2,6 @@
    exam_builder.js ✅ FULL (Updated)
    - Active per section
    - Exam has its own section field
-   ✅ NEW:
-   - Upload image per question (Firebase Storage)
-   - Show image preview inside question card
-   - Delete image (from Storage + clear fields)
 =============================== */
 import { checkAccess } from "./security.js";
 let currentEmail = "";
@@ -26,22 +22,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   // 👇 كود الصفحة الطبيعي هنا
 });
 
+
 import { db } from "./firebase.js";
 import {
   collection, addDoc, getDocs, getDoc, doc, updateDoc, deleteDoc,
   serverTimestamp, query, where
 } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
 
-/* ✅ NEW: Storage */
-import {
-  getStorage,
-  ref as sRef,
-  uploadBytes,
-  getDownloadURL,
-  deleteObject
-} from "https://www.gstatic.com/firebasejs/10.7.2/firebase-storage.js";
 
-const storage = getStorage();
 
 /* ===============================
    UI
@@ -80,19 +68,17 @@ function normalizeQuestion(q) {
   const defaultMode = (type === "essay" || type === "short") ? "manual" : "auto";
   return {
     id: q.id || uid(),
-    section: q.section || "Inbound", // Question section
+    section: q.section || "Inbound",
     type,
     title: q.title || "",
     points: Number(q.points ?? 10),
     correctionMode: q.correctionMode || defaultMode,
     options: Array.isArray(q.options) ? q.options : [],
     correctAnswer: q.correctAnswer ?? "",
-
-    /* ✅ NEW: Image fields */
-    imageUrl: q.imageUrl || "",
-    imagePath: q.imagePath || ""
+    image: q.image || ""   // ✅ NEW
   };
 }
+
 
 function escapeHtml(s) {
   return String(s ?? "")
@@ -101,39 +87,6 @@ function escapeHtml(s) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
-}
-
-/* ===============================
-   ✅ NEW Helpers (Image)
-=============================== */
-function safeFileName(name) {
-  return String(name || "file")
-    .replace(/[^\w.\-]+/g, "_")
-    .slice(0, 60);
-}
-
-async function uploadQuestionImage(file, qid) {
-  if (!file) return { url: "", path: "" };
-
-  if (!examId) {
-    alert("⚠️ لازم تنشئ/تحمّل Exam أولاً قبل رفع صورة.");
-    return { url: "", path: "" };
-  }
-
-  const extName = safeFileName(file.name);
-  const path = `exam_question_images/${examId}/${qid}/${Date.now()}_${extName}`;
-  const fileRef = sRef(storage, path);
-
-  await uploadBytes(fileRef, file);
-  const url = await getDownloadURL(fileRef);
-
-  return { url, path };
-}
-
-async function deleteQuestionImage(path) {
-  if (!path) return;
-  const fileRef = sRef(storage, path);
-  await deleteObject(fileRef);
 }
 
 /* ===============================
@@ -220,120 +173,47 @@ function render() {
         </div>
       </div>
 
-      <!-- ✅ NEW: Image block -->
       <div class="hr"></div>
-      <div class="qimgBox"></div>
+      <div class="q-image-box">
+  ${q.image ? `<img class="q-image-preview" src="${q.image}">` : ""}
+  
+  <div class="q-image-actions">
+    <button class="q-image-upload">📷 إضافة / تغيير صورة</button>
+    ${q.image ? `<button class="q-image-remove">🗑 حذف الصورة</button>` : ""}
+    <input type="file" accept="image/*" style="display:none">
+  </div>
+</div>
 
-      <div class="hr"></div>
       <div class="opts"></div>
     `;
+const imgInput = el.querySelector('input[type="file"]');
+const uploadBtn = el.querySelector('.q-image-upload');
+const removeBtn = el.querySelector('.q-image-remove');
+
+uploadBtn.onclick = () => imgInput.click();
+
+imgInput.onchange = () => {
+  const file = imgInput.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onloadend = () => {
+    examData.questions[idx].image = reader.result;
+    render();
+  };
+  reader.readAsDataURL(file);
+};
+
+if (removeBtn) {
+  removeBtn.onclick = () => {
+    examData.questions[idx].image = "";
+    render();
+  };
+}
 
     const optsBox = el.querySelector(".opts");
     const typeSel = el.querySelector(".qType");
     const modeSel = el.querySelector(".qMode");
-    const imgBox  = el.querySelector(".qimgBox");
-
-    /* ✅ NEW: Render image UI */
-    function renderImageBox() {
-      const qq = examData.questions[idx];
-
-      const hasImage = !!qq.imageUrl;
-      imgBox.innerHTML = `
-        <div class="field" style="margin-top:4px">
-          <label>صورة السؤال (اختياري)</label>
-
-          <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center">
-            <input class="qImgInput" type="file" accept="image/*" />
-
-            <button class="btn qImgDelete" type="button"
-              style="background:#ef4444;color:#fff; display:${hasImage ? "inline-flex" : "none"}; align-items:center; gap:8px;">
-              حذف الصورة
-            </button>
-
-            <span class="small qImgHint" style="color:#64748b"></span>
-          </div>
-
-          <div class="qImgPreviewWrap" style="margin-top:10px; display:${hasImage ? "block" : "none"};">
-            <img class="qImgPreview" src="${hasImage ? escapeHtml(qq.imageUrl) : ""}"
-              style="max-width:100%; height:auto; border-radius:14px; border:1px solid #e2e8f0; box-shadow:0 10px 26px rgba(2,6,23,.08);" />
-          </div>
-        </div>
-      `;
-
-      const fileInput = imgBox.querySelector(".qImgInput");
-      const delBtn = imgBox.querySelector(".qImgDelete");
-      const hintEl = imgBox.querySelector(".qImgHint");
-
-      fileInput.addEventListener("change", async () => {
-        const file = fileInput.files?.[0];
-        if (!file) return;
-
-        // basic validation
-        if (!String(file.type || "").startsWith("image/")) {
-          alert("⚠️ الرجاء اختيار ملف صورة فقط.");
-          fileInput.value = "";
-          return;
-        }
-        if (file.size > 6 * 1024 * 1024) {
-          alert("⚠️ حجم الصورة كبير. الحد 6MB.");
-          fileInput.value = "";
-          return;
-        }
-
-        hintEl.textContent = "…جاري رفع الصورة";
-        fileInput.disabled = true;
-
-        try {
-          // if previous image exists, delete it first (optional clean)
-          if (qq.imagePath) {
-            try { await deleteQuestionImage(qq.imagePath); } catch (_) {}
-          }
-
-          const { url, path } = await uploadQuestionImage(file, qq.id);
-          if (!url) {
-            hintEl.textContent = "⚠️ لم يتم الرفع";
-            fileInput.disabled = false;
-            return;
-          }
-
-          qq.imageUrl = url;
-          qq.imagePath = path;
-
-          hintEl.textContent = "✅ تم رفع الصورة";
-          render(); // re-render to show preview
-        } catch (e) {
-          console.error(e);
-          hintEl.textContent = "⚠️ فشل رفع الصورة";
-          fileInput.disabled = false;
-        }
-      });
-
-      delBtn?.addEventListener("click", async () => {
-        const qq = examData.questions[idx];
-        if (!qq.imageUrl && !qq.imagePath) return;
-
-        if (!confirm("حذف الصورة من السؤال؟")) return;
-
-        delBtn.disabled = true;
-        hintEl.textContent = "…جاري حذف الصورة";
-
-        try {
-          if (qq.imagePath) {
-            await deleteQuestionImage(qq.imagePath);
-          }
-          qq.imageUrl = "";
-          qq.imagePath = "";
-          hintEl.textContent = "✅ تم حذف الصورة";
-          render();
-        } catch (e) {
-          console.error(e);
-          hintEl.textContent = "⚠️ فشل حذف الصورة";
-          delBtn.disabled = false;
-        }
-      });
-    }
-
-    renderImageBox();
 
     function renderOptions() {
       const t = examData.questions[idx].type;
@@ -406,13 +286,7 @@ function render() {
     renderOptions();
 
     // Delete question
-    el.querySelector(".qDel").onclick = async () => {
-      // ✅ NEW: if question has image, optionally delete from storage
-      const qq = examData.questions[idx];
-      if (qq?.imagePath) {
-        try { await deleteQuestionImage(qq.imagePath); } catch (_) {}
-      }
-
+    el.querySelector(".qDel").onclick = () => {
       examData.questions.splice(idx, 1);
       render();
     };
@@ -505,6 +379,11 @@ btnNewExam.onclick = async () => {
   render();
 };
 
+
+
+
+
+
 btnLoadActive.onclick = async () => {
   const sec = examSection?.value || "Inbound";
 
@@ -532,11 +411,11 @@ btnLoadActive.onclick = async () => {
   examData = best;
 
   // تعبئة الفورم
-  examTitle.value = examData.title || "";
-  examDesc.value = examData.description || "";
+  examTitle.value   = examData.title || "";
+  examDesc.value    = examData.description || "";
   durationMin.value = examData.durationMin ?? 20;
-  passScore.value = examData.passScore ?? 60;
-  examStatus.value = examData.status || "draft";
+  passScore.value   = examData.passScore ?? 60;
+  examStatus.value  = examData.status || "draft";
 
   if (examSection) {
     examSection.value = examData.section || sec;
@@ -544,6 +423,8 @@ btnLoadActive.onclick = async () => {
 
   render();
 };
+
+
 
 btnAddQ.onclick = () => {
   if (!examData) return alert("أنشئ أو حمّل امتحان أولاً");
