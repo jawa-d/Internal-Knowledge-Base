@@ -1,7 +1,7 @@
 import { db } from "./firebase.js";
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
 
-const COMPANY_DOMAIN = "@earthlink.iq";
+const COMPANY_DOMAIN = "@km.iq";
 let generatedCode = "";
 
 const emailInput = document.getElementById("emailInput");
