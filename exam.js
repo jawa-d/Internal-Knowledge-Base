@@ -1,6 +1,7 @@
 /* ===============================
    exam.js ✅ FULL (Updated)
    - Load active exam by employee section
+   - MCQ single + MCQ multi (checkbox)
    - Attempt docId remains: examId__employeeId
 =============================== */
 
@@ -34,11 +35,13 @@ let exam = null;
 let questions = [];
 let attemptRef = null;
 let attemptId = "";
-let answers = {}; // {qid: value}
+let answers = {};
 let startedAtMs = 0;
 let timerInt = null;
 
-// Helpers
+/* ===============================
+   Helpers
+=============================== */
 const num = (v,d=0)=> Number.isFinite(+v) ? +v : d;
 const sameText = (a,b)=> String(a??"").trim().toLowerCase() === String(b??"").trim().toLowerCase();
 
@@ -58,16 +61,17 @@ function formatTime(sec){
   return `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
 }
 
-/* ✅ Load active exam by section */
+/* ===============================
+   Load active exam
+=============================== */
 async function loadActiveExamForSection(section){
   const qy = query(
     collection(db,"exams"),
     where("status","==","active"),
-    where("section","==", String(section || "").trim())
+    where("section","==", String(section||"").trim())
   );
 
   const snap = await getDocs(qy);
-
   if (snap.empty){
     examTitleEl.textContent = "لا يوجد امتحان فعال لهذا القسم";
     examDescEl.textContent = "اطلب من الأدمن تفعيل امتحان لقسمك.";
@@ -84,33 +88,42 @@ async function loadActiveExamForSection(section){
 
   examTitleEl.textContent = exam.title || "Exam";
   examDescEl.textContent = exam.description || "";
-
   return best;
 }
 
+/* ===============================
+   Normalize Question
+=============================== */
 function normalizeQuestion(q){
   const type = q.type || "tf";
-  const correctionMode = q.correctionMode || ((type==="short"||type==="essay")?"manual":"auto");
+  const correctionMode =
+    q.correctionMode || ((type==="short"||type==="essay")?"manual":"auto");
+
   return {
     id: q.id,
     section: q.section || "Inbound",
     type,
+    subType: q.subType || "single",   // ✅
     title: q.title || "",
     points: num(q.points,1),
     correctionMode,
     options: Array.isArray(q.options)? q.options : [],
     correctAnswer: q.correctAnswer ?? "",
-      image: q.image || "" // ✅ NEW
+    image: q.image || ""
   };
 }
 
+/* ===============================
+   Render Questions
+=============================== */
 function renderQuestionsForSection(section){
   questionsBox.innerHTML = "";
   answers = {};
 
-  // ✅ Here we still filter exam.questions by question.section
-  // But exam itself already targets a section
-  const all = Array.isArray(exam.questions) ? exam.questions.map(normalizeQuestion) : [];
+  const all = Array.isArray(exam.questions)
+    ? exam.questions.map(normalizeQuestion)
+    : [];
+
   questions = all.filter(q=> String(q.section).trim() === String(section).trim());
 
   if (!questions.length){
@@ -127,78 +140,99 @@ function renderQuestionsForSection(section){
     const card = document.createElement("div");
     card.className = "qcard";
     card.dataset.qid = q.id;
-    card.dataset.index = idx + 1; // ⭐ خاص بالدزاين (رقم السؤال)
 
     card.innerHTML = `
       <div class="qhead">
-        <div class="qtitle">${idx+1}. ${q.title || "—"}</div>
+        <div class="qtitle">${idx+1}. ${q.title}</div>
         <div class="qmeta">
           <span class="badge">${q.type}</span>
           <span class="badge">${q.correctionMode === "manual" ? "🟡 يدوي" : "⚡ تلقائي"}</span>
-          <span class="badge">الدرجة: ${Math.max(1,num(q.points,1))}</span>
+          <span class="badge">الدرجة: ${q.points}</span>
         </div>
       </div>
 
-      ${
-    q.image
-    ? `<div class="q-image-wrap">
-         <img src="${q.image}" alt="question image">
-       </div>`
-    : ``
-  }
+      ${q.image ? `<div class="q-image-wrap"><img src="${q.image}"></div>` : ``}
 
       <div class="opts"></div>
     `;
 
     const opts = card.querySelector(".opts");
 
+    /* ===== TF ===== */
     if (q.type === "tf"){
       opts.innerHTML = `
-        <label class="opt">
-          <input type="radio" name="q_${q.id}" value="true">
-          <span>True</span>
-        </label>
-        <label class="opt">
-          <input type="radio" name="q_${q.id}" value="false">
-          <span>False</span>
-        </label>
+        <label class="opt"><input type="radio" name="q_${q.id}" value="true"><span>True</span></label>
+        <label class="opt"><input type="radio" name="q_${q.id}" value="false"><span>False</span></label>
       `;
-
       opts.querySelectorAll("input").forEach(inp=>{
-        inp.addEventListener("change", ()=>{
-          // 🟢 Design: تمييز الجواب المختار
-          opts.querySelectorAll(".opt").forEach(o=>o.classList.remove("selected"));
-          inp.closest(".opt")?.classList.add("selected");
-
-          // ✅ المنطق الأصلي بدون تغيير
-          onAnswer(q.id, inp.value);
-        });
+        inp.onchange = ()=> onAnswer(q.id, inp.value);
       });
+    }
 
-    } else if (q.type === "mcq"){
-      const ops = (q.options && q.options.length) ? q.options : ["", "", "", ""];
-      opts.innerHTML = ops.map((o,i)=>`
-        <label class="opt">
-          <input type="radio" name="q_${q.id}" value="${o}">
-          <span>${o || `خيار ${i+1}`}</span>
-        </label>
-      `).join("");
+    /* ===== MCQ ===== */
+    else if (q.type === "mcq"){
+      const ops = q.options.length ? q.options : ["","","",""];
 
-      opts.querySelectorAll("input").forEach(inp=>{
-        inp.addEventListener("change", ()=>{
-          // 🟢 Design: تمييز الجواب المختار
-          opts.querySelectorAll(".opt").forEach(o=>o.classList.remove("selected"));
-          inp.closest(".opt")?.classList.add("selected");
+      // MCQ MULTI
+      if (q.subType === "multi"){
+        answers[q.id] = [];
+        opts.innerHTML = ops.map((o,i)=>`
+          <label class="opt">
+            <input type="checkbox" data-i="${i}">
+            <span>${o || `خيار ${i+1}`}</span>
+          </label>
+        `).join("");
 
-          // ✅ المنطق الأصلي بدون تغيير
-          onAnswer(q.id, inp.value);
+        opts.querySelectorAll("input").forEach(ch=>{
+          ch.onchange = ()=>{
+            const i = Number(ch.dataset.i);
+            if (ch.checked && !answers[q.id].includes(i)) answers[q.id].push(i);
+            if (!ch.checked) answers[q.id] = answers[q.id].filter(x=>x!==i);
+            onAnswer(q.id, answers[q.id]);
+            ch.onchange = ()=>{
+  const i = Number(ch.dataset.i);
+
+  if (ch.checked && !answers[q.id].includes(i))
+    answers[q.id].push(i);
+
+  if (!ch.checked)
+    answers[q.id] = answers[q.id].filter(x=>x!==i);
+
+  ch.closest(".opt")?.classList.toggle("selected", ch.checked);
+  onAnswer(q.id, answers[q.id]);
+};
+
+          };
         });
-      });
+      }
 
-    } else {
+      // MCQ SINGLE
+      else {
+        opts.innerHTML = ops.map((o,i)=>`
+          <label class="opt">
+            <input type="radio" name="q_${q.id}" value="${o}">
+            <span>${o || `خيار ${i+1}`}</span>
+          </label>
+        `).join("");
+
+        opts.querySelectorAll("input").forEach(inp=>{
+          inp.onchange = ()=> onAnswer(q.id, inp.value);
+          opts.querySelectorAll("input").forEach(inp=>{
+  inp.onchange = ()=>{
+    opts.querySelectorAll(".opt").forEach(o=>o.classList.remove("selected"));
+    inp.closest(".opt")?.classList.add("selected");
+    onAnswer(q.id, inp.value);
+  };
+});
+
+        });
+      }
+    }
+
+    /* ===== Text ===== */
+    else {
       opts.innerHTML = `<textarea placeholder="اكتب إجابتك هنا..."></textarea>`;
-      const ta = opts.querySelector("textarea");
-      ta.addEventListener("input", ()=> onAnswer(q.id, ta.value));
+      opts.querySelector("textarea").oninput = e=> onAnswer(q.id, e.target.value);
     }
 
     questionsBox.appendChild(card);
@@ -207,28 +241,28 @@ function renderQuestionsForSection(section){
   btnSubmit.disabled = false;
 }
 
-
+/* ===============================
+   Save Answer
+=============================== */
 let saveTimer = null;
 function onAnswer(qid, value){
   answers[qid] = value;
-
   saveHint.textContent = "…جاري الحفظ";
+
   clearTimeout(saveTimer);
   saveTimer = setTimeout(async ()=>{
     if (!attemptRef) return;
-    try{
-      await updateDoc(attemptRef, {
-        answers,
-        updatedAt: serverTimestamp()
-      });
-      saveHint.textContent = "✅ تم الحفظ";
-    }catch(e){
-      console.error(e);
-      saveHint.textContent = "⚠️ فشل الحفظ";
-    }
-  }, 450);
+    await updateDoc(attemptRef,{
+      answers,
+      updatedAt: serverTimestamp()
+    });
+    saveHint.textContent = "✅ تم الحفظ";
+  },450);
 }
 
+/* ===============================
+   Check Attempt
+=============================== */
 async function checkAlreadyAttempted(employeeId){
   attemptId = `${activeExamId}__${employeeId}`;
   attemptRef = doc(db,"exam_attempts",attemptId);
@@ -236,44 +270,47 @@ async function checkAlreadyAttempted(employeeId){
   return snap.exists() ? snap.data() : null;
 }
 
+/* ===============================
+   Timer
+=============================== */
 function startTimer(durationMin){
-  const total = Math.max(1, num(durationMin, 20)) * 60;
+  const total = Math.max(1, num(durationMin,20)) * 60;
   startedAtMs = Date.now();
   clearInterval(timerInt);
 
   timerInt = setInterval(()=>{
-    const passed = Math.floor((Date.now() - startedAtMs)/1000);
-    const left = Math.max(0, total - passed);
+    const passed = Math.floor((Date.now()-startedAtMs)/1000);
+    const left = Math.max(0, total-passed);
     timerEl.textContent = formatTime(left);
-
-    if (left <= 0){
+    if (left<=0){
       clearInterval(timerInt);
       btnSubmit.click();
     }
-  }, 1000);
+  },1000);
 }
 
+/* ===============================
+   Auto Correction
+=============================== */
 function calcAutoRaw(){
   let autoRaw = 0;
   let maxRaw = 0;
 
   questions.forEach(q=>{
-    const max = Math.max(1, num(q.points,1));
+    const max = Math.max(1,num(q.points,1));
     maxRaw += max;
 
-    const ans = answers[q.id] ?? "";
     if (q.correctionMode === "manual") return;
-
+    const ans = answers[q.id];
     let correct = false;
+
     if (q.type === "tf"){
       const a = parseTF(ans);
       const c = parseTF(q.correctAnswer);
-      if (a !== null && c !== null) correct = (a === c);
-      else correct = sameText(ans, q.correctAnswer);
-    } else if (q.type === "mcq"){
-      correct = sameText(ans, q.correctAnswer);
-    } else {
-      if (q.correctAnswer) correct = sameText(ans, q.correctAnswer);
+      correct = (a!==null && c!==null) ? a===c : sameText(ans,q.correctAnswer);
+    }
+    else if (q.type === "mcq" && q.subType !== "multi"){
+      correct = sameText(ans,q.correctAnswer);
     }
 
     if (correct) autoRaw += max;
@@ -282,9 +319,9 @@ function calcAutoRaw(){
   return {autoRaw, maxRaw};
 }
 
-// ===============================
-// Start Exam
-// ===============================
+/* ===============================
+   Start Exam
+=============================== */
 btnStart.onclick = async ()=>{
   const name = empName.value.trim();
   const id = empId.value.trim();
@@ -296,105 +333,74 @@ btnStart.onclick = async ()=>{
   }
 
   btnStart.disabled = true;
-  startHint.textContent = "…جاري تحميل امتحان القسم";
+  startHint.textContent = "…جاري التحميل";
 
   const loaded = await loadActiveExamForSection(section);
-  if (!loaded){
-    btnStart.disabled = false;
-    startHint.textContent = "❌ لا يوجد امتحان فعال لقسمك";
-    return;
-  }
+  if (!loaded) return;
 
-  startHint.textContent = "…جاري التحقق";
   const prev = await checkAlreadyAttempted(id);
-
-  if (prev && (prev.status === "submitted" || prev.status === "finalized")){
-    startHint.textContent = "❌ لقد أديت هذا الامتحان مسبقًا";
+  if (prev && (prev.status==="submitted"||prev.status==="finalized")){
+    startHint.textContent = "❌ الامتحان مؤدى مسبقًا";
     return;
   }
 
-  await setDoc(attemptRef, {
+  await setDoc(attemptRef,{
     examId: activeExamId,
-    examTitle: exam.title || "",
-
+    examTitle: exam.title||"",
     employeeName: name,
     employeeId: id,
-    email: empEmail.value.trim() || "",
+    email: empEmail.value.trim()||"",
     section,
-
-    status: "started",
+    status:"started",
     answers: prev?.answers || {},
-
     createdAt: prev?.createdAt || serverTimestamp(),
     startedAt: serverTimestamp(),
     updatedAt: serverTimestamp()
-  }, { merge: true });
+  },{merge:true});
 
-  const after = await getDoc(attemptRef);
-  answers = after.exists() ? (after.data().answers || {}) : {};
+  const snap = await getDoc(attemptRef);
+  answers = snap.exists()? snap.data().answers || {} : {};
 
   renderQuestionsForSection(section);
   examCard.style.display = "block";
   startHint.textContent = "✅ بدأ الامتحان";
-
   startTimer(exam.durationMin ?? 20);
-
-  // restore answers
-  questions.forEach(q=>{
-    const val = answers[q.id];
-    if (val == null) return;
-
-    const card = questionsBox.querySelector(`[data-qid="${q.id}"]`);
-    if (!card) return;
-
-    if (q.type === "tf" || q.type === "mcq"){
-      card.querySelectorAll("input[type=radio]").forEach(r=>{
-        if (String(r.value) === String(val)) r.checked = true;
-      });
-    } else {
-      const ta = card.querySelector("textarea");
-      if (ta) ta.value = String(val);
-    }
-  });
-
   btnStart.disabled = false;
 };
 
-// ===============================
-// Submit Exam
-// ===============================
+/* ===============================
+   Submit Exam
+=============================== */
 btnSubmit.onclick = async ()=>{
   if (!attemptRef) return;
 
   btnSubmit.disabled = true;
   saveHint.textContent = "…جاري الإرسال";
 
-  const {autoRaw, maxRaw} = calcAutoRaw();
-  const manualRaw = 0;
-  const earnedRaw = autoRaw + manualRaw;
+  const {autoRaw,maxRaw} = calcAutoRaw();
+  const earnedRaw = autoRaw;
   const totalScore = maxRaw ? Math.round((earnedRaw/maxRaw)*100) : 0;
 
-  await updateDoc(attemptRef, {
+  await updateDoc(attemptRef,{
     answers,
-    status: "submitted",
+    status:"submitted",
     submittedAt: serverTimestamp(),
     autoRaw,
-    manualRaw,
     maxRaw,
     earnedRaw,
-    autoScore: maxRaw ? Math.round((autoRaw/maxRaw)*100) : 0,
-    manualScore: 0,
     totalScore,
     passScore: exam.passScore ?? 60,
-    timeSpentSec: Math.floor((Date.now() - startedAtMs)/1000),
+    timeSpentSec: Math.floor((Date.now()-startedAtMs)/1000),
     updatedAt: serverTimestamp()
   });
 
   finishOverlay.style.display = "flex";
-  setTimeout(()=> location.href="dashboard.html", 2000);
+  setTimeout(()=>location.href="dashboard.html",2000);
 };
 
-// init
+/* ===============================
+   Init
+=============================== */
 timerEl.textContent = "--:--";
 examTitleEl.textContent = "امتحان";
 examDescEl.textContent = "اختر القسم ثم ابدأ الامتحان";
