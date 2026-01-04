@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>QC Analytics | تقييمات الموظفين</title>
+
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+
+  <!-- Sidebar -->
+  <link rel="stylesheet" href="sidebar.css">
+
+  <!-- Page CSS -->
+  <link rel="stylesheet" href="qc_analytics.css">
+</head>
+
+<body>
+
+  <!-- Sidebar -->
+  <div id="sidebar"></div>
+  <script src="sidebar.js"></script>
+
+  <!-- Page -->
+  <main class="page qc-page" id="qcRoot">
+
+    <!-- Top Header -->
+    <section class="hero">
+      <div class="hero-left">
+        <h1>QC Evaluation Analytics</h1>
+        <p>بحث + تحليل أداء الموظفين من ملف Excel عبر API</p>
+      </div>
+
+      <div class="hero-right">
+        <div class="badge">
+          <span class="dot"></span>
+          <span id="apiStateText">Ready for API</span>
+        </div>
+
+        <button class="btn btn-ghost" id="btnRefresh">تحديث البيانات</button>
+      </div>
+    </section>
+
+    <!-- Search Card -->
+    <section class="card glass search-card">
+      <div class="card-head">
+        <div class="title">
+          <span class="icon">🔎</span>
+          <div>
+            <h2>بحث الموظف</h2>
+            <p>اكتب جزء من الاسم وحدد التاريخ (اختياري)</p>
+          </div>
+        </div>
+
+        <div class="right-actions">
+          <button class="btn btn-primary" id="btnSearch">بحث</button>
+          <button class="btn btn-secondary" id="btnClear">تفريغ</button>
+        </div>
+      </div>
+
+      <div class="filters">
+        <div class="field">
+          <label>اسم الموظف</label>
+          <input id="empNameInput" type="text" placeholder="مثال: Jawad Kadhum..." autocomplete="off" />
+          <div class="hint">بحث contains (جزء من الاسم يكفي)</div>
+        </div>
+
+        <div class="field">
+          <label>من تاريخ</label>
+          <input id="fromDate" type="date" />
+          <div class="hint">اختياري</div>
+        </div>
+
+        <div class="field">
+          <label>إلى تاريخ</label>
+          <input id="toDate" type="date" />
+          <div class="hint">اختياري</div>
+        </div>
+
+        <div class="field">
+          <label>مصدر البيانات</label>
+          <select id="sourceSelect">
+            <option value="api">API (قريباً)</option>
+            <option value="mock">Mock (تجربة)</option>
+          </select>
+          <div class="hint">حالياً Mock حتى نكمل الربط</div>
+        </div>
+      </div>
+
+      <div class="status-bar" id="statusBar">
+        <span class="status-pill neutral" id="statusPill">جاهز</span>
+        <span class="status-text" id="statusText">اكتب جزء من اسم الموظف واضغط بحث</span>
+      </div>
+    </section>
+
+    <!-- Employee Summary -->
+    <section class="card glass emp-summary hidden" id="empSummary">
+      <div class="emp-title">
+        <div class="avatar">👤</div>
+        <div class="info">
+          <h2 id="empTitle">—</h2>
+          <p id="empSub">—</p>
+        </div>
+      </div>
+
+      <div class="mini-stats">
+        <div class="mini">
+          <div class="k">عدد التقييمات</div>
+          <div class="v" id="empCount">0</div>
+        </div>
+        <div class="mini">
+          <div class="k">متوسط الدرجة</div>
+          <div class="v" id="empAvg">0%</div>
+        </div>
+        <div class="mini">
+          <div class="k">آخر تاريخ</div>
+          <div class="v" id="empLast">—</div>
+        </div>
+        <div class="mini">
+          <div class="k">أفضل درجة</div>
+          <div class="v" id="empBest">—</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Employee Insights -->
+    <section class="card glass hidden" id="empInsights">
+      <div class="card-head">
+        <div class="title">
+          <span class="icon">🧠</span>
+          <div>
+            <h2>Employee Insights</h2>
+            <p>Health Score + Trend + Badge</p>
+          </div>
+        </div>
+
+        <div class="right-actions">
+          <span class="pill" id="empBadge">—</span>
+          <span class="pill" id="empTrend">—</span>
+        </div>
+      </div>
+
+      <div class="insights-grid">
+        <div class="insight big">
+          <div class="k">Health Score</div>
+          <div class="v" id="empHealthScore">—</div>
+          <div class="sub" id="empHealthSub">—</div>
+        </div>
+
+        <div class="insight">
+          <div class="k">آخر تقييم</div>
+          <div class="v" id="empLastScore">—</div>
+          <div class="sub" id="empLastVsAvg">—</div>
+        </div>
+
+        <div class="insight">
+          <div class="k">التذبذب</div>
+          <div class="v" id="empVolatility">—</div>
+          <div class="sub">فرق أعلى/أدنى</div>
+        </div>
+
+        <div class="insight">
+          <div class="k">مقارنة (عام)</div>
+          <div class="v" id="empVsTeam">—</div>
+          <div class="sub" id="empVsTeamSub">—</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Employee Analytics Cards -->
+    <section class="grid-4 hidden" id="empCards">
+      <div class="card glass kpi">
+        <div class="kpi-top">
+          <span class="kpi-ico">🔁</span>
+          <span class="kpi-title">أكثر ملاحظة متكررة</span>
+        </div>
+        <div class="kpi-val" id="empMostNote">—</div>
+        <div class="kpi-sub" id="empMostNoteCount">—</div>
+      </div>
+
+      <div class="card glass kpi">
+        <div class="kpi-top">
+          <span class="kpi-ico">📈</span>
+          <span class="kpi-title">أعلى درجة</span>
+        </div>
+        <div class="kpi-val" id="empHigh">—</div>
+        <div class="kpi-sub">ضمن الفترة المختارة</div>
+      </div>
+
+      <div class="card glass kpi">
+        <div class="kpi-top">
+          <span class="kpi-ico">📉</span>
+          <span class="kpi-title">أدنى درجة</span>
+        </div>
+        <div class="kpi-val" id="empLow">—</div>
+        <div class="kpi-sub">ضمن الفترة المختارة</div>
+      </div>
+
+      <div class="card glass kpi">
+        <div class="kpi-top">
+          <span class="kpi-ico">⭐</span>
+          <span class="kpi-title">المحور الأضعف</span>
+        </div>
+        <div class="kpi-val" id="empWeakCat">—</div>
+        <div class="kpi-sub">أكثر محور نقصاً</div>
+      </div>
+    </section>
+
+    <!-- ✅ Charts Section -->
+    <section class="card glass hidden" id="chartsSection">
+      <div class="card-head simple">
+        <h2>Charts & Trend</h2>
+        <p>Radar + Distribution + Tracking (All records)</p>
+      </div>
+
+      <div class="charts-grid">
+        <div class="chart-box">
+          <h3>📈 Trend (تتبع الدرجات)</h3>
+          <canvas id="trendChart"></canvas>
+          <div class="trend-insight" id="trendInsight"></div>
+        </div>
+
+        <div class="chart-box">
+          <h3>🕸 Radar (محاور QC)</h3>
+          <canvas id="radarChart"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-box" style="margin-top:18px">
+        <h3>📊 Distribution (توزيع الدرجات)</h3>
+        <canvas id="distChart"></canvas>
+      </div>
+    </section>
+
+    <!-- Details Table -->
+    <section class="card glass hidden" id="detailsCard">
+      <div class="card-head simple">
+        <h2>التفاصيل</h2>
+        <p>كل سجلات هذا الموظف (مفلترة حسب التاريخ)</p>
+      </div>
+
+      <div class="table-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>التاريخ</th>
+              <th>Call / SRC</th>
+              <th>النتيجة</th>
+              <th>أضعف محور</th>
+              <th>ملاحظة</th>
+            </tr>
+          </thead>
+          <tbody id="detailsBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- General Analytics -->
+    <section class="card glass">
+      <div class="card-head">
+        <div class="title">
+          <span class="icon">🌍</span>
+          <div>
+            <h2>تحليل عام</h2>
+            <p>إحصائيات على مستوى جميع الموظفين</p>
+          </div>
+        </div>
+        <button class="btn btn-ghost" id="btnGeneral">إعادة حساب العام</button>
+      </div>
+
+      <section class="grid-4">
+        <div class="card glass kpi">
+          <div class="kpi-top">
+            <span class="kpi-ico">🏆</span>
+            <span class="kpi-title">أعلى موظف</span>
+          </div>
+          <div class="kpi-val" id="genTopEmp">—</div>
+          <div class="kpi-sub" id="genTopEmpSub">—</div>
+        </div>
+
+        <div class="card glass kpi">
+          <div class="kpi-top">
+            <span class="kpi-ico">🚨</span>
+            <span class="kpi-title">أدنى موظف</span>
+          </div>
+          <div class="kpi-val" id="genLowEmp">—</div>
+          <div class="kpi-sub" id="genLowEmpSub">—</div>
+        </div>
+
+        <div class="card glass kpi">
+          <div class="kpi-top">
+            <span class="kpi-ico">🔁</span>
+            <span class="kpi-title">أكثر ملاحظة متكررة</span>
+          </div>
+          <div class="kpi-val" id="genMostNote">—</div>
+          <div class="kpi-sub" id="genMostNoteSub">—</div>
+        </div>
+
+        <div class="card glass kpi">
+          <div class="kpi-top">
+            <span class="kpi-ico">📌</span>
+            <span class="kpi-title">أكثر محور ضعف</span>
+          </div>
+          <div class="kpi-val" id="genWeakCat">—</div>
+          <div class="kpi-sub">عام لكل الموظفين</div>
+        </div>
+      </section>
+    </section>
+
+    <!-- Empty State -->
+    <section class="empty hidden" id="emptyState">
+      <div class="empty-card">
+        <div class="emo">📭</div>
+        <h2>لا توجد بيانات حالياً</h2>
+        <p>جرّب تغيير الاسم أو الفترة الزمنية.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ✅ Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- Page JS -->
+  <script src="qc_analytics.js"></script>
+</body>
+</html>
