@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>طلب تبليغ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="sidebar.css">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="report_request.css">
+</head>
+
+<body>
+<!-- Sidebar -->
+<div id="sidebar"></div>
+<script src="sidebar.js"></script>
+<div class="page">
+
+  <div class="header">
+    <h1>📢 طلب تبليغ</h1>
+    <p>إرسال تبليغ رسمي إلى الإدارة</p>
+  </div>
+
+  <div class="card">
+
+    <form id="reportForm">
+
+      <div class="form-group">
+        <label>اسم الموظف</label>
+        <input type="text" name="name" required>
+      </div>
+
+      <div class="form-group">
+        <label>المعرف الوظيفي</label>
+        <input type="text" name="employee_id" required>
+      </div>
+
+      <div class="form-group">
+        <label>القسم</label>
+        <input type="text" name="department" required>
+      </div>
+
+      <div class="form-group">
+        <label>البريد الإلكتروني</label>
+        <input type="email" name="email" required>
+      </div>
+
+      <div class="form-group">
+        <label>نوع التبليغ</label>
+        <select name="type" required>
+          <option value="">اختر النوع</option>
+          <option value="مشكلة تقنية">مشكلة تقنية</option>
+          <option value="مخالفة إدارية">مخالفة إدارية</option>
+          <option value="اقتراح تطوير">اقتراح تطوير</option>
+          <option value="أخرى">أخرى</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>عنوان التبليغ</label>
+        <input type="text" name="title" required>
+      </div>
+
+      <div class="form-group">
+        <label>تفاصيل التبليغ</label>
+        <textarea name="details" required></textarea>
+      </div>
+
+      <button type="submit" class="btn-submit">إرسال التبليغ</button>
+
+      <div class="success-msg" id="successMsg">✔ تم إرسال التبليغ بنجاح</div>
+      <div class="error-msg" id="errorMsg">✖ حدث خطأ أثناء الإرسال</div>
+
+    </form>
+
+  </div>
+
+</div>
+
+<script src="report_request.js"></script>
+</body>
+</html>
