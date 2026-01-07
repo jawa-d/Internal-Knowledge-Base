@@ -85,16 +85,13 @@ function buildExamUsersChartData(attemptsSnap) {
    Load dashboard data
 ================================ */
 async function loadDashboard() {
-
   /* ===== Core collections ===== */
   const usersSnap   = await getDocs(collection(db, "users"));
   const shelvesSnap = await getDocs(collection(db, "shelves"));
   const newsSnap    = await getDocs(collection(db, "news"));
   const kpiSnap     = await getDocs(collection(db, "kpi_reports"));
-
   /* ===== Exam attempts (IMPORTANT) ===== */
   const attemptsSnap = await getDocs(collection(db, "exam_attempts"));
-
   /* ===============================
      Counters
   ============================== */
@@ -102,19 +99,16 @@ async function loadDashboard() {
   animate(shelvesCount, shelvesSnap.size);
   animate(newsCount, newsSnap.size);
   animate(kpiCount, kpiSnap.size);
-
   /* ---- Exam users counter (unique) ---- */
   const uniqueExamUsers = new Set();
   attemptsSnap.forEach(doc => {
     const d = doc.data();
     if (d.userEmail) uniqueExamUsers.add(d.userEmail);
   });
-
   animate(
     document.getElementById("examUsersCount"),
     uniqueExamUsers.size
   );
-
   /* ===============================
      Charts
   ============================== */
@@ -122,7 +116,6 @@ async function loadDashboard() {
   drawLineChart("shelvesChart", shelvesSnap.size, "rgba(0,194,168,1)");
   drawLineChart("booksChart", shelvesSnap.size * 3, "rgba(120,120,255,1)");
   drawLineChart("kpiChart", kpiSnap.size, "rgba(255,193,7,1)");
-
   /* ---- Exam users monthly chart ---- */
   const examUsersMonthly = buildExamUsersChartData(attemptsSnap);
 
@@ -147,7 +140,6 @@ async function loadDashboard() {
     }
   });
 }
-
 /* ===============================
    Init
 ================================ */

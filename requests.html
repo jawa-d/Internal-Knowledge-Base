@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>إدارة الطلبات | Request Management</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="global.css">
+  <link rel="stylesheet" href="requests.css">
+  <link rel="stylesheet" href="sidebar.css">
+</head>
+
+<body>
+
+  <!-- Sidebar -->
+  <div id="sidebar"></div>
+  <script src="sidebar.js"></script>
+
+  <!-- Unauthorized -->
+  <div id="unauthorizedBox" class="unauthorized-box">
+    <h2>🚫 غير مخوّل للدخول</h2>
+    <p>يرجى التواصل مع مدير النظام</p>
+  </div>
+
+  <!-- Page -->
+  <main id="requestPageContent" class="task-page">
+
+    <!-- Navbar -->
+    <div class="top-nav glass">
+      <div class="nav-left">
+        <h1 class="nav-title">Request Management</h1>
+        <p class="nav-sub">إدارة ومتابعة الطلبات</p>
+      </div>
+
+      <div class="nav-center">
+        <h2 class="kb-title">Employee Requests</h2>
+        <div class="live-pill">
+          <span class="dot-live"></span>
+          <span>Realtime</span>
+        </div>
+      </div>
+
+      <div class="nav-right">
+        <div class="task-actions">
+          <button id="openCreateBtn" class="btn-primary">
+            <span class="btn-ico">➕</span>
+            <span>إنشاء طلب</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Board -->
+    <section class="board">
+      <div class="board-head">
+        <h2 class="section-title2">الطلبات الحالية</h2>
+
+        <div class="board-tools">
+          <div class="mini-stats">
+            <div class="mini-chip">
+              <span class="mini-dot inprog"></span>
+              <span>In Progress</span>
+              <strong id="countInProgress">0</strong>
+            </div>
+            <div class="mini-chip">
+              <span class="mini-dot done"></span>
+              <span>Done</span>
+              <strong id="countDone">0</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="columns">
+        <div class="column float-in">
+          <div class="column-header">
+            <div class="col-left">
+              <span class="col-title">In Progress</span>
+              <span class="col-sub">طلبات قيد المتابعة</span>
+            </div>
+            <span class="col-count" id="countInProgressTop">0</span>
+          </div>
+          <div id="colInProgress" class="column-body"></div>
+        </div>
+
+        <div class="column float-in delay-1">
+          <div class="column-header">
+            <div class="col-left">
+              <span class="col-title">Done</span>
+              <span class="col-sub">طلبات مكتملة</span>
+            </div>
+            <span class="col-count" id="countDoneTop">0</span>
+          </div>
+          <div id="colDone" class="column-body"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- =========================
+       Modal: Create Request
+  ========================== -->
+  <div id="createOverlay" class="m-overlay">
+    <div class="m-box pop">
+      <div class="m-head">
+        <div>
+          <h2 class="m-title">إنشاء طلب جديد</h2>
+          <p class="m-sub">أدخل بيانات الطلب</p>
+        </div>
+        <button class="m-x" id="createCloseX" aria-label="close">✕</button>
+      </div>
+
+      <div class="m-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>اسم الموظف</label>
+            <input type="text" id="cEmpName" placeholder="مثال: Jawad">
+          </div>
+
+          <div class="form-group">
+            <label>Employee ID</label>
+            <input type="text" id="cEmpId" placeholder="مثال: 1001">
+          </div>
+
+          <div class="form-group">
+            <label>عنوان الطلب</label>
+            <input type="text" id="cReqTitle" placeholder="مثال: Task">
+          </div>
+
+          <div class="form-group">
+            <label>تفاصيل الطلب</label>
+            <input type="text" id="cReqDesc" placeholder="تفاصيل الطلب">
+          </div>
+        </div>
+
+        <div class="hint-line">
+          ✅ سيتم إنشاء الطلب مباشرة ضمن <b>In Progress</b> مع تسجيل <b>وقت الفتح</b>.
+        </div>
+      </div>
+
+      <div class="m-foot">
+        <button id="createCancelBtn" class="btn-ghost">إلغاء</button>
+        <button id="createSaveBtn" class="btn-primary">حفظ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================
+       Modal: Update Request
+  ========================== -->
+  <div id="updateOverlay" class="m-overlay">
+    <div class="m-box pop">
+      <div class="m-head">
+        <div>
+          <h2 class="m-title">تحديث الطلب</h2>
+          <p class="m-sub">تعديل البيانات أو الحالة</p>
+        </div>
+        <button class="m-x" id="updateCloseX" aria-label="close">✕</button>
+      </div>
+
+      <div class="m-body">
+        <input type="hidden" id="uReqId">
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>اسم الموظف</label>
+            <input type="text" id="uEmpName">
+          </div>
+
+          <div class="form-group">
+            <label>Employee ID</label>
+            <input type="text" id="uEmpId">
+          </div>
+
+          <div class="form-group">
+            <label>عنوان الطلب</label>
+            <input type="text" id="uReqTitle">
+          </div>
+
+          <div class="form-group">
+            <label>تفاصيل الطلب</label>
+            <input type="text" id="uReqDesc">
+          </div>
+
+          <div class="form-group">
+            <label>الحالة</label>
+            <select id="uReqStatus">
+              <option value="in-progress">In Progress</option>
+              <option value="done">Done</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="hint-line">
+          عند اختيار <b>Done</b> سيتم حفظ <b>وقت الإغلاق</b> تلقائياً ✅
+        </div>
+      </div>
+
+      <div class="m-foot">
+        <button id="updateCancelBtn" class="btn-ghost">إلغاء</button>
+        <button id="updateSaveBtn" class="btn-primary">حفظ التعديل</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================
+       Modal: Confirm Delete
+  ========================== -->
+  <div id="confirmOverlay" class="m-overlay">
+    <div class="m-box m-small pop">
+      <div class="m-head">
+        <div>
+          <h2 class="m-title">تأكيد الحذف</h2>
+          <p class="m-sub">هل أنت متأكد من حذف هذا الطلب؟</p>
+        </div>
+        <button class="m-x" id="confirmCloseX" aria-label="close">✕</button>
+      </div>
+
+      <div class="m-body">
+        <div class="confirm-info" id="confirmInfo"></div>
+        <input type="hidden" id="confirmReqId">
+      </div>
+
+      <div class="m-foot">
+        <button id="confirmCancelBtn" class="btn-ghost">إلغاء</button>
+        <button id="confirmDeleteBtn" class="btn-danger">حذف</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================
+       Modal: Request Details (NEW)
+  ========================== -->
+  <div id="detailsOverlay" class="m-overlay">
+    <div class="m-box pop details-box">
+      <div class="m-head">
+        <div>
+          <h2 class="m-title">تفاصيل الطلب</h2>
+          <p class="m-sub" id="dSub">عرض كامل للمعلومات</p>
+        </div>
+        <button class="m-x" id="detailsCloseX" aria-label="close">✕</button>
+      </div>
+
+      <div class="m-body">
+        <input type="hidden" id="dReqId" />
+
+        <div class="details-hero">
+          <div class="details-title" id="dTitle">—</div>
+          <div class="details-badges">
+            <span class="pill pill-progress" id="dStatus">In Progress</span>
+            <span class="pill pill-id" id="dDocId">ID: —</span>
+          </div>
+        </div>
+
+        <div class="details-grid">
+          <div class="d-card">
+            <h4>👤 الموظف</h4>
+            <div class="d-val" id="dEmployee">—</div>
+          </div>
+
+          <div class="d-card">
+            <h4>🆔 Employee ID</h4>
+            <div class="d-val" id="dEmployeeId">—</div>
+          </div>
+
+          <div class="d-card">
+            <h4>🕒 وقت الفتح</h4>
+            <div class="d-val" id="dOpenedAt">—</div>
+          </div>
+
+          <div class="d-card">
+            <h4>✅ وقت الإغلاق</h4>
+            <div class="d-val" id="dDoneAt">—</div>
+          </div>
+
+          <div class="d-card d-wide">
+            <h4>📝 التفاصيل</h4>
+            <div class="d-desc" id="dDesc">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="m-foot details-actions">
+        <button id="detailsDoneBtn" class="btn-primary">✅ تم الإنجاز</button>
+        <button id="detailsEditBtn" class="btn-ghost">✏️ تعديل</button>
+        <button id="detailsDeleteBtn" class="btn-danger">🗑️ حذف</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>Developed by <strong>Jawad Kadhim. ALL RIGHTS RESERVED.</strong> © 2025</p>
+  </footer>
+
+  <script type="module" src="requests.js"></script>
+</body>
+</html>
