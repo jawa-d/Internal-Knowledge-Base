@@ -100,8 +100,11 @@ const detailsCloseX = document.getElementById("detailsCloseX");
 ================================ */
 const cEmpName = document.getElementById("cEmpName");
 const cEmpId = document.getElementById("cEmpId");
-const cReqTitle = document.getElementById("cReqTitle");
 const cReqDesc = document.getElementById("cReqDesc");
+
+const cReqTitleSelect = document.getElementById("cReqTitleSelect");
+const cReqTitleCustom = document.getElementById("cReqTitleCustom");
+const otherTitleGroup = document.getElementById("otherTitleGroup");
 
 /* ===============================
    Update Modal Inputs
@@ -137,13 +140,33 @@ const detailsEditBtn = document.getElementById("detailsEditBtn");
 const detailsDeleteBtn = document.getElementById("detailsDeleteBtn");
 
 /* ===============================
-   Create Request  (🔥 مباشرة In Progress)
+   Dropdown Logic (Other Task)
+================================ */
+if (cReqTitleSelect) {
+  cReqTitleSelect.addEventListener("change", () => {
+    if (cReqTitleSelect.value === "Other Task") {
+      otherTitleGroup.style.display = "block";
+    } else {
+      otherTitleGroup.style.display = "none";
+      cReqTitleCustom.value = "";
+    }
+  });
+}
+
+/* ===============================
+   Create Request
 ================================ */
 async function createRequestFromModal() {
   const employee = (cEmpName.value || "").trim();
   const employeeId = (cEmpId.value || "").trim();
-  const title = (cReqTitle.value || "").trim();
   const description = (cReqDesc.value || "").trim();
+
+  let title = "";
+  if (cReqTitleSelect.value === "Other Task") {
+    title = (cReqTitleCustom.value || "").trim();
+  } else {
+    title = (cReqTitleSelect.value || "").trim();
+  }
 
   if (!employee || !title) {
     alert("الرجاء إدخال اسم الموظف وعنوان الطلب");
@@ -156,7 +179,7 @@ async function createRequestFromModal() {
     title,
     description,
     status: "in-progress",
-    openedAt: serverTimestamp(), // وقت الفتح
+    openedAt: serverTimestamp(),
     doneAt: null,
     createdAt: serverTimestamp()
   };
@@ -174,13 +197,15 @@ async function createRequestFromModal() {
 function resetCreateModal() {
   cEmpName.value = "";
   cEmpId.value = "";
-  cReqTitle.value = "";
   cReqDesc.value = "";
+  cReqTitleSelect.value = "";
+  cReqTitleCustom.value = "";
+  otherTitleGroup.style.display = "none";
 }
 
-if (createCloseX) createCloseX.onclick = () => closeModal(createOverlay);
-if (createCancelBtn) createCancelBtn.onclick = () => closeModal(createOverlay);
-if (createSaveBtn) createSaveBtn.onclick = createRequestFromModal;
+createCloseX.onclick = () => closeModal(createOverlay);
+createCancelBtn.onclick = () => closeModal(createOverlay);
+createSaveBtn.onclick = createRequestFromModal;
 
 /* ===============================
    Update Request
@@ -209,8 +234,6 @@ async function saveUpdateModal() {
   }
 
   const payload = { employee, employeeId, title, description, status };
-
-  // إذا صار Done: خزّن وقت الإغلاق إذا مو مخزون
   if (status === "done") payload.doneAt = serverTimestamp();
 
   try {
@@ -222,9 +245,9 @@ async function saveUpdateModal() {
   }
 }
 
-if (updateCloseX) updateCloseX.onclick = () => closeModal(updateOverlay);
-if (updateCancelBtn) updateCancelBtn.onclick = () => closeModal(updateOverlay);
-if (updateSaveBtn) updateSaveBtn.onclick = saveUpdateModal;
+updateCloseX.onclick = () => closeModal(updateOverlay);
+updateCancelBtn.onclick = () => closeModal(updateOverlay);
+updateSaveBtn.onclick = saveUpdateModal;
 
 /* ===============================
    Delete Request
@@ -240,24 +263,61 @@ function openDeleteConfirm(req) {
 
 async function confirmDelete() {
   const id = confirmReqId.value;
-
   try {
     await deleteDoc(doc(db, REQUESTS_COL, id));
     closeModal(confirmOverlay);
-    // إذا التفاصيل مفتوحة لنفس الطلب، اغلقها
-    if (dReqId.value === id) closeModal(detailsOverlay);
+    closeModal(detailsOverlay);
   } catch (err) {
     console.error("Delete request error:", err);
     alert("فشل حذف الطلب");
   }
 }
 
-if (confirmCloseX) confirmCloseX.onclick = () => closeModal(confirmOverlay);
-if (confirmCancelBtn) confirmCancelBtn.onclick = () => closeModal(confirmOverlay);
-if (confirmDeleteBtn) confirmDeleteBtn.onclick = confirmDelete;
+confirmCloseX.onclick = () => closeModal(confirmOverlay);
+confirmCancelBtn.onclick = () => closeModal(confirmOverlay);
+confirmDeleteBtn.onclick = confirmDelete;
 
 /* ===============================
-   Details Modal
+   Details Modal Buttons (🔥 FIXED)
+================================ */
+detailsCloseX.onclick = () => closeModal(detailsOverlay);
+
+detailsDoneBtn.onclick = async () => {
+  const id = dReqId.value;
+  if (!id) return;
+
+  try {
+    await updateDoc(doc(db, REQUESTS_COL, id), {
+      status: "done",
+      doneAt: serverTimestamp()
+    });
+    closeModal(detailsOverlay);
+  } catch (err) {
+    console.error(err);
+    alert("فشل تحديث الحالة");
+  }
+};
+
+detailsEditBtn.onclick = () => {
+  const id = dReqId.value;
+  const req = requests.find(r => r.id === id);
+  if (!req) return;
+
+  closeModal(detailsOverlay);
+  openUpdateModal(req);
+};
+
+detailsDeleteBtn.onclick = () => {
+  const id = dReqId.value;
+  const req = requests.find(r => r.id === id);
+  if (!req) return;
+
+  closeModal(detailsOverlay);
+  openDeleteConfirm(req);
+};
+
+/* ===============================
+   Details Modal Open
 ================================ */
 function openDetailsModal(req){
   dReqId.value = req.id;
@@ -282,60 +342,8 @@ function openDetailsModal(req){
   openModal(detailsOverlay);
 }
 
-if (detailsCloseX) detailsCloseX.onclick = () => closeModal(detailsOverlay);
-
-// زر Done داخل التفاصيل
-if (detailsDoneBtn) {
-  detailsDoneBtn.onclick = async () => {
-    const id = dReqId.value;
-    if (!id) return;
-    await updateDoc(doc(db, REQUESTS_COL, id), {
-      status: "done",
-      doneAt: serverTimestamp()
-    });
-    closeModal(detailsOverlay);
-  };
-}
-
-// زر Edit داخل التفاصيل
-if (detailsEditBtn) {
-  detailsEditBtn.onclick = () => {
-    const id = dReqId.value;
-    const req = requests.find(r => r.id === id);
-    if (!req) return;
-    closeModal(detailsOverlay);
-    openUpdateModal(req);
-  };
-}
-
-// زر Delete داخل التفاصيل
-if (detailsDeleteBtn) {
-  detailsDeleteBtn.onclick = () => {
-    const id = dReqId.value;
-    const req = requests.find(r => r.id === id);
-    if (!req) return;
-    closeModal(detailsOverlay);
-    openDeleteConfirm(req);
-  };
-}
-
-// اغلاق المودال عند الضغط خارج البوكس
-[createOverlay, updateOverlay, confirmOverlay, detailsOverlay].forEach(ov => {
-  if (!ov) return;
-  ov.addEventListener("click", (e) => {
-    if (e.target === ov) closeModal(ov);
-  });
-});
-
-// اغلاق بـ ESC
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") {
-    [createOverlay, updateOverlay, confirmOverlay, detailsOverlay].forEach(ov => ov && closeModal(ov));
-  }
-});
-
 /* ===============================
-   Render Board (بدون Draft)
+   Render Board
 ================================ */
 function renderBoard() {
   colInProgress.innerHTML = "";
@@ -350,18 +358,15 @@ function renderBoard() {
 
     card.innerHTML = `
       <div class="task-title">${req.title}</div>
-
       <div class="task-meta">
         <span class="label">👤</span>
         <span>${req.employee}</span>
         ${req.employeeId ? `<span class="label">🆔</span><span>${req.employeeId}</span>` : ""}
       </div>
-
       <div class="task-meta">
         <span class="label">🕒 فتح:</span>
         <span>${fmt(req.openedAt)}</span>
       </div>
-
       ${
         req.status === "done" && req.doneAt
           ? `<div class="task-meta"><span class="label">✅ إغلاق:</span><span>${fmt(req.doneAt)}</span></div>`
@@ -369,44 +374,6 @@ function renderBoard() {
       }
     `;
 
-    // Actions
-    const actions = document.createElement("div");
-    actions.className = "card-actions";
-
-    if (req.status === "in-progress") {
-      const btnDone = document.createElement("button");
-      btnDone.className = "btn-small btn-update";
-      btnDone.textContent = "✅ تم الإنجاز";
-      btnDone.onclick = async (e) => {
-        e.stopPropagation();
-        await updateDoc(doc(db, REQUESTS_COL, req.id), {
-          status: "done",
-          doneAt: serverTimestamp()
-        });
-      };
-      actions.appendChild(btnDone);
-    }
-
-    const btnEdit = document.createElement("button");
-    btnEdit.className = "btn-small btn-update";
-    btnEdit.textContent = "✏️ تعديل";
-    btnEdit.onclick = (e) => {
-      e.stopPropagation();
-      openUpdateModal(req);
-    };
-
-    const btnDelete = document.createElement("button");
-    btnDelete.className = "btn-small btn-delete";
-    btnDelete.textContent = "🗑️ حذف";
-    btnDelete.onclick = (e) => {
-      e.stopPropagation();
-      openDeleteConfirm(req);
-    };
-
-    actions.append(btnEdit, btnDelete);
-    card.appendChild(actions);
-
-    // 👇 Popup عند الضغط على الطلب (المطلوب منك)
     card.onclick = () => openDetailsModal(req);
 
     if (req.status === "in-progress") {
@@ -425,7 +392,7 @@ function renderBoard() {
 }
 
 /* ===============================
-   Firestore Subscribe (Realtime)
+   Firestore Subscribe
 ================================ */
 function subscribeRequests() {
   if (unsubRequests) unsubRequests();
@@ -453,17 +420,13 @@ function subscribeRequests() {
 
     requests = list;
     renderBoard();
-  }, (err) => {
-    console.error("Subscribe error:", err);
-    alert("تعذر تحميل الطلبات - تحقق من صلاحيات Firebase");
   });
 }
 
 /* ===============================
    Top Buttons
 ================================ */
-const openCreateBtn = document.getElementById("openCreateBtn");
-if (openCreateBtn) openCreateBtn.onclick = () => openModal(createOverlay);
+document.getElementById("openCreateBtn").onclick = () => openModal(createOverlay);
 
 /* ===============================
    INIT

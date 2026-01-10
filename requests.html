@@ -42,6 +42,12 @@
 
       <div class="nav-right">
         <div class="task-actions">
+          <!-- 🔥 زر تقرير -->
+          <button id="reportBtn" class="btn-ghost">
+            📊 تقرير
+          </button>
+
+          <!-- زر إنشاء -->
           <button id="openCreateBtn" class="btn-primary">
             <span class="btn-ico">➕</span>
             <span>إنشاء طلب</span>
@@ -98,7 +104,7 @@
   </main>
 
   <!-- =========================
-       Modal: Create Request
+       Modal: Create Request (UPDATED)
   ========================== -->
   <div id="createOverlay" class="m-overlay">
     <div class="m-box pop">
@@ -122,12 +128,42 @@
             <input type="text" id="cEmpId" placeholder="مثال: 1001">
           </div>
 
+          <!-- 🔥 عنوان الطلب Dropdown -->
           <div class="form-group">
             <label>عنوان الطلب</label>
-            <input type="text" id="cReqTitle" placeholder="مثال: Task">
+            <select id="cReqTitleSelect">
+              <option value="">-- اختر عنوان الطلب --</option>
+              <option>Task</option>
+              <option>Update Knowledge Base</option>
+              <option>Edit Knowledge Base</option>
+              <option>New Notifications</option>
+              <option>Update Notifications</option>
+              <option>Remove Notifications</option>
+              <option>New Employee Access Data</option>
+              <option>Prepare Monthly Assessment</option>
+              <option>Assessment Validation</option>
+              <option>After Training Follow Up</option>
+              <option>Trainees Coaching</option>
+              <option>Check Quality Report</option>
+              <option>Update Material</option>
+              <option>New Material</option>
+              <option>Email Of Access Data</option>
+              <option>Email Of Rounds</option>
+              <option>Email Of Coaching</option>
+              <option>Training For New Employee</option>
+              <option>Training For New & exist subcontractor</option>
+              <option>Training For New Employee & exist Sales</option>
+              <option>Other Task</option>
+            </select>
           </div>
 
-          <div class="form-group">
+          <!-- يظهر فقط عند Other Task -->
+          <div class="form-group" id="otherTitleGroup" style="display:none">
+            <label>عنوان مخصص</label>
+            <input type="text" id="cReqTitleCustom" placeholder="اكتب العنوان هنا...">
+          </div>
+
+          <div class="form-group" style="grid-column:1/-1">
             <label>تفاصيل الطلب</label>
             <input type="text" id="cReqDesc" placeholder="تفاصيل الطلب">
           </div>
@@ -229,7 +265,7 @@
   </div>
 
   <!-- =========================
-       Modal: Request Details (NEW)
+       Modal: Request Details
   ========================== -->
   <div id="detailsOverlay" class="m-overlay">
     <div class="m-box pop details-box">
@@ -293,5 +329,21 @@
   </footer>
 
   <script type="module" src="requests.js"></script>
+
+  <!-- 🔹 Title Select Logic -->
+  <script>
+    const titleSelect = document.getElementById("cReqTitleSelect");
+    const otherGroup = document.getElementById("otherTitleGroup");
+
+    if (titleSelect) {
+      titleSelect.addEventListener("change", () => {
+        if (titleSelect.value === "Other Task") {
+          otherGroup.style.display = "block";
+        } else {
+          otherGroup.style.display = "none";
+        }
+      });
+    }
+  </script>
 </body>
 </html>

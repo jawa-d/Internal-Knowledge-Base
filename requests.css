@@ -554,3 +554,22 @@ body {
   .details-actions{ gap:10px; }
   .details-actions button{ width:100%; }
 }
+.form-group select{
+  width: 100%;
+  padding: 10px 11px;
+  border-radius: 14px;
+  border: 1px solid #d1d5db;
+  font-size: 13px;
+  outline: none;
+  background: #fff url("data:image/svg+xml;utf8,<svg fill='%236b7280' height='20' viewBox='0 0 24 24' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>") no-repeat left 12px center;
+  background-size: 16px;
+  appearance: none;
+  cursor: pointer;
+  transition: .15s;
+  font-family: "Cairo", sans-serif;
+}
+
+.form-group select:focus{
+  border-color: var(--blue);
+  box-shadow: 0 0 0 4px rgba(41,97,255,.12);
+}
