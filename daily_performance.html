@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Daily Performance | تقييم الأداء اليومي</title>
+
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+
+  <!-- Sidebar -->
+  <link rel="stylesheet" href="sidebar.css">
+
+  <!-- Page CSS -->
+  <link rel="stylesheet" href="daily_performance.css">
+</head>
+
+<body>
+
+  <!-- Sidebar -->
+  <div id="sidebar"></div>
+  <script src="sidebar.js"></script>
+
+  <!-- Page -->
+  <main class="page dp-page">
+
+    <!-- ================= HERO ================= -->
+    <section class="hero">
+      <div class="hero-left">
+        <h1>Daily Performance</h1>
+        <p>تحليل الأداء اليومي للموظف حسب ID + فترة زمنية + إحصائيات شاملة</p>
+      </div>
+
+      <div class="hero-right">
+        <div class="badge">
+          <span class="dot"></span>
+          <span id="apiUrlText">MOCK MODE</span>
+        </div>
+
+        <!-- زر الإعداد (يظهر فقط للأدمن) -->
+        <button class="btn btn-ghost" id="btnApiSettings" style="display:none">إعداد API</button>
+      </div>
+    </section>
+
+    <!-- ================= ADMIN MODAL ================= -->
+    <div id="apiModal" class="api-modal" data-close style="display:none">
+      <div class="api-modal-box">
+        <h3>إعداد API الشهري</h3>
+
+        <div class="field">
+          <label>الشهر</label>
+          <input id="apiMonth" type="month" />
+        </div>
+
+        <div class="field">
+          <label>رابط الـ API</label>
+          <input id="apiUrl" type="text" placeholder="https://script.google.com/..." />
+        </div>
+
+        <div class="actions">
+          <button id="btnSaveApi">حفظ</button>
+          <button id="btnDeleteApi">حذف</button>
+          <button id="btnCloseModal">إغلاق</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= SEARCH CARD ================= -->
+    <section class="card glass search-card">
+      <div class="card-head">
+        <div class="title">
+          <span class="icon">🔍</span>
+          <div>
+            <h2>بحث الأداء</h2>
+            <p>أدخل ID وحدد الفترة الزمنية</p>
+          </div>
+        </div>
+
+        <div class="right-actions">
+          <button class="btn btn-primary" id="btnSearch">بحث</button>
+          <button class="btn btn-secondary" id="btnClear">تفريغ</button>
+        </div>
+      </div>
+
+      <div class="filters">
+        <div class="field">
+          <label>Employee ID</label>
+          <input id="empId" type="text" placeholder="مثال: 10742" autocomplete="off" />
+          <div class="hint">رقم الموظف حسب الشيت</div>
+        </div>
+
+        <div class="field">
+          <label>من تاريخ</label>
+          <input id="dateFrom" type="date" />
+          <div class="hint">بداية الفترة</div>
+        </div>
+
+        <div class="field">
+          <label>إلى تاريخ</label>
+          <input id="dateTo" type="date" />
+          <div class="hint">نهاية الفترة</div>
+        </div>
+      </div>
+
+      <div class="status-bar">
+        <span class="status-pill neutral" id="statusPill">جاهز</span>
+        <span class="status-text" id="statusText">أدخل البيانات ثم اضغط بحث</span>
+      </div>
+    </section>
+
+    <!-- ================= KPI ================= -->
+    <section class="grid-4">
+      <div class="card glass kpi">
+        <div class="kpi-top">
+          <span class="kpi-ico">📊</span>
+          <span class="kpi-title">AVG الفترة</span>
+        </div>
+        <div class="kpi-val" id="kpiAvg">—</div>
+        <div class="kpi-sub" id="kpiAvgHint">—</div>
+      </div>
+
+      <div class="card glass kpi">
+        <div class="kpi-top">
+          <span class="kpi-ico">📈</span>
+          <span class="kpi-title">أعلى تقييم</span>
+        </div>
+        <div class="kpi-val" id="kpiMax">—</div>
+        <div class="kpi-sub" id="kpiMaxHint">—</div>
+      </div>
+
+      <div class="card glass kpi">
+        <div class="kpi-top">
+          <span class="kpi-ico">📉</span>
+          <span class="kpi-title">أدنى تقييم</span>
+        </div>
+        <div class="kpi-val" id="kpiMin">—</div>
+        <div class="kpi-sub" id="kpiMinHint">—</div>
+      </div>
+
+      <div class="card glass kpi">
+        <div class="kpi-top">
+          <span class="kpi-ico">📞</span>
+          <span class="kpi-title">Calls</span>
+        </div>
+        <div class="kpi-val" id="kpiCalls">—</div>
+        <div class="kpi-sub" id="kpiCallsHint">—</div>
+      </div>
+    </section>
+
+    <!-- ================= TABLE ================= -->
+    <section class="card glass">
+      <div class="card-head simple">
+        <h2>النتائج اليومية</h2>
+        <p>كل يوم ضمن الفترة المحددة</p>
+      </div>
+
+      <div class="table-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>التاريخ</th>
+              <th>الاسم</th>
+              <th>ID</th>
+              <th>AVG Daily Evaluation</th>
+              <th>Attendance</th>
+              <th>Calls</th>
+              <th>ملاحظة</th>
+            </tr>
+          </thead>
+          <tbody id="tbody">
+            <tr>
+              <td colspan="7" style="text-align:center;color:var(--muted)">ابدأ بالبحث…</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ================= ANALYSIS ================= -->
+    <section class="card glass">
+      <div class="card-head simple">
+        <h2>تحليل الأعمدة الرقمية</h2>
+        <p>Min / Max / Avg لكل عمود رقمي</p>
+      </div>
+
+      <div class="analysis-grid" id="analysisGrid">
+        <div class="empty-card">سيظهر التحليل بعد البحث…</div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Page JS -->
+  <script type="module" src="daily_performance.js"></script>
+</body>
+</html>
