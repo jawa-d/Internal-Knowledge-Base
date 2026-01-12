@@ -91,13 +91,12 @@ export async function runAnnouncementPopup(){
     ensureStyles();
     buildPopup();
 
-    const qy = query(
-      collection(db, "announcements"),
-      where("active","==", true),
-     orderBy("createdAt","desc"),
+   const qy = query(
+  collection(db, "announcements"),
+  where("active","==", true),
+  limit(1)
+);
 
-      limit(1)
-    );
 
     const snap = await getDocs(qy);
     if (snap.empty) return;
