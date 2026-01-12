@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>إدارة الإعلانات | Announcements Admin</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+  <!-- your global/sidebar if exists -->
+  <link rel="stylesheet" href="global.css">
+  <link rel="stylesheet" href="sidebar.css">
+
+  <link rel="stylesheet" href="announcements_admin.css">
+</head>
+
+<body>
+  <!-- Sidebar (optional if you already use it) -->
+  <div id="sidebar"></div>
+  <script src="sidebar.js"></script>
+
+  <!-- Unauthorized -->
+  <div id="unauthorizedBox" class="unauthorized-box" style="display:none">
+    <h2>🚫 غير مخوّل</h2>
+    <p>هذه الصفحة مخصصة للمسؤولين فقط.</p>
+  </div>
+
+  <main class="wrap" id="pageContent" style="display:none">
+    <header class="topbar">
+      <div class="titleBox">
+        <h1>📢 إدارة الإعلانات</h1>
+        <p>إنشاء إعلان يظهر Popup للكل + متابعة من شاهد الإعلان</p>
+      </div>
+
+      <div class="chips">
+        <div class="chip">
+          <span class="dot"></span>
+          <span>Active Announcements</span>
+          <b id="activeCount">0</b>
+        </div>
+        <div class="chip">
+          <span class="dot teal"></span>
+          <span>Total Users</span>
+          <b id="usersCount">0</b>
+        </div>
+      </div>
+    </header>
+
+    <!-- Create -->
+    <section class="card createCard">
+      <div class="cardHead">
+        <h2>➕ إنشاء إعلان جديد</h2>
+        <p>املأ العنوان والمحتوى واسم صاحب الإعلان (سيظهر للموظفين).</p>
+      </div>
+
+      <div class="formGrid">
+        <div class="field">
+          <label>عنوان الإعلان</label>
+          <input id="aTitle" type="text" placeholder="مثال: صيانة النظام الليلة" maxlength="120">
+        </div>
+
+        <div class="field">
+          <label>اسم صاحب الإعلان (يظهر للكل) ✅</label>
+          <input id="aAuthor" type="text" placeholder="مثال: Jawad Kadhim" maxlength="60">
+        </div>
+
+        <div class="field">
+          <label>الأولوية</label>
+          <select id="aPriority">
+            <option value="normal">Normal</option>
+            <option value="urgent">Urgent</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>الحالة</label>
+          <select id="aActive">
+            <option value="true">Active ✅ (يظهر للكل)</option>
+            <option value="false">Inactive (مخفي)</option>
+          </select>
+        </div>
+
+        <div class="field full">
+          <label>محتوى الإعلان</label>
+          <textarea id="aBody" rows="5" placeholder="اكتب نص الإعلان..." maxlength="1200"></textarea>
+        </div>
+
+        <div class="actions full">
+          <button class="btn primary" id="btnPublish">
+            <span class="ico">🚀</span> نشر الإعلان
+          </button>
+          <button class="btn ghost" id="btnClear">
+            مسح الحقول
+          </button>
+
+          <div class="state" id="stateText">جاهز.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- List -->
+    <section class="card listCard">
+      <div class="cardHead row">
+        <div>
+          <h2>📄 الإعلانات</h2>
+          <p>تحكم بالإعلان + شاهد الإحصائيات.</p>
+        </div>
+        <div class="filters">
+          <select id="filterActive">
+            <option value="all">الكل</option>
+            <option value="true">Active فقط</option>
+            <option value="false">Inactive فقط</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="list" class="list"></div>
+    </section>
+  </main>
+
+  <script type="module" src="announcements_admin.js"></script>
+</body>
+</html>
