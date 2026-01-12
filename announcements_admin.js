@@ -34,6 +34,7 @@ async function requireAdmin(){
     alert("Auth error. Check users collection.");
     return false;
   }
+  
 }
 
 /* ========= DOM ========= */

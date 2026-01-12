@@ -95,7 +95,9 @@ export async function runAnnouncementPopup(){
   collection(db, "announcements"),
   where("active","==", true),
   limit(1)
+  
 );
+
 
 
     const snap = await getDocs(qy);
