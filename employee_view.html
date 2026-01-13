@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Shift</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shift.css">
+</head>
+<body>
+
+<div class="page" style="margin-right:0">
+
+  <div class="header">
+    <div>
+      <h1>My Shift Schedule</h1>
+      <p>Enter your ID and date to view your schedule</p>
+    </div>
+  </div>
+
+  <div class="card controls">
+    <div class="row">
+      <div class="field">
+        <label>Employee ID</label>
+        <input type="text" id="empIdInput">
+      </div>
+
+      <div class="field">
+        <label>Date</label>
+        <input type="date" id="dateInput">
+      </div>
+
+      <div class="field actions">
+        <label>&nbsp;</label>
+        <button class="btn primary" id="btnView">View Schedule</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card table-card">
+    <h3 id="resultTitle">Result</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Sun</th>
+            <th>Mon</th>
+            <th>Tue</th>
+            <th>Wed</th>
+            <th>Thu</th>
+            <th>Fri</th>
+            <th>Sat</th>
+          </tr>
+        </thead>
+        <tbody id="resultBody">
+          <tr><td colspan="7" class="empty">No data</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script type="module" src="employee_view.js"></script>
+</body>
+</html>

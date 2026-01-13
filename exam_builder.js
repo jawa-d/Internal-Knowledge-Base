@@ -1,35 +1,33 @@
 /* ===============================
-   exam_builder.js ✅ FULL (Updated)
+   exam_builder.js ✅ FINAL CLEAN
    - Active per section
    - Exam has its own section field
+   - MCQ single + multi FIXED
 =============================== */
+
 import { checkAccess } from "./security.js";
+import { db } from "./firebase.js";
+import {
+  collection, addDoc, getDocs, doc, updateDoc, deleteDoc,
+  serverTimestamp, query, where
+} from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
+
 let currentEmail = "";
 
+/* ===============================
+   AUTH
+=============================== */
 document.addEventListener("DOMContentLoaded", async () => {
   const allowed = await checkAccess(["admin"]);
   if (!allowed) return;
 
-  // ✅ تحديث مهم
   currentEmail = localStorage.getItem("kb_user_email");
-
   if (!currentEmail) {
     alert("انتهت الجلسة، يرجى تسجيل الدخول مرة أخرى");
     location.href = "login.html";
     return;
   }
-
-  // 👇 كود الصفحة الطبيعي هنا
 });
-
-
-import { db } from "./firebase.js";
-import {
-  collection, addDoc, getDocs, getDoc, doc, updateDoc, deleteDoc,
-  serverTimestamp, query, where
-} from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
-
-
 
 /* ===============================
    UI
@@ -40,8 +38,6 @@ const durationMin = document.getElementById("durationMin");
 const passScore = document.getElementById("passScore");
 const examStatus = document.getElementById("examStatus");
 const currentSection = document.getElementById("currentSection");
-
-/* NEW ✅: Exam section selector */
 const examSection = document.getElementById("examSection");
 
 const btnNewExam = document.getElementById("btnNewExam");
@@ -49,7 +45,6 @@ const btnLoadActive = document.getElementById("btnLoadActive");
 const btnSave = document.getElementById("btnSave");
 const btnDelete = document.getElementById("btnDelete");
 const btnAddQ = document.getElementById("btnAddQ");
-
 const questionsWrap = document.getElementById("questionsWrap");
 const hint = document.getElementById("hint");
 
@@ -71,18 +66,16 @@ function normalizeQuestion(q) {
     id: q.id || uid(),
     section: q.section || "Inbound",
     type,
-    subType: q.subType || "single", // ✅ NEW (single | multi)
+    subType: q.subType || "single",
     title: q.title || "",
     points: Number(q.points ?? 10),
     correctionMode: q.correctionMode || defaultMode,
     options: Array.isArray(q.options) ? q.options : [],
     correctAnswer: q.correctAnswer ?? "",
-    correctAnswers: Array.isArray(q.correctAnswers) ? q.correctAnswers : [], // ✅ NEW
+    correctAnswers: Array.isArray(q.correctAnswers) ? q.correctAnswers : [],
     image: q.image || ""
   };
 }
-
-
 
 function escapeHtml(s) {
   return String(s ?? "")
@@ -94,13 +87,13 @@ function escapeHtml(s) {
 }
 
 /* ===============================
-   ✅ Active per Section
+   Active per Section
 =============================== */
 async function deactivateOtherActiveExams(activeId, section) {
   const qy = query(
     collection(db, "exams"),
     where("status", "==", "active"),
-    where("section", "==", section) // ✅ only same section
+    where("section", "==", section)
   );
 
   const snap = await getDocs(qy);
@@ -126,8 +119,7 @@ function render() {
     return;
   }
 
-  // Normalize exam fields
-  examData.section = examData.section || "Inbound"; // ✅ exam section
+  examData.section = examData.section || "Inbound";
   examData.questions = (examData.questions || []).map(normalizeQuestion);
 
   hint.textContent =
@@ -179,41 +171,40 @@ function render() {
 
       <div class="hr"></div>
       <div class="q-image-box">
-  ${q.image ? `<img class="q-image-preview" src="${q.image}">` : ""}
-  
-  <div class="q-image-actions">
-    <button class="q-image-upload">📷 إضافة / تغيير صورة</button>
-    ${q.image ? `<button class="q-image-remove">🗑 حذف الصورة</button>` : ""}
-    <input type="file" accept="image/*" style="display:none">
-  </div>
-</div>
+        ${q.image ? `<img class="q-image-preview" src="${q.image}">` : ""}
+        <div class="q-image-actions">
+          <button class="q-image-upload">📷 إضافة / تغيير صورة</button>
+          ${q.image ? `<button class="q-image-remove">🗑 حذف الصورة</button>` : ""}
+          <input type="file" accept="image/*" style="display:none">
+        </div>
+      </div>
 
       <div class="opts"></div>
     `;
-const imgInput = el.querySelector('input[type="file"]');
-const uploadBtn = el.querySelector('.q-image-upload');
-const removeBtn = el.querySelector('.q-image-remove');
 
-uploadBtn.onclick = () => imgInput.click();
+    const imgInput = el.querySelector('input[type="file"]');
+    const uploadBtn = el.querySelector('.q-image-upload');
+    const removeBtn = el.querySelector('.q-image-remove');
 
-imgInput.onchange = () => {
-  const file = imgInput.files[0];
-  if (!file) return;
+    uploadBtn.onclick = () => imgInput.click();
 
-  const reader = new FileReader();
-  reader.onloadend = () => {
-    examData.questions[idx].image = reader.result;
-    render();
-  };
-  reader.readAsDataURL(file);
-};
+    imgInput.onchange = () => {
+      const file = imgInput.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        examData.questions[idx].image = reader.result;
+        render();
+      };
+      reader.readAsDataURL(file);
+    };
 
-if (removeBtn) {
-  removeBtn.onclick = () => {
-    examData.questions[idx].image = "";
-    render();
-  };
-}
+    if (removeBtn) {
+      removeBtn.onclick = () => {
+        examData.questions[idx].image = "";
+        render();
+      };
+    }
 
     const optsBox = el.querySelector(".opts");
     const typeSel = el.querySelector(".qType");
@@ -224,53 +215,53 @@ if (removeBtn) {
       const m = examData.questions[idx].correctionMode;
 
       optsBox.innerHTML = "";
-if (t === "mcq") {
-  if (!examData.questions[idx].options.length) {
-    examData.questions[idx].options = ["", "", "", ""];
-  }
 
-  const isMulti = examData.questions[idx].subType === "multi";
+      if (t === "mcq") {
+        if (!examData.questions[idx].options.length) {
+          examData.questions[idx].options = ["", "", "", ""];
+        }
 
-  optsBox.innerHTML = `
-    <div class="field">
-      <label>نوع MCQ</label>
-      <select class="qSubType">
-        <option value="single" ${!isMulti ? "selected" : ""}>إجابة واحدة</option>
-        <option value="multi" ${isMulti ? "selected" : ""}>أكثر من إجابة (Checkbox)</option>
-      </select>
-    </div>
+        const isMulti = examData.questions[idx].subType === "multi";
 
-    <div class="field">
-      <label>الخيارات</label>
-      ${examData.questions[idx].options.map((o, i) => `
-        <div class="optRow">
-          <input class="opt" data-i="${i}" value="${escapeHtml(o)}" placeholder="خيار ${i + 1}">
-          ${
-            isMulti
-              ? `<input type="checkbox" class="qCorrectMulti" data-i="${i}"
-                   ${examData.questions[idx].correctAnswers.includes(i) ? "checked" : ""}>`
-              : ""
-          }
-        </div>
-      `).join("")}
-    </div>
+        optsBox.innerHTML = `
+          <div class="field">
+            <label>نوع MCQ</label>
+            <select class="qSubType">
+              <option value="single" ${!isMulti ? "selected" : ""}>إجابة واحدة</option>
+              <option value="multi" ${isMulti ? "selected" : ""}>أكثر من إجابة (Checkbox)</option>
+            </select>
+          </div>
 
-    <div class="row">
-      <button class="btn addOpt" type="button">+ خيار</button>
-      <button class="btn delOpt" type="button" style="background:#fecaca">- خيار</button>
+          <div class="field">
+            <label>الخيارات</label>
+            ${examData.questions[idx].options.map((o, i) => `
+              <div class="optRow">
+                <input class="opt" data-i="${i}" value="${escapeHtml(o)}" placeholder="خيار ${i + 1}">
+                ${
+                  isMulti
+                    ? `<input type="checkbox" class="qCorrectMulti" data-i="${i}"
+                        ${examData.questions[idx].correctAnswers.includes(o) ? "checked" : ""}>`
+                    : ""
+                }
+              </div>
+            `).join("")}
+          </div>
 
-      ${
-        !isMulti ? `
-        <div class="field" style="min-width:260px">
-          <label>الإجابة الصحيحة</label>
-          <input class="qCorrect" value="${escapeHtml(examData.questions[idx].correctAnswer)}">
-        </div>` : ""
+          <div class="row">
+            <button class="btn addOpt" type="button">+ خيار</button>
+            <button class="btn delOpt" type="button" style="background:#fecaca">- خيار</button>
+
+            ${
+              !isMulti ? `
+              <div class="field" style="min-width:260px">
+                <label>الإجابة الصحيحة</label>
+                <input class="qCorrect" value="${escapeHtml(examData.questions[idx].correctAnswer)}">
+              </div>` : ""
+            }
+          </div>
+        `;
       }
-    </div>
-  `;
-}
-
-       else if (t === "tf") {
+      else if (t === "tf") {
         optsBox.innerHTML = `
           <div class="row">
             <div class="field" style="min-width:260px">
@@ -304,13 +295,15 @@ if (t === "mcq") {
 
     renderOptions();
 
-    // Delete question
+    /* ===============================
+       Events
+    =============================== */
+
     el.querySelector(".qDel").onclick = () => {
       examData.questions.splice(idx, 1);
       render();
     };
 
-    // Update question fields
     el.querySelector(".qTitle").addEventListener("input", (e) => {
       examData.questions[idx].title = e.target.value;
     });
@@ -331,34 +324,65 @@ if (t === "mcq") {
       renderOptions();
     });
 
-    // Options input
+    /* ===== input events ===== */
     optsBox.addEventListener("input", (e) => {
-   if (e.target.classList.contains("qSubType")) {
-  examData.questions[idx].subType = e.target.value;
-  examData.questions[idx].correctAnswers = [];
-  render();
-}
 
-if (e.target.classList.contains("qCorrectMulti")) {
-  const i = Number(e.target.dataset.i);
-  const arr = examData.questions[idx].correctAnswers;
+      // update option text
+      if (e.target.classList.contains("opt")) {
+        const i = Number(e.target.dataset.i);
+        examData.questions[idx].options[i] = e.target.value;
 
-  if (e.target.checked && !arr.includes(i)) arr.push(i);
-  if (!e.target.checked)
-    examData.questions[idx].correctAnswers = arr.filter(x => x !== i);
-}
+        // clean invalid correctAnswers
+        examData.questions[idx].correctAnswers =
+          examData.questions[idx].correctAnswers.filter(v =>
+            examData.questions[idx].options.includes(v)
+          );
+      }
 
+      // single correct text
       if (e.target.classList.contains("qCorrect")) {
         examData.questions[idx].correctAnswer = e.target.value;
       }
     });
 
+    /* ===== change events ===== */
     optsBox.addEventListener("change", (e) => {
+
+      // change subtype
+      if (e.target.classList.contains("qSubType")) {
+        examData.questions[idx].subType = e.target.value;
+        examData.questions[idx].correctAnswer = "";
+        examData.questions[idx].correctAnswers = [];
+        render();
+        return;
+      }
+
+      // multi checkbox
+      if (e.target.classList.contains("qCorrectMulti")) {
+        const i = Number(e.target.dataset.i);
+        const val = examData.questions[idx].options[i];
+        if (!val) return;
+
+        let arr = examData.questions[idx].correctAnswers;
+        if (!Array.isArray(arr)) arr = [];
+
+        if (e.target.checked) {
+          if (!arr.includes(val)) arr.push(val);
+        } else {
+          arr = arr.filter(x => x !== val);
+        }
+
+        examData.questions[idx].correctAnswers = arr;
+        return;
+      }
+
+      // tf / select
       if (e.target.classList.contains("qCorrect")) {
         examData.questions[idx].correctAnswer = e.target.value;
       }
     });
 
+    /* ===== buttons ===== */
     optsBox.addEventListener("click", (e) => {
       if (e.target.classList.contains("addOpt")) {
         examData.questions[idx].options.push("");
@@ -377,6 +401,7 @@ if (e.target.classList.contains("qCorrectMulti")) {
 /* ===============================
    CRUD
 =============================== */
+
 btnNewExam.onclick = async () => {
   const title = examTitle.value.trim();
   if (!title) return alert("اكتب عنوان الامتحان");
@@ -389,7 +414,7 @@ btnNewExam.onclick = async () => {
     durationMin: Number(durationMin.value || 20),
     passScore: Number(passScore.value || 60),
     status: examStatus.value || "draft",
-    section: sec, // ✅ NEW
+    section: sec,
     questions: [],
     createdAt: serverTimestamp(),
     createdBy: currentEmail
@@ -402,22 +427,16 @@ btnNewExam.onclick = async () => {
     durationMin: Number(durationMin.value || 20),
     passScore: Number(passScore.value || 60),
     status: examStatus.value || "draft",
-    section: sec, // ✅ NEW
+    section: sec,
     questions: []
   };
 
   render();
 };
 
-
-
-
-
-
 btnLoadActive.onclick = async () => {
   const sec = examSection?.value || "Inbound";
 
-  // ⬅️ تحميل كل الحالات (draft / active / closed)
   const qy = query(
     collection(db, "exams"),
     where("section", "==", sec)
@@ -429,7 +448,6 @@ btnLoadActive.onclick = async () => {
     return;
   }
 
-  // ⬅️ اختيار أحدث امتحان
   const best = snap.docs
     .map(d => ({ id: d.id, ...d.data() }))
     .sort((a, b) =>
@@ -440,21 +458,15 @@ btnLoadActive.onclick = async () => {
   examId = best.id;
   examData = best;
 
-  // تعبئة الفورم
   examTitle.value   = examData.title || "";
   examDesc.value    = examData.description || "";
   durationMin.value = examData.durationMin ?? 20;
   passScore.value   = examData.passScore ?? 60;
   examStatus.value  = examData.status || "draft";
-
-  if (examSection) {
-    examSection.value = examData.section || sec;
-  }
+  if (examSection) examSection.value = examData.section || sec;
 
   render();
 };
-
-
 
 btnAddQ.onclick = () => {
   if (!examData) return alert("أنشئ أو حمّل امتحان أولاً");
@@ -482,10 +494,9 @@ btnSave.onclick = async () => {
   examData.durationMin = Number(durationMin.value || 20);
   examData.passScore = Number(passScore.value || 60);
   examData.status = examStatus.value || "draft";
-  examData.section = examSection?.value || examData.section || "Inbound"; // ✅ NEW
+  examData.section = examSection?.value || examData.section || "Inbound";
   examData.questions = (examData.questions || []).map(normalizeQuestion);
 
-  // ✅ only deactivate active exams in same section
   if (examData.status === "active") {
     await deactivateOtherActiveExams(examId, examData.section);
   }
@@ -496,7 +507,7 @@ btnSave.onclick = async () => {
     durationMin: examData.durationMin,
     passScore: examData.passScore,
     status: examData.status,
-    section: examData.section, // ✅ NEW
+    section: examData.section,
     questions: examData.questions,
     updatedAt: serverTimestamp(),
     updatedBy: currentEmail

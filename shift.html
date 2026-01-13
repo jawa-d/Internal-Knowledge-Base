@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Shift Schedule</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="sidebar.css">
+  <link rel="stylesheet" href="shift.css">
+</head>
+<body>
+
+<div id="sidebar"></div>
+<script src="sidebar.js"></script>
+
+<main class="page">
+
+  <div class="header">
+    <div>
+      <h1>Shift Schedule</h1>
+      <p>Weekly roster per section — Admin only edit</p>
+    </div>
+
+    <div class="admin-actions admin-only">
+      <button class="btn ghost" id="btnAddSection">➕ Add Section</button>
+      <button class="btn ghost" id="btnAddShift">➕ Add Shift</button>
+      <button class="btn ghost" id="btnAddEmployee">➕ Add Employee</button>
+    </div>
+  </div>
+
+  <div class="card controls">
+    <div class="row">
+      <div class="field">
+        <label>Section</label>
+        <select id="sectionSelect"></select>
+      </div>
+
+      <div class="field">
+        <label>Week Start</label>
+        <input type="date" id="weekStart">
+      </div>
+
+      <div class="field actions">
+        <label>&nbsp;</label>
+        <button class="btn primary" id="btnLoad">Load Schedule</button>
+        <button class="btn" id="btnPrint">Print</button>
+      </div>
+    </div>
+
+    <div class="state" id="state">Ready…</div>
+  </div>
+
+  <div class="card table-card">
+    <div class="table-top">
+      <div>
+        <h3 id="tableTitle">Weekly Table</h3>
+        <span id="tableSubtitle"></span>
+      </div>
+
+      <div class="tools">
+        <input type="text" id="searchInput" placeholder="Search by name or ID…">
+        <button class="btn small admin-only" id="btnAutoFillOff">Auto Fill Off</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Sun</th>
+            <th>Mon</th>
+            <th>Tue</th>
+            <th>Wed</th>
+            <th>Thu</th>
+            <th>Fri</th>
+            <th>Sat</th>
+          </tr>
+        </thead>
+        <tbody id="scheduleBody">
+          <tr>
+            <td colspan="9" class="empty">No data loaded yet</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="footer">Developed by Jawad Kadhim</div>
+
+</main>
+
+<!-- Popups (Section / Shift / Employee) نفس اللي عندك -->
+
+<script type="module" src="shift.js"></script>
+</body>
+</html>

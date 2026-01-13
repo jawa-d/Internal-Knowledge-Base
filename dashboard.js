@@ -81,6 +81,37 @@ function buildExamUsersChartData(attemptsSnap) {
   return months.map(m => monthMap[m].size);
 }
 
+
+
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  const emailEl = document.getElementById("loggedUserEmail");
+  const userBox = document.getElementById("loggedUserBox");
+
+  const email = localStorage.getItem("kb_user_email");
+
+  if(email){
+    emailEl.textContent = email;
+  }else{
+    emailEl.textContent = "Guest User";
+  }
+
+  // Trigger animation
+  setTimeout(() => {
+    userBox.style.opacity = "1";
+  }, 100);
+});
+
+
+
+
+
+
+
+
+
+
 /* ===============================
    Load dashboard data
 ================================ */
