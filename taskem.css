@@ -484,3 +484,25 @@ body {
   font-weight: 700;
 }
 
+.emp-select-wrap {
+  display: flex;
+  gap: 8px;
+}
+
+.emp-select-wrap select {
+  flex: 1;
+}
+
+.add-emp-btn {
+  background: #00c2a8;
+  border: none;
+  color: #fff;
+  padding: 0 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.add-emp-btn:hover {
+  background: #00a893;
+}

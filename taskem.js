@@ -279,6 +279,74 @@ const cProgressValue = document.getElementById("cProgressValue");
 const cProgressFill = document.getElementById("cProgressFill");
 const cProgressLabel = document.getElementById("cProgressLabel");
 
+
+
+//////////////////////
+// ===============================
+// Employee Select (NEW - SAFE ADD)
+// ===============================
+const cEmpSelect = document.getElementById("cEmpSelect");
+const addEmpBtn = document.getElementById("addEmpBtn");
+
+// قائمة افتراضية (لاحقاً Firestore)
+const EMPLOYEES = [
+    { id: "12234 & 11150 ", name:"Abadher&Ghassan" },
+
+  { id: "9441", name: "Mustafa Sameer" },
+  { id: "11150", name: "Ghassan Adnan" },
+  { id: "12234", name: "Abadher Muhammad" },
+
+  { id: "13978", name: "Jawad" }
+];
+
+// تحميل القائمة داخل Select
+function loadEmployeeSelect() {
+  if (!cEmpSelect) return;
+
+  cEmpSelect.innerHTML = `<option value="">-- اختر موظف --</option>`;
+  EMPLOYEES.forEach(emp => {
+    const opt = document.createElement("option");
+    opt.value = emp.id;
+    opt.textContent = emp.name;
+    cEmpSelect.appendChild(opt);
+  });
+}
+
+// اختيار موظف من القائمة
+if (cEmpSelect) {
+  cEmpSelect.addEventListener("change", () => {
+    const emp = EMPLOYEES.find(e => e.id === cEmpSelect.value);
+    if (!emp) return;
+
+    cEmpName.value = emp.name;
+    cEmpId.value = emp.id;
+
+    // نخفي إدخال الاسم لأننا اخترنا
+    cEmpName.style.display = "none";
+  });
+}
+
+// زر إضافة اسم جديد
+if (addEmpBtn) {
+  addEmpBtn.addEventListener("click", () => {
+    if (cEmpSelect) cEmpSelect.value = "";
+    cEmpName.value = "";
+    cEmpId.value = "";
+
+    cEmpName.style.display = "block";
+    cEmpName.focus();
+  });
+}
+
+
+
+
+
+
+
+
+
+
 function calcCreatePreview() {
   const p = computePercent(cCurrentValue.value, cTargetValue.value);
   cProgressValue.value = p;
@@ -301,6 +369,9 @@ const createSaveBtn = document.getElementById("createSaveBtn");
 function resetCreateModal() {
   cEmpName.value = "";
   cEmpId.value = "";
+  if (cEmpSelect) cEmpSelect.value = "";
+  cEmpName.style.display = "none";
+
   cTaskName.value = "";
   cTargetValue.value = "";
   cCurrentValue.value = "";
@@ -310,6 +381,7 @@ function resetCreateModal() {
   cProgressFill.className = "progress-fill";
   cProgressLabel.textContent = "0%";
 }
+
 
 async function createTaskFromModal() {
   const employee = (cEmpName.value || "").trim();
@@ -945,7 +1017,11 @@ if (exportExcelBtn) exportExcelBtn.onclick = exportReportToExcel;
 const openCreateBtn = document.getElementById("openCreateBtn");
 const openReportBtn = document.getElementById("openReportBtn");
 
-if (openCreateBtn) openCreateBtn.onclick = () => { resetCreateModal(); openModal(createOverlay); };
+if (openCreateBtn) openCreateBtn.onclick = () => {
+  resetCreateModal();
+  loadEmployeeSelect();
+  openModal(createOverlay);
+};
 if (openReportBtn) openReportBtn.onclick = () => { clearReport(); openModal(reportOverlay); };
 
 // ===============================
