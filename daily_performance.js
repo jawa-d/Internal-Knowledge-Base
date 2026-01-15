@@ -13,13 +13,65 @@ const MOCK_MODE = true; // غيرها لاحقاً إلى false عند ربط AP
    MOCK DATA
 ========================= */
 const MOCK_ROWS = [
-  { ID:"10742", Name:"Jawad Kadhim", Date:"2026-01-01", "AVG Daily evaluation":88, Attendance:1, Calls:32 },
-  { ID:"10742", Name:"Jawad Kadhim", Date:"2026-01-02", "AVG Daily evaluation":92, Attendance:1, Calls:41 },
-  { ID:"10742", Name:"Jawad Kadhim", Date:"2026-01-03", "AVG Daily evaluation":75, Attendance:1, Calls:20 },
-  { ID:"10742", Name:"Jawad Kadhim", Date:"2026-01-05", "AVG Daily evaluation":80, Attendance:1, Calls:28 },
+  // ===== Ahmad Radi =====
+  { ID:"20001", Name:"Ahmad Radi", Date:"2026-01-01", "AVG Daily evaluation":85, Attendance:1, Calls:30 },
+  { ID:"20001", Name:"Ahmad Radi", Date:"2026-01-02", "AVG Daily evaluation":88, Attendance:1, Calls:34 },
+  { ID:"20001", Name:"Ahmad Radi", Date:"2026-01-03", "AVG Daily evaluation":82, Attendance:1, Calls:28 },
+  { ID:"20001", Name:"Ahmad Radi", Date:"2026-01-04", "AVG Daily evaluation":90, Attendance:1, Calls:40 },
+  { ID:"20001", Name:"Ahmad Radi", Date:"2026-01-05", "AVG Daily evaluation":87, Attendance:1, Calls:36 },
+  { ID:"20001", Name:"Ahmad Radi", Date:"2026-01-06", "AVG Daily evaluation":91, Attendance:1, Calls:44 },
+  { ID:"20001", Name:"Ahmad Radi", Date:"2026-01-07", "AVG Daily evaluation":84, Attendance:1, Calls:31 },
+  { ID:"20001", Name:"Ahmad Radi", Date:"2026-01-08", "AVG Daily evaluation":88, Attendance:1, Calls:35 },
+  { ID:"20001", Name:"Ahmad Radi", Date:"2026-01-09", "AVG Daily evaluation":86, Attendance:1, Calls:33 },
+  { ID:"20001", Name:"Ahmad Radi", Date:"2026-01-10", "AVG Daily evaluation":89, Attendance:1, Calls:38 },
 
-  { ID:"11015", Name:"Zena Majid", Date:"2026-01-01", "AVG Daily evaluation":95, Attendance:1, Calls:50 },
-  { ID:"11015", Name:"Zena Majid", Date:"2026-01-02", "AVG Daily evaluation":90, Attendance:1, Calls:45 }
+  // ===== Layth Qahtan =====
+  { ID:"20002", Name:"Layth Qahtan", Date:"2026-01-01", "AVG Daily evaluation":78, Attendance:1, Calls:25 },
+  { ID:"20002", Name:"Layth Qahtan", Date:"2026-01-02", "AVG Daily evaluation":80, Attendance:1, Calls:27 },
+  { ID:"20002", Name:"Layth Qahtan", Date:"2026-01-03", "AVG Daily evaluation":76, Attendance:1, Calls:22 },
+  { ID:"20002", Name:"Layth Qahtan", Date:"2026-01-04", "AVG Daily evaluation":82, Attendance:1, Calls:29 },
+  { ID:"20002", Name:"Layth Qahtan", Date:"2026-01-05", "AVG Daily evaluation":79, Attendance:1, Calls:26 },
+  { ID:"20002", Name:"Layth Qahtan", Date:"2026-01-06", "AVG Daily evaluation":85, Attendance:1, Calls:33 },
+  { ID:"20002", Name:"Layth Qahtan", Date:"2026-01-07", "AVG Daily evaluation":77, Attendance:1, Calls:24 },
+  { ID:"20002", Name:"Layth Qahtan", Date:"2026-01-08", "AVG Daily evaluation":81, Attendance:1, Calls:28 },
+  { ID:"20002", Name:"Layth Qahtan", Date:"2026-01-09", "AVG Daily evaluation":83, Attendance:1, Calls:31 },
+  { ID:"20002", Name:"Layth Qahtan", Date:"2026-01-10", "AVG Daily evaluation":80, Attendance:1, Calls:27 },
+
+  // ===== Jawad Kadhum Hadi al-Dahhan =====
+  { ID:"20003", Name:"Jawad Kadhum Hadi al-Dahhan", Date:"2026-01-01", "AVG Daily evaluation":90, Attendance:1, Calls:42 },
+  { ID:"20003", Name:"Jawad Kadhum Hadi al-Dahhan", Date:"2026-01-02", "AVG Daily evaluation":92, Attendance:1, Calls:45 },
+  { ID:"20003", Name:"Jawad Kadhum Hadi al-Dahhan", Date:"2026-01-03", "AVG Daily evaluation":88, Attendance:1, Calls:38 },
+  { ID:"20003", Name:"Jawad Kadhum Hadi al-Dahhan", Date:"2026-01-04", "AVG Daily evaluation":94, Attendance:1, Calls:50 },
+  { ID:"20003", Name:"Jawad Kadhum Hadi al-Dahhan", Date:"2026-01-05", "AVG Daily evaluation":91, Attendance:1, Calls:46 },
+  { ID:"20003", Name:"Jawad Kadhum Hadi al-Dahhan", Date:"2026-01-06", "AVG Daily evaluation":89, Attendance:1, Calls:41 },
+  { ID:"20003", Name:"Jawad Kadhum Hadi al-Dahhan", Date:"2026-01-07", "AVG Daily evaluation":93, Attendance:1, Calls:48 },
+  { ID:"20003", Name:"Jawad Kadhum Hadi al-Dahhan", Date:"2026-01-08", "AVG Daily evaluation":95, Attendance:1, Calls:52 },
+  { ID:"20003", Name:"Jawad Kadhum Hadi al-Dahhan", Date:"2026-01-09", "AVG Daily evaluation":92, Attendance:1, Calls:47 },
+  { ID:"20003", Name:"Jawad Kadhum Hadi al-Dahhan", Date:"2026-01-10", "AVG Daily evaluation":94, Attendance:1, Calls:49 },
+
+  // ===== Ali Abbas =====
+  { ID:"20004", Name:"Ali Abbas", Date:"2026-01-01", "AVG Daily evaluation":70, Attendance:1, Calls:20 },
+  { ID:"20004", Name:"Ali Abbas", Date:"2026-01-02", "AVG Daily evaluation":72, Attendance:1, Calls:22 },
+  { ID:"20004", Name:"Ali Abbas", Date:"2026-01-03", "AVG Daily evaluation":68, Attendance:1, Calls:18 },
+  { ID:"20004", Name:"Ali Abbas", Date:"2026-01-04", "AVG Daily evaluation":75, Attendance:1, Calls:26 },
+  { ID:"20004", Name:"Ali Abbas", Date:"2026-01-05", "AVG Daily evaluation":73, Attendance:1, Calls:24 },
+  { ID:"20004", Name:"Ali Abbas", Date:"2026-01-06", "AVG Daily evaluation":78, Attendance:1, Calls:30 },
+  { ID:"20004", Name:"Ali Abbas", Date:"2026-01-07", "AVG Daily evaluation":74, Attendance:1, Calls:25 },
+  { ID:"20004", Name:"Ali Abbas", Date:"2026-01-08", "AVG Daily evaluation":76, Attendance:1, Calls:28 },
+  { ID:"20004", Name:"Ali Abbas", Date:"2026-01-09", "AVG Daily evaluation":71, Attendance:1, Calls:23 },
+  { ID:"20004", Name:"Ali Abbas", Date:"2026-01-10", "AVG Daily evaluation":77, Attendance:1, Calls:29 },
+
+  // ===== Shams Zuhayr =====
+  { ID:"20005", Name:"Shams Zuhayr", Date:"2026-01-01", "AVG Daily evaluation":88, Attendance:1, Calls:35 },
+  { ID:"20005", Name:"Shams Zuhayr", Date:"2026-01-02", "AVG Daily evaluation":90, Attendance:1, Calls:38 },
+  { ID:"20005", Name:"Shams Zuhayr", Date:"2026-01-03", "AVG Daily evaluation":86, Attendance:1, Calls:33 },
+  { ID:"20005", Name:"Shams Zuhayr", Date:"2026-01-04", "AVG Daily evaluation":92, Attendance:1, Calls:41 },
+  { ID:"20005", Name:"Shams Zuhayr", Date:"2026-01-05", "AVG Daily evaluation":89, Attendance:1, Calls:37 },
+  { ID:"20005", Name:"Shams Zuhayr", Date:"2026-01-06", "AVG Daily evaluation":91, Attendance:1, Calls:40 },
+  { ID:"20005", Name:"Shams Zuhayr", Date:"2026-01-07", "AVG Daily evaluation":87, Attendance:1, Calls:34 },
+  { ID:"20005", Name:"Shams Zuhayr", Date:"2026-01-08", "AVG Daily evaluation":93, Attendance:1, Calls:43 },
+  { ID:"20005", Name:"Shams Zuhayr", Date:"2026-01-09", "AVG Daily evaluation":90, Attendance:1, Calls:39 },
+  { ID:"20005", Name:"Shams Zuhayr", Date:"2026-01-10", "AVG Daily evaluation":94, Attendance:1, Calls:45 }
 ];
 
 /* =========================

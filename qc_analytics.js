@@ -187,21 +187,315 @@ function findWeakCategory(row){
 /* ========= MOCK ========= */
 function getMockRows(){
   return [
-    { employee:"Jawad Kadhum Hadi al-Dahhan", date:"1/24/2025 23:05", callId:"10622637", finalScore:75,
-      note:"لم يتم السؤال عن أي استفسارات اخر (other inquiries)", answerEnding:"10/15", caseWriting:"0/15",
-      communication:"30/30", diagnosis:"20/20", problemSolve:"NA" },
-    { employee:"Jawad Kadhum Hadi al-Dahhan", date:"1/24/2025 22:08", callId:"10621855", finalScore:92.3076,
-      note:"لم يتم السؤال عن أي استفسارات اخر (other inquiries)", answerEnding:"10/15", caseWriting:"NA",
-      communication:"30/30", diagnosis:"20/20", problemSolve:"NA" },
-    { employee:"Jawad Kadhum Hadi al-Dahhan", date:"1/24/2025 21:42", callId:"10621482", finalScore:87.5,
-      note:"لم يتم انهاء الاتصال بشكل لائق (Closing greeting)", answerEnding:"5/15", caseWriting:"15/15",
-      communication:"30/30", diagnosis:"20/20", problemSolve:"NA" },
-    { employee:"Jawad Kadhum Hadi al-Dahhan", date:"1/26/2025 0:23", callId:"10635687", finalScore:87.5,
-      note:"لم يتم إبلاغ بجميع طرق التجديد (Answering inquiries)", answerEnding:"15/15", caseWriting:"15/15",
-      communication:"30/30", diagnosis:"10/20", problemSolve:"NA" },
-    { employee:"Jawad Kadhum Hadi al-Dahhan", date:"1/26/2025 0:18", callId:"10635655", finalScore:90,
-      note:"تم إبلاغ المشترك بالانتظار (Focusing 15/30)", answerEnding:"15/15", caseWriting:"15/15",
-      communication:"22/30", diagnosis:"20/20", problemSolve:"NA" },
+    //////////////// Jawad Kadhum
+    {
+      employee:"Jawad Kadhum Hadi al-Dahhan",
+      date:"1/24/2025 23:05",
+      callId:"10622637",
+      finalScore:82,
+      note:"تحسين ختام المكالمة مطلوب",
+      answerEnding:"8/15",
+      caseWriting:"10/15",
+      communication:"28/30",
+      diagnosis:"18/20",
+      problemSolve:"NA"
+    },
+    {
+      employee:"Jawad Kadhum Hadi al-Dahhan",
+      date:"1/24/2025 22:08",
+      callId:"10621855",
+      finalScore:91,
+      note:"أداء ممتاز مع ملاحظة بسيطة",
+      answerEnding:"14/15",
+      caseWriting:"NA",
+      communication:"29/30",
+      diagnosis:"20/20",
+      problemSolve:"NA"
+    },
+    {
+      employee:"Jawad Kadhum Hadi al-Dahhan",
+      date:"1/24/2025 21:42",
+      callId:"10621482",
+      finalScore:76,
+      note:"ضعف في إنهاء الاتصال",
+      answerEnding:"6/15",
+      caseWriting:"15/15",
+      communication:"25/30",
+      diagnosis:"20/20",
+      problemSolve:"NA"
+    },
+    {
+      employee:"Jawad Kadhum Hadi al-Dahhan",
+      date:"1/26/2025 0:23",
+      callId:"10635687",
+      finalScore:88,
+      note:"تواصل جيد لكن التشخيص متوسط",
+      answerEnding:"15/15",
+      caseWriting:"15/15",
+      communication:"27/30",
+      diagnosis:"12/20",
+      problemSolve:"NA"
+    },
+    {
+      employee:"Jawad Kadhum Hadi al-Dahhan",
+      date:"1/26/2025 0:18",
+      callId:"10635655",
+      finalScore:93,
+      note:"أداء قوي جداً",
+      answerEnding:"15/15",
+      caseWriting:"15/15",
+      communication:"29/30",
+      diagnosis:"19/20",
+      problemSolve:"NA"
+    },
+
+    //////////////// Ahmad Radi
+    {
+      employee:"Ahmad Radi",
+      date:"1/26/2025 0:18",
+      callId:"10635655",
+      finalScore:85,
+      note:"تحسين إدارة المكالمة",
+      answerEnding:"12/15",
+      caseWriting:"15/15",
+      communication:"26/30",
+      diagnosis:"18/20",
+      problemSolve:"NA"
+    },
+    {
+      employee:"Ahmad Radi",
+      date:"1/24/2025 23:05",
+      callId:"10622637",
+      finalScore:70,
+      note:"ضعف في طرح الاستفسارات",
+      answerEnding:"7/15",
+      caseWriting:"0/15",
+      communication:"28/30",
+      diagnosis:"20/20",
+      problemSolve:"NA"
+    },
+    {
+      employee:"Ahmad Radi",
+      date:"1/24/2025 22:08",
+      callId:"10621855",
+      finalScore:96,
+      note:"أداء ممتاز جداً",
+      answerEnding:"14/15",
+      caseWriting:"NA",
+      communication:"30/30",
+      diagnosis:"20/20",
+      problemSolve:"NA"
+    },
+    {
+      employee:"Ahmad Radi",
+      date:"1/24/2025 21:42",
+      callId:"10621482",
+      finalScore:62,
+      note:"ضعف في الختام والتواصل",
+      answerEnding:"5/15",
+      caseWriting:"15/15",
+      communication:"22/30",
+      diagnosis:"20/20",
+      problemSolve:"NA"
+    },
+    {
+      employee:"Ahmad Radi",
+      date:"1/26/2025 0:23",
+      callId:"10635687",
+      finalScore:58,
+      note:"الحاجة إلى تحسين شامل",
+      answerEnding:"8/15",
+      caseWriting:"10/15",
+      communication:"20/30",
+      diagnosis:"10/20",
+      problemSolve:"NA"
+    },
+
+    //////////////// Layth Qahtan
+    {
+      employee:"Layth Qahtan",
+      date:"1/26/2025 0:18",
+      callId:"10635655",
+      finalScore:90,
+      note:"أداء ثابت وجيد",
+      answerEnding:"15/15",
+      caseWriting:"15/15",
+      communication:"28/30",
+      diagnosis:"17/20",
+      problemSolve:"NA"
+    },
+    {
+      employee:"Layth Qahtan",
+      date:"1/24/2025 23:05",
+      callId:"10622637",
+      finalScore:74,
+      note:"ضعف في التوثيق",
+      answerEnding:"10/15",
+      caseWriting:"5/15",
+      communication:"29/30",
+      diagnosis:"20/20",
+      problemSolve:"NA"
+    },
+    {
+      employee:"Layth Qahtan",
+      date:"1/24/2025 22:08",
+      callId:"10621855",
+      finalScore:89,
+      note:"أداء جيد جداً",
+      answerEnding:"12/15",
+      caseWriting:"NA",
+      communication:"29/30",
+      diagnosis:"20/20",
+      problemSolve:"NA"
+    },
+    {
+      employee:"Layth Qahtan",
+      date:"1/24/2025 21:42",
+      callId:"10621482",
+      finalScore:83,
+      note:"ختام يحتاج تحسين بسيط",
+      answerEnding:"7/15",
+      caseWriting:"15/15",
+      communication:"29/30",
+      diagnosis:"20/20",
+      problemSolve:"NA"
+    },
+    {
+      employee:"Layth Qahtan",
+      date:"1/26/2025 0:23",
+      callId:"10635687",
+      finalScore:86,
+      note:"تشخيص متوسط",
+      answerEnding:"15/15",
+      caseWriting:"15/15",
+      communication:"26/30",
+      diagnosis:"12/20",
+      problemSolve:"NA"
+    },
+
+    //////////////// Ali Abbas
+    {
+      employee:"Ali Abbas",
+      date:"1/26/2025 0:18",
+      callId:"10635655",
+      finalScore:88,
+      note:"أداء جيد",
+      answerEnding:"15/15",
+      caseWriting:"15/15",
+      communication:"26/30",
+      diagnosis:"17/20",
+      problemSolve:"NA"
+    },
+    {
+      employee:"Ali Abbas",
+      date:"1/24/2025 23:05",
+      callId:"10622637",
+      finalScore:72,
+      note:"ضعف في كتابة الحالة",
+      answerEnding:"10/15",
+      caseWriting:"3/15",
+      communication:"29/30",
+      diagnosis:"20/20",
+      problemSolve:"NA"
+    },
+    {
+      employee:"Ali Abbas",
+      date:"1/24/2025 22:08",
+      callId:"10621855",
+      finalScore:91,
+      note:"مستوى عالي",
+      answerEnding:"14/15",
+      caseWriting:"NA",
+      communication:"30/30",
+      diagnosis:"20/20",
+      problemSolve:"NA"
+    },
+    {
+      employee:"Ali Abbas",
+      date:"1/24/2025 21:42",
+      callId:"10621482",
+      finalScore:84,
+      note:"ختام متوسط",
+      answerEnding:"6/15",
+      caseWriting:"15/15",
+      communication:"29/30",
+      diagnosis:"20/20",
+      problemSolve:"NA"
+    },
+    {
+      employee:"Ali Abbas",
+      date:"1/26/2025 0:23",
+      callId:"10635687",
+      finalScore:87,
+      note:"تشخيص يحتاج دعم",
+      answerEnding:"15/15",
+      caseWriting:"15/15",
+      communication:"27/30",
+      diagnosis:"12/20",
+      problemSolve:"NA"
+    },
+
+    //////////////// Shams Zuhayr
+    {
+      employee:"Shams Zuhayr",
+      date:"1/26/2025 0:18",
+      callId:"10635655",
+      finalScore:92,
+      note:"أداء ممتاز",
+      answerEnding:"15/15",
+      caseWriting:"15/15",
+      communication:"29/30",
+      diagnosis:"18/20",
+      problemSolve:"NA"
+    },
+    {
+      employee:"Shams Zuhayr",
+      date:"1/24/2025 23:05",
+      callId:"10622637",
+      finalScore:78,
+      note:"ضعف في المتابعة",
+      answerEnding:"10/15",
+      caseWriting:"5/15",
+      communication:"29/30",
+      diagnosis:"20/20",
+      problemSolve:"NA"
+    },
+    {
+      employee:"Shams Zuhayr",
+      date:"1/24/2025 22:08",
+      callId:"10621855",
+      finalScore:89,
+      note:"أداء جيد جداً",
+      answerEnding:"12/15",
+      caseWriting:"NA",
+      communication:"30/30",
+      diagnosis:"20/20",
+      problemSolve:"NA"
+    },
+    {
+      employee:"Shams Zuhayr",
+      date:"1/24/2025 21:42",
+      callId:"10621482",
+      finalScore:85,
+      note:"تحسين الختام مطلوب",
+      answerEnding:"7/15",
+      caseWriting:"15/15",
+      communication:"29/30",
+      diagnosis:"20/20",
+      problemSolve:"NA"
+    },
+    {
+      employee:"Shams Zuhayr",
+      date:"1/26/2025 0:23",
+      callId:"10635687",
+      finalScore:88,
+      note:"تشخيص متوسط",
+      answerEnding:"15/15",
+      caseWriting:"15/15",
+      communication:"27/30",
+      diagnosis:"12/20",
+      problemSolve:"NA"
+    }
   ];
 }
 
