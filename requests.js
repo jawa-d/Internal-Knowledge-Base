@@ -102,6 +102,71 @@ const cEmpName = document.getElementById("cEmpName");
 const cEmpId = document.getElementById("cEmpId");
 const cReqDesc = document.getElementById("cReqDesc");
 
+/* ===============================
+   Employee Select (Create Request)
+================================ */
+const cEmpSelect = document.getElementById("cEmpSelect");
+const addEmpBtn = document.getElementById("addEmpBtn");
+
+// قائمة افتراضية (لاحقاً Firestore)
+const EMPLOYEES = [
+    { id: "12234 & 11150 ", name:"Abadher&Ghassan" },
+
+  { id: "9441", name: "Mustafa Sameer" },
+  { id: "11150", name: "Ghassan Adnan" },
+  { id: "12234", name: "Abadher Muhammad" },
+  { id: "13978", name: "Jawad kadhim" }
+];
+
+// تحميل الموظفين داخل select
+function loadEmployeeSelect() {
+  if (!cEmpSelect) return;
+
+  cEmpSelect.innerHTML = `<option value="">-- اختر موظف --</option>`;
+  EMPLOYEES.forEach(emp => {
+    const opt = document.createElement("option");
+    opt.value = emp.id;
+    opt.textContent = emp.name;
+    cEmpSelect.appendChild(opt);
+  });
+
+  // افتراضياً نخفي الإدخال اليدوي
+  cEmpName.style.display = "none";
+}
+
+// عند اختيار موظف
+if (cEmpSelect) {
+  cEmpSelect.addEventListener("change", () => {
+    const emp = EMPLOYEES.find(e => e.id === cEmpSelect.value);
+    if (!emp) return;
+
+    cEmpName.value = emp.name;
+    cEmpId.value = emp.id;
+    cEmpName.style.display = "none";
+  });
+}
+
+// إضافة موظف جديد
+if (addEmpBtn) {
+  addEmpBtn.addEventListener("click", () => {
+    cEmpSelect.value = "";
+    cEmpName.value = "";
+    cEmpId.value = "";
+    cEmpName.style.display = "block";
+    cEmpName.focus();
+  });
+}
+
+
+
+
+
+
+
+
+
+
+
 const cReqTitleSelect = document.getElementById("cReqTitleSelect");
 const cReqTitleCustom = document.getElementById("cReqTitleCustom");
 const otherTitleGroup = document.getElementById("otherTitleGroup");
@@ -195,13 +260,17 @@ async function createRequestFromModal() {
 }
 
 function resetCreateModal() {
+  if (cEmpSelect) cEmpSelect.value = "";
   cEmpName.value = "";
   cEmpId.value = "";
+  cEmpName.style.display = "none";
+
   cReqDesc.value = "";
   cReqTitleSelect.value = "";
   cReqTitleCustom.value = "";
   otherTitleGroup.style.display = "none";
 }
+
 
 createCloseX.onclick = () => closeModal(createOverlay);
 createCancelBtn.onclick = () => closeModal(createOverlay);
@@ -426,7 +495,10 @@ function subscribeRequests() {
 /* ===============================
    Top Buttons
 ================================ */
-document.getElementById("openCreateBtn").onclick = () => openModal(createOverlay);
+document.getElementById("openCreateBtn").onclick = () => {
+  loadEmployeeSelect();
+  openModal(createOverlay);
+};
 
 /* ===============================
    INIT
