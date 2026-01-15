@@ -291,14 +291,15 @@ const addEmpBtn = document.getElementById("addEmpBtn");
 // قائمة افتراضية (لاحقاً Firestore)
 const EMPLOYEES = [
     { id: "12234 & 11150 ", name:"Abadher&Ghassan" },
+  { id: "9441&11150", name: "Mustafa&Ghassan" },
+  { id: "9441&12234", name: "Mustafa&Abadher" },
+  { id: "9441&12234&11150", name: "Mustafa&Abadher&Ghassan" },
 
   { id: "9441", name: "Mustafa Sameer" },
   { id: "11150", name: "Ghassan Adnan" },
   { id: "12234", name: "Abadher Muhammad" },
-
   { id: "13978", name: "Jawad kadhim" }
 ];
-
 // تحميل القائمة داخل Select
 function loadEmployeeSelect() {
   if (!cEmpSelect) return;
