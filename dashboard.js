@@ -5,7 +5,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
 
 /* ===============================
-   Animated counter
+   Animated Counter
 ================================ */
 function animate(el, to) {
   let current = 0;
@@ -23,7 +23,7 @@ function animate(el, to) {
 }
 
 /* ===============================
-   Generic line chart (single value)
+   Generic Line Chart (Single Value)
 ================================ */
 function drawLineChart(canvasId, total, color) {
   const ctx = document.getElementById(canvasId);
@@ -64,6 +64,7 @@ function drawLineChart(canvasId, total, color) {
 function buildExamUsersChartData(attemptsSnap) {
   const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   const monthMap = {};
+
   months.forEach(m => monthMap[m] = new Set());
 
   attemptsSnap.forEach(doc => {
@@ -81,48 +82,35 @@ function buildExamUsersChartData(attemptsSnap) {
   return months.map(m => monthMap[m].size);
 }
 
-
-
-
-
+/* ===============================
+   Logged User Info
+================================ */
 document.addEventListener("DOMContentLoaded", () => {
   const emailEl = document.getElementById("loggedUserEmail");
   const userBox = document.getElementById("loggedUserBox");
 
   const email = localStorage.getItem("kb_user_email");
+  emailEl.textContent = email || "Guest User";
 
-  if(email){
-    emailEl.textContent = email;
-  }else{
-    emailEl.textContent = "Guest User";
-  }
-
-  // Trigger animation
   setTimeout(() => {
     userBox.style.opacity = "1";
   }, 100);
 });
 
-
-
-
-
-
-
-
-
-
 /* ===============================
-   Load dashboard data
+   Load Dashboard Data
 ================================ */
 async function loadDashboard() {
+
   /* ===== Core collections ===== */
-  const usersSnap   = await getDocs(collection(db, "users"));
-  const shelvesSnap = await getDocs(collection(db, "shelves"));
-  const newsSnap    = await getDocs(collection(db, "news"));
-  const kpiSnap     = await getDocs(collection(db, "kpi_reports"));
-  /* ===== Exam attempts (IMPORTANT) ===== */
+  const usersSnap    = await getDocs(collection(db, "users"));
+  const shelvesSnap  = await getDocs(collection(db, "shelves"));
+  const newsSnap     = await getDocs(collection(db, "news"));
+  const kpiSnap      = await getDocs(collection(db, "kpi_reports"));
+
+  /* ===== Exam attempts ===== */
   const attemptsSnap = await getDocs(collection(db, "exam_attempts"));
+
   /* ===============================
      Counters
   ============================== */
@@ -130,16 +118,19 @@ async function loadDashboard() {
   animate(shelvesCount, shelvesSnap.size);
   animate(newsCount, newsSnap.size);
   animate(kpiCount, kpiSnap.size);
-  /* ---- Exam users counter (unique) ---- */
+
+  /* ---- Unique exam users ---- */
   const uniqueExamUsers = new Set();
   attemptsSnap.forEach(doc => {
     const d = doc.data();
     if (d.userEmail) uniqueExamUsers.add(d.userEmail);
   });
+
   animate(
     document.getElementById("examUsersCount"),
     uniqueExamUsers.size
   );
+
   /* ===============================
      Charts
   ============================== */
@@ -147,6 +138,7 @@ async function loadDashboard() {
   drawLineChart("shelvesChart", shelvesSnap.size, "rgba(0,194,168,1)");
   drawLineChart("booksChart", shelvesSnap.size * 3, "rgba(120,120,255,1)");
   drawLineChart("kpiChart", kpiSnap.size, "rgba(255,193,7,1)");
+
   /* ---- Exam users monthly chart ---- */
   const examUsersMonthly = buildExamUsersChartData(attemptsSnap);
 
@@ -171,11 +163,9 @@ async function loadDashboard() {
     }
   });
 }
+
 /* ===============================
-   Init
-================================ */
-/* ===============================
-   ADD ONLY: Logout
+   Logout
 ================================ */
 const logoutBtn = document.getElementById("logoutBtn");
 if (logoutBtn) {
@@ -187,4 +177,7 @@ if (logoutBtn) {
   });
 }
 
+/* ===============================
+   Init
+================================ */
 loadDashboard();
