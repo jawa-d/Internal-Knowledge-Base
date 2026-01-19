@@ -76,21 +76,8 @@
   overflow: hidden;
 }
 
-.card::after{
-  content:'';
-  position:absolute;
-  inset:0;
-  background: linear-gradient(120deg, transparent, rgba(0,194,168,.12), transparent);
-  opacity:0;
-  transition:.35s;
-}
-
-.card:hover::after{
-  opacity:1;
-}
-
 .card:hover {
-  transform: translateY(-6px) scale(1.01);
+  transform: translateY(-6px);
   box-shadow: 0 20px 45px rgba(0,0,0,0.12);
 }
 
@@ -104,7 +91,6 @@
   align-items: center;
   justify-content: center;
   font-size: 22px;
-  flex-shrink: 0;
 }
 
 .label {
@@ -116,168 +102,131 @@
   font-size: 30px;
   font-weight: 800;
   color: var(--primary);
-  margin-top: 2px;
 }
 
 /* ===============================
-   Charts
+   Charts Layout (FIXED)
 ================================ */
 
-/* ===============================
-   Charts Grid (Like Screenshot)
-================================ */
-
-/* ===============================
-   Charts Grid (Like Screenshot)
-================================ */
-
-.charts-grid {
+/* كل سطر = جارتين */
+.charts-wrapper {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* صفين فقط */
+  grid-template-columns: repeat(2, 1fr);
   gap: 28px;
-  margin-top: 10px;
+  margin-top: 20px;
 }
 
 /* Responsive */
 @media (max-width: 1200px) {
-  .charts-grid {
+  .charts-wrapper {
     grid-template-columns: 1fr;
   }
 }
 
+/* ===============================
+   Chart Card
+================================ */
 
 .chart-card {
   background: #ffffff;
   border-radius: 26px;
-  padding: 22px 26px;
-  height: 340px;
+  padding: 20px 24px;
+  min-height: 320px;   /* بدل height */
+  height: auto;        /* 🔥 مهم */
   box-shadow:
     0 12px 30px rgba(0,0,0,0.06),
     inset 0 0 0 1px rgba(0,0,0,0.04);
   display: flex;
   flex-direction: column;
-  transition: .35s ease;
 }
 
-.chart-card:hover {
-  transform: translateY(-4px);
-  box-shadow:
-    0 22px 50px rgba(0,0,0,0.12),
-    inset 0 0 0 1px rgba(0,56,168,0.15);
-}
 
 .chart-card h3 {
   font-size: 14px;
   font-weight: 700;
   color: #0f172a;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   text-align: right;
-  padding-right: 6px;
-}
-.chart-card canvas {
-  width: 100% !important;
-  height: 100% !important;
 }
 
+/* 🔑 المفتاح الحقيقي لعمل Chart.js */
+.chart-card canvas {
+  width: 100% !important;
+  height: 260px !important;
+}
 
 /* ===============================
    Logged User Box
 ================================ */
 
-.logged-user-box{
-  display:flex;
-  align-items:center;
-  gap:14px;
-  padding:12px 22px;
-  border-radius:18px;
+.logged-user-box {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 22px;
+  border-radius: 18px;
   background: linear-gradient(135deg, var(--primary), var(--accent));
-  color:#fff;
-  width: fit-content;
-  box-shadow: 0 12px 34px rgba(0,0,0,.2);
-  animation: slideFadeIn .8s ease forwards;
-  opacity:0;
-}
-
-.logged-user-box .email{
-  font-size:14px;
-  font-weight:700;
-  letter-spacing:.2px;
-}
-
-/* ===============================
-   Logout Button
-================================ */
-
-.logout-btn {
-  position: absolute;
-  left: 30px;
-  top: 30px;
-  background: linear-gradient(135deg, #ff5252, #ff1744);
   color: #fff;
-  border: none;
-  border-radius: 14px;
-  padding: 9px 18px;
-  font-family: "Cairo", sans-serif;
-  font-size: 13px;
-  cursor: pointer;
-  box-shadow: 0 8px 22px rgba(255, 23, 68, 0.4);
-  transition: .3s ease;
+  box-shadow: 0 12px 34px rgba(0,0,0,.2);
+  opacity: 0;
+  animation: slideFadeIn .8s ease forwards;
 }
 
-.logout-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 14px 34px rgba(255, 23, 68, 0.55);
-}
-
-/* ===============================
-   Animation
-================================ */
-
-@keyframes slideFadeIn{
-  from{
-    transform: translateY(-18px);
-    opacity:0;
-  }
-  to{
+@keyframes slideFadeIn {
+  to {
+    opacity: 1;
     transform: translateY(0);
-    opacity:1;
   }
 }
-/* ===============================
-   Wide Charts Section (Like Image)
-================================ */
-
-.charts-wide{
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 28px;
-  margin-bottom: 36px;
+/* تحسين التباعد بين الجارتات */
+.charts-wrapper {
+  gap: 36px;            /* كان 28 */
 }
 
-@media (max-width: 1200px){
-  .charts-wide{
-    grid-template-columns: 1fr;
-  }
+/* مسافة داخلية أوضح */
+.chart-card {
+  padding: 26px 30px;   /* كان 22px */
+}
+/* حركة خفيفة للجارت */
+.chart-card {
+  transition: transform .35s ease, box-shadow .35s ease;
 }
 
-.chart-card.wide{
-  height: 340px;
-  padding: 22px 26px;
-  border-radius: 24px;
-  background: #fff;
+.chart-card:hover {
+  transform: translateY(-6px) scale(1.01);
   box-shadow:
-    0 14px 40px rgba(0,0,0,0.08),
-    inset 0 0 0 1px rgba(0,0,0,0.04);
+    0 22px 55px rgba(0,0,0,0.12),
+    inset 0 0 0 1px rgba(0,56,168,0.15);
+}
+/* Card base */
+.card {
+  --card-accent: var(--primary);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.08);
 }
 
-.chart-card.wide h3{
-  font-size: 14px;
-  font-weight: 700;
-  text-align: right;
-  margin-bottom: 14px;
-  color: var(--text-dark);
+/* الخط العلوي */
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto auto 0;
+  height: 4px;
+  width: 100%;
+  background: var(--card-accent);
+  border-radius: 18px 18px 0 0;
 }
 
-.chart-card.wide canvas{
-  flex: 1;
+/* Hover shadow حسب اللون */
+.card:hover {
+  box-shadow:
+    0 18px 40px color-mix(in srgb, var(--card-accent) 35%, transparent);
+}
+.card .icon svg {
+  width: 26px;
+  height: 26px;
+  stroke-width: 2.2;
+  transition: transform .3s ease;
+}
+
+.card:hover .icon svg {
+  transform: scale(1.15) rotate(-3deg);
 }

@@ -154,3 +154,13 @@
   color: #fff;
   font-weight: 600;
 }
+.sidebar i svg {
+  width: 18px;
+  height: 18px;
+  margin-left: 8px;
+  stroke-width: 2.2;
+}
+
+.item:hover i svg {
+  transform: scale(1.1);
+}

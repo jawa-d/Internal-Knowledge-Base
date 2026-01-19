@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Dashboard</title>
 
-  <!-- Tailwind CSS (Utility only – no layout logic) -->
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -47,24 +47,17 @@
   <!-- ================= Header ================= -->
   <div class="dash-header flex items-center justify-between mb-8">
     <div>
-      <h1 class="text-3xl font-bold text-slate-800 dark:text-white">
-        Dashboard
-      </h1>
-      <p class="text-slate-500 dark:text-slate-400 mt-1">
-        نظرة عامة على أداء النظام
-      </p>
+      <h1 class="text-3xl font-bold text-slate-800 dark:text-white">Dashboard</h1>
+      <p class="text-slate-500 dark:text-slate-400 mt-1">نظرة عامة على أداء النظام</p>
     </div>
 
-    <!-- Logged User -->
     <div id="loggedUserBox" class="logged-user-box">
       <span id="loggedUserEmail" class="email">loading...</span>
     </div>
 
-    <!-- Logout -->
     <button
       id="logoutBtn"
-      class="px-4 py-2 rounded-xl bg-danger text-white shadow hover:opacity-90 transition"
-    >
+      class="px-4 py-2 rounded-xl bg-danger text-white shadow hover:opacity-90 transition">
       تسجيل الخروج
     </button>
   </div>
@@ -72,40 +65,40 @@
   <!-- ================= KPI CARDS ================= -->
   <div class="cards mb-10">
 
-    <div onclick="location.href='users.html'" class="card">
-      <div class="icon">👤</div>
+    <div onclick="location.href='users.html'" class="card users">
+      <div class="icon"><i data-lucide="users"></i></div>
       <div>
         <div class="label">عدد المستخدمين</div>
         <div class="number" id="usersCount">0</div>
       </div>
     </div>
 
-    <div onclick="location.href='shelves.html'" class="card">
-      <div class="icon">🗂</div>
+    <div onclick="location.href='shelves.html'" class="card shelves">
+      <div class="icon"><i data-lucide="folders"></i></div>
       <div>
         <div class="label">عدد الرفوف</div>
         <div class="number" id="shelvesCount">0</div>
       </div>
     </div>
 
-    <div onclick="location.href='news.html'" class="card">
-      <div class="icon">📰</div>
+    <div onclick="location.href='news.html'" class="card news">
+      <div class="icon"><i data-lucide="newspaper"></i></div>
       <div>
         <div class="label">عدد الأخبار</div>
         <div class="number" id="newsCount">0</div>
       </div>
     </div>
 
-    <div onclick="location.href='kpi_productivity.html'" class="card">
-      <div class="icon">📊</div>
+    <div onclick="location.href='kpi_productivity.html'" class="card kpi">
+      <div class="icon"><i data-lucide="bar-chart-3"></i></div>
       <div>
         <div class="label">مؤشرات KPI</div>
         <div class="number" id="kpiCount">0</div>
       </div>
     </div>
 
-    <div onclick="location.href='exam.html'" class="card">
-      <div class="icon">📝</div>
+    <div onclick="location.href='exam.html'" class="card exams">
+      <div class="icon"><i data-lucide="clipboard-check"></i></div>
       <div>
         <div class="label">موظفو الامتحان</div>
         <div class="number" id="examUsersCount">0</div>
@@ -117,7 +110,6 @@
   <!-- ================= Charts Section ================= -->
   <div class="charts-wrapper">
 
-    <!-- Row 1 : Big Charts -->
     <div class="charts-row charts-row--big">
       <div class="chart-card chart-card--big">
         <h3>عدد المستخدمين</h3>
@@ -130,7 +122,6 @@
       </div>
     </div>
 
-    <!-- Row 2 : Small Charts -->
     <div class="charts-row charts-row--small">
       <div class="chart-card">
         <h3>عدد الرفوف</h3>
@@ -152,67 +143,17 @@
 
 </div>
 
-<!-- ================= Charts Logic (UNCHANGED) ================= -->
-<script>
-function createGradient(ctx, color) {
-  const g = ctx.createLinearGradient(0, 0, 0, 240);
-  g.addColorStop(0, color + '55');
-  g.addColorStop(1, color + '00');
-  return g;
-}
-
-const baseOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  tension: 0.45,
-  plugins: { legend: { display: false } },
-  scales: {
-    x: { grid: { display: false } },
-    y: { beginAtZero: true }
-  }
-};
-
-function renderLineChart(id, data, color) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  const ctx = el.getContext("2d");
-
-  new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: ["Jan","Feb","Mar","Apr","May","Jun"],
-      datasets: [{
-        data,
-        borderColor: color,
-        backgroundColor: createGradient(ctx, color),
-        fill: true,
-        pointRadius: 4
-      }]
-    },
-    options: baseOptions
-  });
-}
-
-function initDashboard() {
-  updateCards(dashboardStats);
-
-  renderLineChart("usersChart", buildTrend(dashboardStats.users), "#0038a8");
-  renderLineChart("shelvesChart", buildTrend(dashboardStats.shelves), "#00c2a8");
-  renderLineChart("booksChart", buildTrend(dashboardStats.shelves * 3), "#0038a8");
-  renderLineChart("kpiChart", buildTrend(dashboardStats.kpi), "#00c2a8");
-  renderLineChart("examUsersChart", buildTrend(dashboardStats.examUsers), "#0038a8");
-}
-
-initDashboard();
-
-
-</script>
-
-<!-- App Logic -->
+<!-- ================= App Logic ================= -->
 <script type="module" src="dashboard.js"></script>
 <script type="module">
   import { runAnnouncementPopup } from "./announcement_popup.js";
   runAnnouncementPopup();
+</script>
+
+<!-- ================= Lucide Icons ================= -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+  lucide.createIcons();
 </script>
 
 </body>
