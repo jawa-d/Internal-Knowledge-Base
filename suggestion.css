@@ -2,78 +2,115 @@
 body {
   background: #f1f5fb;
   font-family: "Cairo", sans-serif;
+  margin: 0;
 }
 
-/* ===== المساحة التي تحتوي على الفورم ===== */
+/* ===== منطقة المحتوى (وسط الصفحة) ===== */
 .content-area {
-  margin-right: 260px; /* لأن السايدبار عرضه 260px */
-  padding: 120px 40px;
+  margin-right: 260px;                 /* عرض السايدبار */
+  min-height: calc(100vh - 140px);     /* Header + Footer */
   display: flex;
-  justify-content: flex-e; /* يسحب الفورم لليمين */
+  justify-content: center;             /* أفقي */
+  align-items: center;                 /* عمودي */
+  padding: 40px;
+  box-sizing: border-box;
 }
 
 /* ===== صندوق الفورم ===== */
 .suggestion-box {
-  width: 55%;          /* 🔥 عرض مثالي بدون خروج */
-  max-width: 750px;    /* يمنع الفورم من التمدد أكثر من اللازم */
-  background: #fff;
-  padding: 35px 40px;
-  border-radius: 18px;
+  width: 100%;
+  max-width: 720px;
+  background: #ffffff;
+  padding: 36px 42px;
+  border-radius: 20px;
   border: 1px solid #e5e7eb;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  animation: fadeUp 0.6s ease both;
 }
 
+/* ===== العنوان ===== */
+.suggestion-box h1,
 .suggestion-box h2 {
   font-size: 24px;
-  margin-bottom: 25px;
+  margin-bottom: 10px;
   text-align: center;
+  color: #0f172a;
 }
 
-/* ===== حقول الإدخال ===== */
+.suggestion-box p {
+  text-align: center;
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 28px;
+}
+
+/* ===== الحقول ===== */
 .form-input {
   width: 100%;
-  padding: 14px;
-  border-radius: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
   border: 1px solid #d7dce4;
-  background: #f7f9fc;
+  background: #f8fafc;
   font-size: 15px;
   margin-bottom: 18px;
   outline: none;
+  transition: 0.25s ease;
+  box-sizing: border-box;
+}
+
+.form-input::placeholder {
+  color: #94a3b8;
 }
 
 .form-input:focus {
   border-color: #0038a8;
   background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(0, 56, 168, 0.12);
 }
 
 /* ===== زر الإرسال ===== */
 .send-btn {
-  background: #0038a8;
-  color: white;
+  background: linear-gradient(135deg, #0038a8, #0057ff);
+  color: #ffffff;
   border: none;
-  padding: 13px 30px;
-  border-radius: 12px;
-  font-size: 16px;
+  padding: 14px 34px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 700;
   cursor: pointer;
   display: block;
-  margin-left: auto; /* يجعل الزر يلتصق باليمين */
-  transition: 0.25s;
+  margin-right: auto; /* RTL */
+  transition: 0.3s ease;
 }
 
 .send-btn:hover {
-  background: #264dff;
   transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 56, 168, 0.25);
 }
+
+/* ===== الفوتر ===== */
 .footer {
   text-align: center;
-  padding: 18px 0;
+  padding: 20px 0;
   font-size: 14px;
-  color: #777;
-  margin-top: 40px;
+  color: #64748b;
+  margin-top: 60px;
   border-top: 1px solid #e5e7eb;
 }
 
 .footer strong {
-  color: #4b6fff;
+  color: #0038a8;
   font-weight: 700;
+}
+
+/* ===== أنيميشن الدخول ===== */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
