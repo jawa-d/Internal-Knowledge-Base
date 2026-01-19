@@ -15,6 +15,9 @@ import { checkAccess } from "./security.js";
 document.addEventListener("DOMContentLoaded", async () => {
   const allowed = await checkAccess(["admin"]);
   if (!allowed) return;
+
+  await checkAdmin();
+  await loadUsers();
 });
 
 /* =====================
@@ -38,7 +41,7 @@ async function checkAdmin() {
   currentEmail = localStorage.getItem("kb_user_email");
 
   if (!currentEmail) {
-    window.location.href = "login.html";
+    location.href = "login.html";
     return;
   }
 
@@ -55,14 +58,34 @@ async function loadUsers() {
   const snapshot = await getDocs(collection(db, "users"));
   USERS = [];
 
-  snapshot.forEach(docSnap => {
+  snapshot.forEach(d => {
     USERS.push({
-      email: docSnap.id,
-      ...docSnap.data()
+      email: d.id,
+      ...d.data()
     });
   });
 
   renderUsers();
+}
+
+/* =====================
+   HELPERS (BADGES)
+===================== */
+function renderRole(role = "none") {
+  const r = role.toLowerCase();
+  const map = {
+    admin: "Admin",
+    editor: "Editor",
+    viewer: "Viewer",
+    none: "None"
+  };
+  return `<strong>${map[r] || "None"}</strong>`;
+}
+
+function renderStatus(status = "pending") {
+  const s = status.toLowerCase();
+  const cls = `status-${s}`;
+  return `<span class="${cls}">${s.toUpperCase()}</span>`;
 }
 
 /* =====================
@@ -80,20 +103,20 @@ function renderUsers() {
       <tr class="${isAdmin ? "" : "blurred"}">
         <td>${isAdmin ? (u.name || "-") : "██████"}</td>
         <td>${isAdmin ? u.email : "████████@████"}</td>
-        <td>${isAdmin ? (u.role || "none").toUpperCase() : "████"}</td>
-        <td>${isAdmin ? (u.status || "pending") : "████"}</td>
+        <td>${isAdmin ? renderRole(u.role) : "████"}</td>
+        <td>${isAdmin ? renderStatus(u.status) : "████"}</td>
         <td>${editBtn}</td>
       </tr>
     `;
   });
 
-  // 🔐 Mask
+  // 🔐 Mask for non-admin
   const mask = document.getElementById("usersMask");
-  mask.style.display = isAdmin ? "none" : "flex";
+  if (mask) mask.style.display = isAdmin ? "none" : "flex";
 }
 
 /* =====================
-   EDIT USER (ADMIN)
+   EDIT USER
 ===================== */
 window.editUser = function (email) {
   if (!isAdmin) return;
@@ -109,7 +132,7 @@ window.editUser = function (email) {
 };
 
 /* =====================
-   CLOSE EDIT POPUP
+   CLOSE POPUP
 ===================== */
 window.closePopup = function () {
   document.getElementById("popupOverlay").style.display = "none";
@@ -117,27 +140,23 @@ window.closePopup = function () {
 };
 
 /* =====================
-   SAVE EDIT USER
+   SAVE USER
 ===================== */
 window.saveUser = async function () {
   if (!isAdmin || !editingEmail) return;
 
-  const newRole = document.getElementById("editRole").value;
-  const newStatus = document.getElementById("editStatus").value;
+  const role = document.getElementById("editRole").value;
+  const status = document.getElementById("editStatus").value;
 
-  await updateDoc(doc(db, "users", editingEmail), {
-    role: newRole,
-    status: newStatus
-  });
+  await updateDoc(doc(db, "users", editingEmail), { role, status });
 
   alert("✔ تم تحديث بيانات المستخدم");
-
   closePopup();
   loadUsers();
 };
 
 /* =====================
-   ➕ ADD USER POPUP
+   ADD USER POPUP
 ===================== */
 window.openAddUser = function () {
   if (!isAdmin) return;
@@ -149,7 +168,7 @@ window.closeAddUser = function () {
 };
 
 /* =====================
-   CREATE USER (Firestore)
+   CREATE USER
 ===================== */
 window.createUser = async function () {
   if (!isAdmin) return;
@@ -163,15 +182,15 @@ window.createUser = async function () {
     return;
   }
 
-  const userRef = doc(db, "users", email);
-  const snap = await getDoc(userRef);
+  const ref = doc(db, "users", email);
+  const snap = await getDoc(ref);
 
   if (snap.exists()) {
     alert("⚠️ المستخدم موجود مسبقًا");
     return;
   }
 
-  await setDoc(userRef, {
+  await setDoc(ref, {
     email,
     role,
     status,
@@ -180,13 +199,6 @@ window.createUser = async function () {
   });
 
   alert("✅ تم إضافة المستخدم");
-
   closeAddUser();
   loadUsers();
 };
-
-/* =====================
-   INIT
-===================== */
-await checkAdmin();
-await loadUsers();
