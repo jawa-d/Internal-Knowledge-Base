@@ -85,7 +85,7 @@ function sendSuggestion() {
     details: document.getElementById("details").value.trim(),
   };
 
-  if (!data.name || !data.id || !data.email || !data.title || !data.details) {
+  if (!data.name || !data.id  || !data.title || !data.details) {
     alert("الرجاء ملء جميع الحقول قبل الإرسال.");
     return;
   }
@@ -102,7 +102,7 @@ function sendSuggestion() {
   .then(() => {
     alert("تم إرسال الاقتراح بنجاح ✅");
 
-    ["empName","empID","email","title","details"].forEach(id => {
+    ["empName","empID","title","details"].forEach(id => {
       document.getElementById(id).value = "";
     });
   })
