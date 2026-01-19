@@ -23,6 +23,17 @@ function animate(el, to) {
 }
 
 /* ===============================
+   Soft Gradient (IMPORTANT)
+================================ */
+function createSoftGradient(ctx, color) {
+  const gradient = ctx.createLinearGradient(0, 0, 0, 260);
+  gradient.addColorStop(0, color.replace("1)", "0.18)"));
+  gradient.addColorStop(0.6, color.replace("1)", "0.08)"));
+  gradient.addColorStop(1, color.replace("1)", "0.00)"));
+  return gradient;
+}
+
+/* ===============================
    Chart Base Options (GLOBAL)
 ================================ */
 const baseOptions = {
@@ -54,21 +65,20 @@ const baseOptions = {
       callbacks: {
         label: (ctx) => {
           const value = ctx.parsed.y;
+          const prev = ctx.dataset.data[ctx.dataIndex - 1] ?? value;
+          const diff = value - prev;
+          const arrow = diff >= 0 ? "▲" : "▼";
           const max = ctx.chart.scales.y.max || value;
           const percent = ((value / max) * 100).toFixed(1);
-          return `القيمة: ${value} (${percent}%)`;
+          return `${arrow} ${value} (${percent}%)`;
         }
       }
     }
   },
 
   scales: {
-    x: {
-      grid: { display: false }
-    },
-    y: {
-      beginAtZero: true
-    }
+    x: { grid: { display: false } },
+    y: { beginAtZero: true }
   }
 };
 
@@ -79,7 +89,9 @@ function drawLineChart(canvasId, total, color) {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
 
-  return new Chart(canvas, {
+  const ctx = canvas.getContext("2d");
+
+  return new Chart(ctx, {
     type: "line",
     data: {
       labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
@@ -93,13 +105,13 @@ function drawLineChart(canvasId, total, color) {
           total
         ],
         borderColor: color,
-        backgroundColor: color.replace("1)", "0.12)"),
+        backgroundColor: createSoftGradient(ctx, color),
         fill: true,
         tension: 0.45,
+        borderWidth: 1.8,
         pointRadius: 4,
         pointHoverRadius: 7,
-        pointBackgroundColor: "#fff",
-        borderWidth: 2
+        pointBackgroundColor: "#ffffff"
       }]
     },
     options: baseOptions
@@ -117,7 +129,6 @@ function buildExamUsersChartData(attemptsSnap) {
   attemptsSnap.forEach(doc => {
     const d = doc.data();
     if (!d.createdAt || !d.userEmail) return;
-
     const month = d.createdAt.toDate().toLocaleString("en", { month: "short" });
     map[month]?.add(d.userEmail);
   });
@@ -170,16 +181,20 @@ async function loadDashboard() {
   /* Exam users monthly */
   const monthly = buildExamUsersChartData(attemptsSnap);
 
-  new Chart(document.getElementById("examUsersChart"), {
+  const examCanvas = document.getElementById("examUsersChart");
+  const examCtx = examCanvas.getContext("2d");
+
+  new Chart(examCtx, {
     type: "line",
     data: {
       labels: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
       datasets: [{
         data: monthly,
         borderColor: "rgba(236,72,153,1)",
-        backgroundColor: "rgba(236,72,153,0.12)",
+        backgroundColor: createSoftGradient(examCtx, "rgba(236,72,153,1)"),
         fill: true,
         tension: 0.45,
+        borderWidth: 1.8,
         pointRadius: 4,
         pointHoverRadius: 7
       }]
